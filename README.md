@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Slate
 
-## Getting Started
+Pianificatore a blocchi orari per studenti, universitari e giovani lavoratori.
 
-First, run the development server:
+## Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+
+- npm or yarn
+- Supabase account
+
+## Setup
+
+### 1. Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Wait for the project to be ready
+3. Go to **Settings > API** to find your `URL` and `anon key`
+
+### 2. Database Setup
+
+In the Supabase Dashboard, go to **SQL Editor** and run:
+
+```sql
+-- Create blocks table
+create table blocks (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text not null,
+  category text not null default 'altro',
+  color text not null default '#6366f1',
+  day_of_week integer not null,
+  start_hour integer not null,
+  start_minute integer not null default 0,
+  duration_minutes integer not null default 60,
+  week_offset integer not null default 0,
+  notes text,
+  created_at timestamp with time zone default now()
+);
+
+-- Enable Row Level Security
+alter table blocks enable row level security;
+
+-- Create policy
+create policy "Users can manage their own blocks"
+  on blocks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Auth Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Go to **Authentication > Providers**
+2. Enable **Email** (or configure Google/Apple OAuth)
+3. Go to **Authentication > URL Configuration**
+4. Add to **Redirect URLs**:
+   - Local: `http://localhost:3000/auth/callback`
+   - Production: `https://yourdomain.com/auth/callback`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Environment Variables
 
-## Learn More
+Create `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Replace the values with your Supabase credentials from Settings > API.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Run Locally
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+### Vercel
+
+1. Push your code to GitHub
+2. Go to [vercel.com](https://vercel.com) and import the repository
+3. Add the environment variables in the Vercel dashboard
+4. Deploy
+
+## Features
+
+- Weekly time block planning grid
+- Categories: Studio, Lavoro, Lezione, Altro
+- Custom colors for each block
+- Week navigation (previous/next)
+- Real-time current time indicator
+- User authentication with Supabase
+- Automatic data synchronization
+
+## Tech Stack
+
+- Next.js 14 (App Router)
+- TypeScript
+- Supabase (Auth + Database)
+- Tailwind CSS
+- date-fns
+- lucide-react

@@ -1,0 +1,256 @@
+# SLATE — Agent Prompt
+# Istruzioni per la creazione completa dell'app da zero in VSCode
+
+---
+
+## OBIETTIVO
+
+Crea un'applicazione web chiamata **Slate** — un pianificatore a blocchi orari per studenti, universitari e giovani lavoratori. L'app permette di organizzare la settimana in blocchi visivi (studio, lavoro, lezioni, ecc.) con autenticazione utente e sincronizzazione dei dati su cloud.
+
+---
+
+## STACK TECNICO
+
+- **Framework**: Next.js 14 (App Router)
+- **Auth + Database**: Supabase (Auth con Google, Apple, email/password + Postgres)
+- **Styling**: Tailwind CSS
+- **Linguaggio**: TypeScript
+- **Deploy target**: Vercel
+
+---
+
+## SETUP INIZIALE
+
+1. Inizializza il progetto:
+   ```
+   npx create-next-app@latest slate --typescript --tailwind --app --eslint
+   cd slate
+   ```
+
+2. Installa le dipendenze:
+   ```
+   npm install @supabase/supabase-js @supabase/ssr
+   npm install @dnd-kit/core @dnd-kit/modifiers @dnd-kit/utilities
+   npm install date-fns
+   npm install lucide-react
+   ```
+
+3. Crea il file `.env.local` con:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+---
+
+## STRUTTURA DEL PROGETTO
+
+```
+slate/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx                  # Landing/login page
+│   ├── auth/
+│   │   ├── callback/route.ts     # OAuth callback handler
+│   │   └── login/page.tsx        # Pagina di login
+│   └── dashboard/
+│       └── page.tsx              # App principale con la griglia
+├── components/
+│   ├── WeekGrid.tsx              # Griglia settimanale principale
+│   ├── BlockCard.tsx             # Singolo blocco orario
+│   ├── BlockModal.tsx            # Modale creazione/modifica blocco
+│   ├── Sidebar.tsx               # Sidebar con categorie e info utente
+│   └── AuthButton.tsx            # Bottone login/logout
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts             # Supabase browser client
+│   │   ├── server.ts             # Supabase server client
+│   │   └── middleware.ts         # Auth middleware
+│   └── types.ts                  # Tipi TypeScript condivisi
+├── hooks/
+│   ├── useBlocks.ts              # Hook per CRUD blocchi
+│   └── useWeek.ts                # Hook per navigazione settimana
+└── middleware.ts                 # Protezione route autenticate
+```
+
+---
+
+## DATABASE SUPABASE
+
+### Tabella `blocks`
+
+```sql
+create table blocks (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text not null,
+  category text not null default 'altro',   -- 'studio' | 'lavoro' | 'lezione' | 'altro'
+  color text not null default '#6366f1',
+  day_of_week integer not null,             -- 0 = Lunedì, 6 = Domenica
+  start_hour integer not null,              -- 0–23
+  start_minute integer not null default 0,  -- 0 o 30
+  duration_minutes integer not null default 60,
+  week_offset integer not null default 0,   -- 0 = settimana corrente, -1, +1, ecc.
+  notes text,
+  created_at timestamp with time zone default now()
+);
+
+-- Row Level Security: ogni utente vede solo i propri blocchi
+alter table blocks enable row level security;
+
+create policy "Users can manage their own blocks"
+  on blocks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+```
+
+### Configurazione Auth in Supabase Dashboard
+
+Abilita i seguenti provider in Authentication > Providers:
+- **Email** (con conferma email opzionale)
+- **Google** (richiede Google Cloud Console OAuth credentials)
+- **Apple** (richiede Apple Developer account)
+
+Imposta il **Redirect URL** su: `https://tuodominio.com/auth/callback`
+In locale: `http://localhost:3000/auth/callback`
+
+---
+
+## FUNZIONALITÀ DA IMPLEMENTARE
+
+### 1. Autenticazione
+
+- Pagina `/auth/login` con tre opzioni:
+  - "Continua con Google" (OAuth)
+  - "Continua con Apple" (OAuth)
+  - Form email + password (sign up / sign in)
+- Redirect automatico a `/dashboard` dopo il login
+- Logout con pulizia sessione
+- Middleware che protegge `/dashboard` dai non autenticati
+
+### 2. Griglia Settimanale (`WeekGrid`)
+
+- Vista 7 colonne (Lun–Dom) × 24 righe (ore 00:00–23:00)
+- Ogni cella rappresenta 1 ora; supporto a blocchi multipli di 30 min
+- Navigazione settimana: frecce ← → per settimana precedente/successiva
+- Indicatore "Oggi" evidenziato nella colonna del giorno corrente
+- Linea dell'ora corrente animata (come Google Calendar)
+- Header con date (es. "Lun 21 Apr")
+
+### 3. Blocchi Orari (`BlockCard`)
+
+Ogni blocco ha:
+- `title` — nome del blocco (es. "Analisi Matematica", "Turno lavoro")
+- `category` — una tra: Studio, Lavoro, Lezione, Altro
+- `color` — colore personalizzabile scelto dall'utente
+- `start_hour` / `start_minute` / `duration_minutes`
+- `notes` — note opzionali
+
+Il blocco nella griglia mostra:
+- Colore di sfondo con opacità (es. `bg-indigo-500/20` con bordo `border-indigo-500`)
+- Titolo e orario (es. "09:00 – 11:00")
+- Icona categoria
+- Click per aprire il modale di modifica
+- Tasto × per eliminazione rapida
+
+### 4. Modale Creazione/Modifica (`BlockModal`)
+
+Si apre:
+- Click su cella vuota della griglia → crea nuovo blocco con giorno/ora precompilati
+- Click su blocco esistente → modifica
+
+Campi:
+- Titolo (input text, obbligatorio)
+- Categoria (select: Studio 📚 / Lavoro 💼 / Lezione 🎓 / Altro 📌)
+- Colore (color picker o palette di 8 colori predefiniti)
+- Giorno (precompilato, modificabile)
+- Ora inizio (select ogni 30 min)
+- Durata (select: 30 min, 1h, 1h30, 2h, 2h30, 3h, personalizzata)
+- Note (textarea opzionale)
+- Bottoni: Salva / Annulla / Elimina (se modifica)
+
+### 5. Sincronizzazione
+
+- Al caricamento del dashboard, fetch di tutti i blocchi dell'utente per la settimana visualizzata
+- Creazione/modifica/eliminazione blocco → update immediato UI + chiamata Supabase
+- Ottimistic updates: aggiorna UI subito, poi conferma da DB
+
+### 6. Sidebar
+
+- Avatar + nome utente + email
+- Riepilogo settimana: ore totali per categoria
+- Bottone logout
+- (Opzionale futuro) filtri per categoria
+
+---
+
+## DESIGN
+
+**Stile**: Minimal, pulito, professionale ma non freddo. Target giovani.
+
+**Palette colori**:
+```css
+--background: #0f0f0f       /* sfondo scuro principale */
+--surface: #1a1a1a          /* card e pannelli */
+--surface-hover: #222222    /* hover states */
+--border: #2a2a2a           /* bordi sottili */
+--text-primary: #f5f5f5     /* testo principale */
+--text-secondary: #888888   /* testo secondario */
+--accent: #e8e0d0           /* accento caldo, quasi bianco-avorio */
+```
+
+**Colori categorie**:
+```
+Studio  → #6366f1  (indigo)
+Lavoro  → #10b981  (emerald)
+Lezione → #f59e0b  (amber)
+Altro   → #8b5cf6  (violet)
+```
+
+**Font**: Usa Google Fonts
+- Display/Logo: `DM Serif Display` (per il nome "Slate" e header importanti)
+- UI: `DM Sans` (per tutto il resto)
+
+**Dettagli UI**:
+- Border radius piccolo e consistente (4–6px)
+- Ombre sottili, niente effetti pesanti
+- Transizioni brevi (150–200ms ease)
+- Griglia con linee sottili `#2a2a2a`
+- Ore in colonna sinistra fisse, colonne giorni scrollabili
+- Responsive: su mobile mostra un giorno alla volta con swipe
+
+---
+
+## PAGINA LANDING (non autenticato)
+
+La root `/` mostra una landing page minimal:
+- Logo "Slate" in DM Serif Display
+- Tagline: "La tua settimana, a blocchi."
+- CTA: "Inizia gratis" → porta a `/auth/login`
+- Screenshot/mockup della griglia (o semplicemente la griglia stessa animata in loop)
+- Sfondo scuro, nessun elemento superfluo
+
+---
+
+## MIDDLEWARE E PROTEZIONE ROUTE
+
+```typescript
+// middleware.ts
+// Se utente non autenticato tenta di accedere a /dashboard → redirect a /auth/login
+// Se utente autenticato accede a / o /auth/login → redirect a /dashboard
+```
+
+---
+
+## NOTE FINALI PER L'AGENT
+
+- Usa il **App Router** di Next.js 14 (non Pages Router)
+- Usa **Server Components** dove possibile, Client Components solo dove serve interattività
+- Gestisci gli errori di auth in modo user-friendly (toast o messaggi inline)
+- Tutto il codice in **TypeScript**, niente `any`
+- Commenta le sezioni non ovvie
+- Alla fine, fornisci un **README.md** con istruzioni per:
+  1. Setup Supabase (creazione progetto, tabella SQL, provider OAuth)
+  2. Variabili d'ambiente
+  3. Avvio in locale
+  4. Deploy su Vercel
