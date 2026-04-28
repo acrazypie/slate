@@ -1,8 +1,7 @@
 'use client';
 
-import { format } from 'date-fns';
-import { Block, CATEGORY_LABELS } from '@/lib/types';
-import { X } from 'lucide-react';
+import { Block, getContrastColor } from '@/lib/types';
+import { Repeat } from 'lucide-react';
 
 interface BlockCardProps {
   block: Block;
@@ -18,9 +17,7 @@ export function BlockCard({ block, onClick }: BlockCardProps) {
   const top = ((block.start_hour * 60 + block.start_minute) / (24 * 60)) * 100;
   const height = (block.duration_minutes / (24 * 60)) * 100;
 
-  const colorHex = block.color;
-  const bgColor = `${colorHex}33`;
-  const borderColor = colorHex;
+  const textColor = getContrastColor(block.color);
 
   return (
     <div
@@ -29,16 +26,19 @@ export function BlockCard({ block, onClick }: BlockCardProps) {
         top: `${top}%`,
         height: `${height}%`,
         minHeight: '24px',
-        backgroundColor: bgColor,
-        borderColor: borderColor,
+        backgroundColor: block.color,
+        borderColor: block.color,
       }}
       onClick={onClick}
     >
       <div className="flex flex-col h-full">
         <div className="flex items-start justify-between gap-1">
-          <span className="text-xs font-medium text-[#f5f5f5] truncate">{block.title}</span>
+          <span className="text-xs font-medium truncate" style={{ color: textColor }}>{block.title}</span>
+          {block.is_recurring && (
+            <Repeat className="w-3 h-3 flex-shrink-0" style={{ color: textColor }} />
+          )}
         </div>
-        <span className="text-[10px] text-[#888888]">{startTime} – {endTime}</span>
+        <span className="text-[10px]" style={{ color: textColor, opacity: 0.8 }}>{startTime} – {endTime}</span>
       </div>
     </div>
   );

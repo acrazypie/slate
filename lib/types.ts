@@ -1,5 +1,7 @@
 export type BlockCategory = 'studio' | 'lavoro' | 'lezione' | 'altro';
 
+export type RecurrenceType = 'weekly' | 'monthly';
+
 export interface Block {
   id: string;
   user_id: string;
@@ -12,7 +14,19 @@ export interface Block {
   duration_minutes: number;
   week_offset: number;
   notes: string | null;
+  is_recurring: boolean;
+  recurrence_type?: RecurrenceType;
+  recurrence_end_date?: string;
+  recurrence_group_id?: string;
   created_at: string;
+}
+
+export function getContrastColor(hexColor: string): string {
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#1a1a1a' : '#ffffff';
 }
 
 export interface BlockFormData {
@@ -24,6 +38,9 @@ export interface BlockFormData {
   start_minute: number;
   duration_minutes: number;
   notes: string;
+  is_recurring?: boolean;
+  recurrence_type?: RecurrenceType;
+  recurrence_end_date?: string;
 }
 
 export const CATEGORY_COLORS: Record<BlockCategory, string> = {

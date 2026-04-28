@@ -3,8 +3,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { startOfWeek, addWeeks, format, eachDayOfInterval, isSameDay } from 'date-fns';
 
+export type ViewMode = 'day' | 'week' | 'month';
+
 export function useWeek() {
   const [weekOffset, setWeekOffset] = useState(0);
+  const [view, setView] = useState<ViewMode>(
+    () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'week'
+  );
 
   const currentWeekStart = useMemo(() => {
     return startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
@@ -18,6 +23,11 @@ export function useWeek() {
   }, [currentWeekStart]);
 
   const today = new Date();
+
+  const setViewMode = useCallback((newView: ViewMode) => {
+    setView(newView);
+    localStorage.setItem('slate-default-view', newView);
+  }, []);
 
   const goToNextWeek = useCallback(() => {
     setWeekOffset((prev) => prev + 1);
@@ -55,5 +65,7 @@ export function useWeek() {
     goToCurrentWeek,
     formatWeekRange,
     isCurrentWeek,
+    view,
+    setViewMode,
   };
 }

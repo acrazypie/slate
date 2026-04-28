@@ -18,6 +18,16 @@
   --surface: #1a1a1a;
 }
 
+.light {
+  --color-background: #f5f4f0;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0eeea;
+  --color-border: #e0ddd8;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-accent: #1a1a1a;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-text-primary);

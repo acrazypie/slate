@@ -5,11 +5,13 @@ import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { WeekGrid } from '@/components/WeekGrid';
 import { Sidebar } from '@/components/Sidebar';
+import { SettingsModal } from '@/components/SettingsModal';
 import { useBlocks } from '@/hooks/useBlocks';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const supabase = createClient();
   const { blocks } = useBlocks(0);
 
@@ -35,9 +37,14 @@ export default function DashboardPage() {
       <Sidebar 
         user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
         blocks={blocks}
+        onSettingsClick={() => setIsSettingsOpen(true)}
       />
       <WeekGrid 
         user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
+      />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
     </div>
   );

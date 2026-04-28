@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Block, BlockFormData } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export function useBlocks(weekOffset: number = 0) {
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -37,6 +38,56 @@ export function useBlocks(weekOffset: number = 0) {
   const createBlock = async (formData: BlockFormData): Promise<Block | null> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
+
+    if (formData.is_recurring && formData.recurrence_type) {
+      const groupId = uuidv4();
+      const blocks: Partial<Block>[] = [];
+      const maxOccurrences = 52;
+      
+      const baseDate = new Date();
+      
+      for (let i = 0; i < maxOccurrences; i++) {
+        const weekOffsetInc = formData.recurrence_type === 'weekly' ? i : Math.floor((i * 30) / 7);
+        
+        if (formData.recurrence_end_date) {
+          const occurrenceDate = new Date(baseDate);
+          occurrenceDate.setDate(occurrenceDate.getDate() + (weekOffsetInc * 7));
+          if (occurrenceDate > new Date(formData.recurrence_end_date)) {
+            break;
+          }
+        }
+        
+        blocks.push({
+          ...formData,
+          user_id: user.id,
+          week_offset: weekOffset + weekOffsetInc,
+          notes: formData.notes || null,
+          is_recurring: true,
+          recurrence_type: formData.recurrence_type,
+          recurrence_end_date: formData.recurrence_end_date,
+          recurrence_group_id: groupId,
+          id: uuidv4(),
+        });
+      }
+
+      const { data, error } = await supabase
+        .from('blocks')
+        .insert(blocks as any)
+        .select();
+
+      if (error) {
+        setError(error.message);
+        return null;
+      }
+
+      setBlocks((prev) => [...prev, ...(data || [])].sort((a, b) => {
+        if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+        if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
+        return a.start_minute - b.start_minute;
+      }));
+      
+      return data?.[0] || null;
+    }
 
     const newBlock = {
       ...formData,

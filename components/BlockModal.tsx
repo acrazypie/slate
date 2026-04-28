@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Block, BlockCategory, BlockFormData, DAY_NAMES, COLOR_PALETTE, DURATION_OPTIONS, CATEGORY_COLORS } from '@/lib/types';
+import { Block, BlockCategory, BlockFormData, DAY_NAMES, COLOR_PALETTE, DURATION_OPTIONS, CATEGORY_COLORS, RecurrenceType } from '@/lib/types';
 import { X } from 'lucide-react';
 
 interface BlockModalProps {
@@ -9,6 +9,7 @@ interface BlockModalProps {
   onClose: () => void;
   onSave: (data: BlockFormData) => Promise<void>;
   onDelete: () => Promise<void>;
+  onDeleteRecurring?: (deleteType: 'current' | 'this-and-following' | 'all') => Promise<void>;
   initialData?: {
     day_of_week: number;
     start_hour: number;
@@ -17,7 +18,7 @@ interface BlockModalProps {
   block?: Block | null;
 }
 
-export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, block }: BlockModalProps) {
+export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurring, initialData, block }: BlockModalProps) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<BlockCategory>('studio');
   const [color, setColor] = useState(CATEGORY_COLORS.studio);
@@ -27,6 +28,12 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
   const [duration_minutes, setDurationMinutes] = useState(60);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Recurring fields
+  const [is_recurring, setIsRecurring] = useState(false);
+  const [recurrence_type, setRecurrenceType] = useState<RecurrenceType>('weekly');
+  const [recurrence_end_date, setRecurrenceEndDate] = useState('');
+  const [showDeleteRecurringMenu, setShowDeleteRecurringMenu] = useState(false);
 
   useEffect(() => {
     if (block) {
@@ -38,6 +45,9 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
       setStartMinute(block.start_minute);
       setDurationMinutes(block.duration_minutes);
       setNotes(block.notes || '');
+      setIsRecurring(block.is_recurring || false);
+      setRecurrenceType(block.recurrence_type || 'weekly');
+      setRecurrenceEndDate(block.recurrence_end_date || '');
     } else if (initialData) {
       setTitle('');
       setCategory('studio');
@@ -47,6 +57,9 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
       setStartMinute(initialData.start_minute);
       setDurationMinutes(60);
       setNotes('');
+      setIsRecurring(false);
+      setRecurrenceType('weekly');
+      setRecurrenceEndDate('');
     }
   }, [block, initialData]);
 
@@ -69,8 +82,20 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
       start_minute,
       duration_minutes,
       notes,
+      is_recurring,
+      recurrence_type: is_recurring ? recurrence_type : undefined,
+      recurrence_end_date: is_recurring && recurrence_end_date ? recurrence_end_date : undefined,
     });
     setLoading(false);
+  };
+
+  const handleDeleteRecurring = async (deleteType: 'current' | 'this-and-following' | 'all') => {
+    if (onDeleteRecurring) {
+      setLoading(true);
+      await onDeleteRecurring(deleteType);
+      setLoading(false);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -83,9 +108,9 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
       <div 
-        className="bg-[#1a1a1a] rounded-lg w-full max-w-md mx-4 p-6"
+        className="bg-[#1a1a1a] rounded-t-2xl sm:rounded-lg w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -206,8 +231,123 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
             />
           </div>
 
+          {/* Recurrence section */}
+          <div>
+            <label className="block text-sm text-[#888888] mb-2">Ripetizione</label>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setIsRecurring(false)}
+                className={`w-full px-3 py-2 rounded-md text-sm text-left transition-colors ${
+                  !is_recurring
+                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
+                    : 'bg-[#222222] text-[#f5f5f5] hover:bg-[#2a2a2a]'
+                }`}
+              >
+                Nessuna
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsRecurring(true); setRecurrenceType('weekly'); }}
+                className={`w-full px-3 py-2 rounded-md text-sm text-left transition-colors ${
+                  is_recurring && recurrence_type === 'weekly'
+                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
+                    : 'bg-[#222222] text-[#f5f5f5] hover:bg-[#2a2a2a]'
+                }`}
+              >
+                Settimanale (ogni settimana stesso giorno e ora)
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsRecurring(true); setRecurrenceType('monthly'); }}
+                className={`w-full px-3 py-2 rounded-md text-sm text-left transition-colors ${
+                  is_recurring && recurrence_type === 'monthly'
+                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
+                    : 'bg-[#222222] text-[#f5f5f5] hover:bg-[#2a2a2a]'
+                }`}
+              >
+                Mensile (ogni mese stesso giorno e ora)
+              </button>
+            </div>
+          </div>
+
+          {is_recurring && (
+            <div>
+              <label className="block text-sm text-[#888888] mb-2">Fine ripetizione</label>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setRecurrenceEndDate('')}
+                  className={`w-full px-3 py-2 rounded-md text-sm text-left transition-colors ${
+                    !recurrence_end_date
+                      ? 'bg-[#e8e0d0] text-[#0f0f0f]'
+                      : 'bg-[#222222] text-[#f5f5f5] hover:bg-[#2a2a2a]'
+                  }`}
+                >
+                  Mai
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRecurrenceEndDate(recurrence_end_date || new Date().toISOString().split('T')[0])}
+                    className={`flex-1 px-3 py-2 rounded-md text-sm text-left transition-colors ${
+                      recurrence_end_date
+                        ? 'bg-[#e8e0d0] text-[#0f0f0f]'
+                        : 'bg-[#222222] text-[#f5f5f5] hover:bg-[#2a2a2a]'
+                    }`}
+                  >
+                    Fino al:
+                  </button>
+                  {recurrence_end_date && (
+                    <input
+                      type="date"
+                      value={recurrence_end_date}
+                      onChange={(e) => setRecurrenceEndDate(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-[#222222] text-[#f5f5f5] rounded-md border border-[#2a2a2a] focus:border-[#e8e0d0] focus:outline-none"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-3 pt-2">
-            {block && (
+            {block && onDeleteRecurring && block.is_recurring ? (
+              <div className="flex-1">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteRecurringMenu(!showDeleteRecurringMenu)}
+                  className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-md transition-colors w-full text-left"
+                >
+                  {showDeleteRecurringMenu ? 'Annulla' : 'Elimina'}
+                </button>
+                {showDeleteRecurringMenu && (
+                  <div className="mt-2 space-y-2 p-3 bg-[#222222] rounded-md">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRecurring('current')}
+                      className="w-full px-3 py-2 text-sm text-[#f5f5f5] hover:bg-[#2a2a2a] rounded-md text-left"
+                    >
+                      Solo questo blocco
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRecurring('this-and-following')}
+                      className="w-full px-3 py-2 text-sm text-[#f5f5f5] hover:bg-[#2a2a2a] rounded-md text-left"
+                    >
+                      Questo e i seguenti
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRecurring('all')}
+                      className="w-full px-3 py-2 text-sm text-[#f5f5f5] hover:bg-[#2a2a2a] rounded-md text-left"
+                    >
+                      Tutti i blocchi della serie
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : block ? (
               <button
                 type="button"
                 onClick={onDelete}
@@ -215,7 +355,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, initialData, blo
               >
                 Elimina
               </button>
-            )}
+            ) : null}
             <button
               type="button"
               onClick={onClose}

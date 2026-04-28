@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Block, CATEGORY_LABELS, CATEGORY_COLORS, BlockCategory } from '@/lib/types';
-import { LogOut, Clock } from 'lucide-react';
+import { LogOut, Clock, Settings as SettingsIcon } from 'lucide-react';
 
 interface SidebarProps {
   user?: {
@@ -11,9 +11,10 @@ interface SidebarProps {
     name?: string;
   };
   blocks: Block[];
+  onSettingsClick?: () => void;
 }
 
-export function Sidebar({ user, blocks }: SidebarProps) {
+export function Sidebar({ user, blocks, onSettingsClick }: SidebarProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -88,7 +89,16 @@ export function Sidebar({ user, blocks }: SidebarProps) {
         </div>
       </div>
 
-      <div className="p-4 border-t border-[#2a2a2a]">
+      <div className="p-4 border-t border-[#2a2a2a] space-y-1">
+        {onSettingsClick && (
+          <button
+            onClick={onSettingsClick}
+            className="w-full flex items-center gap-2 px-4 py-2 text-[#888888] hover:text-[#f5f5f5] hover:bg-[#222222] rounded-md transition-colors"
+          >
+            <SettingsIcon className="w-4 h-4" />
+            Impostazioni
+          </button>
+        )}
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-2 px-4 py-2 text-[#888888] hover:text-[#f5f5f5] hover:bg-[#222222] rounded-md transition-colors"
