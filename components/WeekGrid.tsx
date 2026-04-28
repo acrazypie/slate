@@ -17,9 +17,10 @@ interface WeekGridProps {
     email: string;
     name?: string;
   };
+  onOpenSidebar?: () => void;
 }
 
-export function WeekGrid({ user }: WeekGridProps) {
+export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
   const { weekOffset, weekDays, today, goToNextWeek, goToPrevWeek, goToCurrentWeek, formatWeekRange } = useWeek();
   const { blocks, createBlock, updateBlock, deleteBlock, refetch: fetchBlocks } = useBlocks(weekOffset);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -31,7 +32,6 @@ export function WeekGrid({ user }: WeekGridProps) {
     start_minute: number;
   } | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -164,45 +164,14 @@ export function WeekGrid({ user }: WeekGridProps) {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setIsSidebarOpen(true)}
+            onClick={onOpenSidebar}
             className="p-2 rounded-md hover:bg-[#1a1a1a] transition-colors"
+            aria-label="Apri menu"
           >
             <Menu className="w-5 h-5 text-[#888888]" />
           </button>
         </div>
       </div>
-
-      {/* Mobile sidebar overlay */}
-      {isSidebarOpen && (
-        <div className="sm:hidden fixed inset-0 z-40">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-64 bg-[#1a1a1a] border-l border-[#2a2a2a]">
-            <div className="flex justify-end p-4">
-              <button onClick={() => setIsSidebarOpen(false)} className="p-2">
-                <X className="w-5 h-5 text-[#888888]" />
-              </button>
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-[#888888] mb-2">Navigazione rapida</p>
-              <div className="grid grid-cols-7 gap-1">
-                {weekDays.map((day, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setSelectedDayIndex(i); setIsSidebarOpen(false); }}
-                    className={`p-2 rounded text-xs ${
-                      selectedDayIndex === i
-                        ? 'bg-[#e8e0d0] text-[#0f0f0f]'
-                        : 'bg-[#222222] text-[#f5f5f5] hover:bg-[#2a2a2a]'
-                    }`}
-                  >
-                    {format(day, 'EEE', { locale: it })}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Desktop header */}
       <div className="hidden sm:flex items-center justify-between px-6 py-4 bg-[#0f0f0f] border-b border-[#2a2a2a]">

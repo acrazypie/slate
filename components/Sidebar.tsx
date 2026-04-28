@@ -12,15 +12,17 @@ interface SidebarProps {
   };
   blocks: Block[];
   onSettingsClick?: () => void;
+  onClose?: () => void;
 }
 
-export function Sidebar({ user, blocks, onSettingsClick }: SidebarProps) {
+export function Sidebar({ user, blocks, onSettingsClick, onClose }: SidebarProps) {
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/auth/login');
+    onClose?.();
   };
 
   const categoryHours = blocks.reduce((acc, block) => {
