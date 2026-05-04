@@ -50,23 +50,23 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
-        <div className="text-[#888888]">Caricamento...</div>
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <div className="text-text-secondary">Caricamento...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#0f0f0f]">
+    <div className="flex h-screen bg-bg text-text-primary">
       {/* Desktop sidebar - always visible */}
-      <div className="hidden md:flex md:w-64 md:flex-col">
+      <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-surface">
         <Sidebar 
           user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
           blocks={blocks}
           onSettingsClick={() => setIsSettingsOpen(true)}
           onClose={handleCloseSidebar}
         />
-      </div>
+      </aside>
 
       {/* Mobile scrim */}
       <div
@@ -79,28 +79,32 @@ export default function DashboardPage() {
         aria-hidden="true"
       />
 
-      {/* Mobile drawer */}
+      {/* Mobile full-screen drawer */}
       <div
         className={`
-          fixed top-0 left-0 z-50 h-full w-72 md:hidden
-          transform transition-transform duration-300 ease-in-out
+          fixed inset-0 z-50 md:hidden
+          bg-surface transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         aria-label="Menu laterale"
       >
-        <button
-          onClick={handleCloseSidebar}
-          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-          aria-label="Chiudi menu"
-        >
-          <X className="w-5 h-5 text-[#888888]" />
-        </button>
-        <Sidebar 
-          user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
-          blocks={blocks}
-          onSettingsClick={() => { setIsSettingsOpen(true); handleCloseSidebar(); }}
-          onClose={handleCloseSidebar}
-        />
+        <div className="flex items-center justify-end p-4">
+          <button
+            onClick={handleCloseSidebar}
+            className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
+            aria-label="Chiudi menu"
+          >
+            <X className="w-6 h-6 text-text-secondary" />
+          </button>
+        </div>
+        <div className="flex-1 -mt-4">
+          <Sidebar 
+            user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
+            blocks={blocks}
+            onSettingsClick={() => { setIsSettingsOpen(true); handleCloseSidebar(); }}
+            onClose={handleCloseSidebar}
+          />
+        </div>
       </div>
 
       <WeekGrid 

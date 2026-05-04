@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { X, Sun, Moon, Monitor } from 'lucide-react';
+import { X, Sun, Moon, Monitor, Smartphone, ChevronDown, ChevronUp } from 'lucide-react';
 import { ViewMode } from '@/hooks/useWeek';
 
 interface SettingsModalProps {
@@ -10,11 +10,16 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
+type TabId = 'general' | 'homescreen';
+
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { theme, setTheme } = useTheme();
   const [defaultView, setDefaultView] = useState<ViewMode>(
     () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'week'
   );
+  const [activeTab, setActiveTab] = useState<TabId>('general');
+  const [iosExpanded, setIosExpanded] = useState(false);
+  const [androidExpanded, setAndroidExpanded] = useState(false);
 
   const handleViewChange = (view: ViewMode) => {
     setDefaultView(view);
@@ -24,94 +29,210 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
       <div 
-        className="bg-[#1a1a1a] dark:bg-[#1a1a1a] light:bg-white rounded-lg w-full max-w-md mx-4 p-6"
+        className="bg-surface rounded-t-2xl sm:rounded-lg w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-medium text-[#f5f5f5] dark:text-[#f5f5f5] light:text-[#1a1a1a]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-medium text-text-primary">
             Impostazioni
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-[#2a2a2a] dark:hover:bg-[#2a2a2a] light:hover:bg-[#f0eeea] rounded">
-            <X className="w-5 h-5 text-[#888888]" />
+          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded">
+            <X className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm text-[#888888] dark:text-[#888888] light:text-[#666666] mb-3">Tema</label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setTheme('light')}
-                className={`flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm transition-colors ${
-                  theme === 'light'
-                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
-                    : 'bg-[#222222] dark:bg-[#222222] light:bg-[#f0eeea] text-[#f5f5f5] dark:text-[#f5f5f5] light:text-[#1a1a1a] hover:bg-[#2a2a2a]'
-                }`}
-              >
-                <Sun className="w-4 h-4" />
-                Chiaro
-              </button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm transition-colors ${
-                  theme === 'dark'
-                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
-                    : 'bg-[#222222] dark:bg-[#222222] light:bg-[#f0eeea] text-[#f5f5f5] dark:text-[#f5f5f5] light:text-[#1a1a1a] hover:bg-[#2a2a2a]'
-                }`}
-              >
-                <Moon className="w-4 h-4" />
-                Scuro
-              </button>
-              <button
-                onClick={() => setTheme('system')}
-                className={`flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm transition-colors ${
-                  theme === 'system'
-                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
-                    : 'bg-[#222222] dark:bg-[#222222] light:bg-[#f0eeea] text-[#f5f5f5] dark:text-[#f5f5f5] light:text-[#1a1a1a] hover:bg-[#2a2a2a]'
-                }`}
-              >
-                <Monitor className="w-4 h-4" />
-                Sistema
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-[#888888] dark:text-[#888888] light:text-[#666666] mb-3">Vista predefinita</label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => handleViewChange('day')}
-                className={`px-3 py-3 rounded-md text-sm transition-colors ${
-                  defaultView === 'day'
-                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
-                    : 'bg-[#222222] dark:bg-[#222222] light:bg-[#f0eeea] text-[#f5f5f5] dark:text-[#f5f5f5] light:text-[#1a1a1a] hover:bg-[#2a2a2a]'
-                }`}
-              >
-                Giorno
-              </button>
-              <button
-                onClick={() => handleViewChange('week')}
-                className={`px-3 py-3 rounded-md text-sm transition-colors ${
-                  defaultView === 'week'
-                    ? 'bg-[#e8e0d0] text-[#0f0f0f]'
-                    : 'bg-[#222222] dark:bg-[#222222] light:bg-[#f0eeea] text-[#f5f5f5] dark:text-[#f5f5f5] light:text-[#1a1a1a] hover:bg-[#2a2a2a]'
-                }`}
-              >
-                Settimana
-              </button>
-              <button
-                onClick={() => handleViewChange('month')}
-                disabled
-                className="px-3 py-3 rounded-md text-sm transition-colors bg-[#222222] dark:bg-[#222222] light:bg-[#f0eeea] text-[#888888] dark:text-[#888888] light:text-[#666666] hover:bg-[#2a2a2a] opacity-50 cursor-not-allowed"
-              >
-                Mese
-                <span className="block text-xs">(in arrivo)</span>
-              </button>
-            </div>
-          </div>
+        {/* Tab bar */}
+        <div className="flex gap-1 mb-5 bg-surface-hover rounded-lg p-1">
+          <button
+            onClick={() => setActiveTab('general')}
+            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'general'
+                ? 'bg-accent text-bg'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Generale
+          </button>
+          <button
+            onClick={() => setActiveTab('homescreen')}
+            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'homescreen'
+                ? 'bg-accent text-bg'
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Smartphone className="w-4 h-4 inline-block mr-1 -mt-0.5" />
+            App
+          </button>
         </div>
+
+        {activeTab === 'general' && (
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm text-text-secondary mb-3">Tema</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-md text-sm transition-colors ${
+                    theme === 'light'
+                      ? 'bg-accent text-bg font-medium'
+                      : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
+                >
+                  <Sun className="w-4 h-4" />
+                  Chiaro
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-md text-sm transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-accent text-bg font-medium'
+                      : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
+                >
+                  <Moon className="w-4 h-4" />
+                  Scuro
+                </button>
+                <button
+                  onClick={() => setTheme('system')}
+                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-md text-sm transition-colors ${
+                    theme === 'system'
+                      ? 'bg-accent text-bg font-medium'
+                      : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
+                >
+                  <Monitor className="w-4 h-4" />
+                  Sistema
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-text-secondary mb-3">Vista predefinita</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handleViewChange('day')}
+                  className={`px-3 py-3 rounded-md text-sm transition-colors ${
+                    defaultView === 'day'
+                      ? 'bg-accent text-bg font-medium'
+                      : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
+                >
+                  Giorno
+                </button>
+                <button
+                  onClick={() => handleViewChange('week')}
+                  className={`px-3 py-3 rounded-md text-sm transition-colors ${
+                    defaultView === 'week'
+                      ? 'bg-accent text-bg font-medium'
+                      : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
+                >
+                  Settimana
+                </button>
+                <button
+                  disabled
+                  className="px-3 py-3 rounded-md text-sm transition-colors bg-surface-hover text-text-secondary opacity-50 cursor-not-allowed"
+                >
+                  Mese
+                  <span className="block text-xs">(in arrivo)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'homescreen' && (
+          <div className="space-y-4">
+            <div className="text-sm text-text-secondary leading-relaxed">
+              Aggiungi Slate alla schermata home per usarla come app a schermo intero.
+            </div>
+
+            {/* iOS section */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setIosExpanded(!iosExpanded)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-surface-hover hover:bg-border transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🍎</span>
+                  <span className="text-sm font-medium text-text-primary">iPhone / iPad (Safari)</span>
+                </div>
+                {iosExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-text-secondary" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-text-secondary" />
+                )}
+              </button>
+              {iosExpanded && (
+                <div className="p-4 space-y-3 border-t border-border">
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">1</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Apri <strong className="text-text-primary">Safari</strong> e vai alla pagina di Slate</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">2</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Tocca il pulsante <strong className="text-text-primary">Condividi</strong> <span className="inline-block text-text-primary">⎋</span> in basso al centro della pagina</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">3</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Scorri verso il basso e tocca <strong className="text-text-primary">Aggiungi alla schermata home</strong></p>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">4</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Conferma toccando <strong className="text-text-primary">Aggiungi</strong> in alto a destra</p>
+                  </div>
+                  <div className="mt-3 p-3 bg-surface-hover rounded-md text-xs text-text-secondary">
+                    L&apos;app si aprirà a schermo intero senza la barra di Safari, come un&apos;app nativa.
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Android section */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setAndroidExpanded(!androidExpanded)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-surface-hover hover:bg-border transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🤖</span>
+                  <span className="text-sm font-medium text-text-primary">Android (Chrome)</span>
+                </div>
+                {androidExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-text-secondary" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-text-secondary" />
+                )}
+              </button>
+              {androidExpanded && (
+                <div className="p-4 space-y-3 border-t border-border">
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">1</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Apri <strong className="text-text-primary">Chrome</strong> e vai alla pagina di Slate</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">2</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Tocca il menu <strong className="text-text-primary">⋮</strong> in alto a destra</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">3</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Tocca <strong className="text-text-primary">Aggiungi a schermata Home</strong> (o &ldquo;Installa app&rdquo;)</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">4</span>
+                    <p className="text-sm text-text-secondary pt-0.5">Conferma toccando <strong className="text-text-primary">Aggiungi</strong></p>
+                  </div>
+                  <div className="mt-3 p-3 bg-surface-hover rounded-md text-xs text-text-secondary">
+                    L&apos;app apparirà come un&apos;icona sulla tua home screen e si aprirà a schermo intero.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

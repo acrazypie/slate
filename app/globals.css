@@ -3,8 +3,17 @@
 @theme {
   --font-sans: var(--font-dm-sans);
   --font-serif: var(--font-dm-serif);
-  
-  --color-background: #0f0f0f;
+  --color-bg: var(--color-bg, #0f0f0f);
+  --color-surface: var(--color-surface, #1a1a1a);
+  --color-surface-hover: var(--color-surface-hover, #222222);
+  --color-border: var(--color-border, #2a2a2a);
+  --color-text-primary: var(--color-text-primary, #f5f5f5);
+  --color-text-secondary: var(--color-text-secondary, #888888);
+  --color-accent: var(--color-accent, #e8e0d0);
+}
+
+:root {
+  --color-bg: #0f0f0f;
   --color-surface: #1a1a1a;
   --color-surface-hover: #222222;
   --color-border: #2a2a2a;
@@ -13,13 +22,8 @@
   --color-accent: #e8e0d0;
 }
 
-:root {
-  --background: #0f0f0f;
-  --surface: #1a1a1a;
-}
-
 .light {
-  --color-background: #f5f4f0;
+  --color-bg: #f5f4f0;
   --color-surface: #ffffff;
   --color-surface-hover: #f0eeea;
   --color-border: #e0ddd8;
@@ -28,7 +32,11 @@
   --color-accent: #1a1a1a;
 }
 
+html {
+  background: var(--color-bg);
+}
+
 body {
-  background: var(--color-background);
+  background: var(--color-bg);
   color: var(--color-text-primary);
 }
