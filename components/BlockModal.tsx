@@ -106,13 +106,13 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
     }
   }
 
-  const selectedRadio = 'inline-flex items-center justify-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors';
-  const unselectedRadio = 'inline-flex items-center justify-center px-3 py-2.5 rounded-md text-sm transition-colors bg-surface text-text-primary hover:bg-surface-hover';
+  const selectedRadio = 'inline-flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors';
+  const unselectedRadio = 'inline-flex items-center justify-center px-3 py-2.5 rounded-xl text-sm transition-colors bg-surface text-text-primary hover:bg-surface-hover';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
       <div 
-        className="bg-surface rounded-t-2xl sm:rounded-lg w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
+        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -131,7 +131,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               placeholder="Titolo"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md placeholder-text-secondary border border-border focus:border-accent focus:outline-none"
+              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl placeholder-text-secondary border border-border focus:border-accent focus:outline-none"
               autoFocus
             />
           </div>
@@ -144,9 +144,9 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                   key={cat}
                   type="button"
                   onClick={() => handleCategoryChange(cat)}
-                  className={`px-3 py-2.5 rounded-md text-sm transition-colors ${
+                  className={`px-3 py-2.5 rounded-xl text-sm transition-colors ${
                     category === cat
-                      ? 'bg-accent text-bg font-medium'
+                      ? 'bg-accent text-accent-contrast font-medium'
                       : 'bg-surface-hover text-text-primary hover:bg-border'
                   }`}
                 >
@@ -182,7 +182,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               <select
                 value={day_of_week}
                 onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md border border-border focus:border-accent focus:outline-none"
+                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
               >
                 {DAY_NAMES.map((day, i) => (
                   <option key={i} value={i}>{day}</option>
@@ -194,7 +194,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               <select
                 value={duration_minutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md border border-border focus:border-accent focus:outline-none"
+                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
               >
                 {DURATION_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -212,7 +212,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 setStartHour(h);
                 setStartMinute(m);
               }}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md border border-border focus:border-accent focus:outline-none"
+              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
             >
               {timeOptions.map((opt) => (
                 <option key={`${opt.hour}:${opt.minute}`} value={`${opt.hour}:${opt.minute}`}>
@@ -229,7 +229,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Aggiungi note..."
               rows={3}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md placeholder-text-secondary border border-border focus:border-accent focus:outline-none resize-none"
+              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl placeholder-text-secondary border border-border focus:border-accent focus:outline-none resize-none"
             />
           </div>
 
@@ -239,21 +239,21 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               <button
                 type="button"
                 onClick={() => setIsRecurring(false)}
-                className={`w-full ${!is_recurring ? selectedRadio + ' bg-accent text-bg font-medium' : unselectedRadio}`}
+                className={`w-full ${!is_recurring ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
               >
                 Nessuna
               </button>
               <button
                 type="button"
                 onClick={() => { setIsRecurring(true); setRecurrenceType('weekly'); }}
-                className={`w-full ${is_recurring && recurrence_type === 'weekly' ? selectedRadio + ' bg-accent text-bg font-medium' : unselectedRadio}`}
+                className={`w-full ${is_recurring && recurrence_type === 'weekly' ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
               >
                 Settimanale
               </button>
               <button
                 type="button"
                 onClick={() => { setIsRecurring(true); setRecurrenceType('monthly'); }}
-                className={`w-full ${is_recurring && recurrence_type === 'monthly' ? selectedRadio + ' bg-accent text-bg font-medium' : unselectedRadio}`}
+                className={`w-full ${is_recurring && recurrence_type === 'monthly' ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
               >
                 Mensile
               </button>
@@ -267,7 +267,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 <button
                   type="button"
                   onClick={() => setRecurrenceEndDate('')}
-                  className={`w-full ${!recurrence_end_date ? selectedRadio + ' bg-accent text-bg font-medium' : unselectedRadio}`}
+                  className={`w-full ${!recurrence_end_date ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
                 >
                   Mai
                 </button>
@@ -275,7 +275,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                   <button
                     type="button"
                     onClick={() => setRecurrenceEndDate(recurrence_end_date || new Date().toISOString().split('T')[0])}
-                    className={`flex-1 ${recurrence_end_date ? selectedRadio + ' bg-accent text-bg font-medium' : unselectedRadio}`}
+                    className={`flex-1 ${recurrence_end_date ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
                   >
                     Fino al:
                   </button>
@@ -284,7 +284,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                       type="date"
                       value={recurrence_end_date}
                       onChange={(e) => setRecurrenceEndDate(e.target.value)}
-                      className="flex-1 px-3 py-2.5 bg-surface-hover text-text-primary rounded-md border border-border focus:border-accent focus:outline-none"
+                      className="flex-1 px-3 py-2.5 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
                     />
                   )}
                 </div>
@@ -298,30 +298,30 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 <button
                   type="button"
                   onClick={() => setShowDeleteRecurringMenu(!showDeleteRecurringMenu)}
-                  className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-md transition-colors w-full text-left"
+                  className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors w-full text-left"
                 >
                   {showDeleteRecurringMenu ? 'Annulla' : 'Elimina'}
                 </button>
                 {showDeleteRecurringMenu && (
-                  <div className="mt-2 space-y-2 p-3 bg-surface-hover rounded-md">
+                  <div className="mt-2 space-y-2 p-3 bg-surface-hover rounded-xl">
                     <button
                       type="button"
                       onClick={() => handleDeleteRecurring('current')}
-                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-md text-left"
+                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-xl text-left"
                     >
                       Solo questo blocco
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteRecurring('this-and-following')}
-                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-md text-left"
+                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-xl text-left"
                     >
                       Questo e i seguenti
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteRecurring('all')}
-                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-md text-left"
+                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-xl text-left"
                     >
                       Tutti i blocchi della serie
                     </button>
@@ -332,7 +332,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               <button
                 type="button"
                 onClick={onDelete}
-                className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
               >
                 Elimina
               </button>
@@ -340,14 +340,14 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-md transition-colors hover:bg-border"
+              className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
             >
               Annulla
             </button>
             <button
               type="submit"
               disabled={loading || !title.trim()}
-              className="flex-1 px-4 py-3 bg-accent text-bg rounded-md font-medium transition-colors hover:opacity-90 disabled:opacity-50"
+              className="flex-1 px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {loading ? 'Salvataggio...' : 'Salva'}
             </button>

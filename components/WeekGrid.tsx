@@ -178,7 +178,7 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
         <div className="flex items-center gap-1">
           <button
             onClick={handleGoToPrevDay}
-            className="p-1.5 rounded-md hover:bg-surface-hover transition-colors"
+            className="p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-text-secondary" />
           </button>
@@ -187,14 +187,14 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
           </h2>
           <button
             onClick={handleGoToNextDay}
-            className="p-1.5 rounded-md hover:bg-surface-hover transition-colors"
+            className="p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
           >
             <ChevronRight className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
         <button
           onClick={onOpenSidebar}
-          className="p-1.5 rounded-md hover:bg-surface-hover transition-colors"
+          className="p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
           aria-label="Apri impostazioni"
         >
           <Settings className="w-5 h-5 text-text-secondary" />
@@ -206,14 +206,14 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
         <div className="flex items-center gap-4">
           <button
             onClick={goToPrevWeek}
-            className="p-2 rounded-md hover:bg-surface-hover transition-colors"
+            className="p-2 rounded-xl hover:bg-surface-hover transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-text-secondary" />
           </button>
           <h2 className="text-lg font-medium text-text-primary">{formatWeekRange}</h2>
           <button
             onClick={goToNextWeek}
-            className="p-2 rounded-md hover:bg-surface-hover transition-colors"
+            className="p-2 rounded-xl hover:bg-surface-hover transition-colors"
           >
             <ChevronRight className="w-5 h-5 text-text-secondary" />
           </button>

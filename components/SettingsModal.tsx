@@ -31,7 +31,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
       <div 
-        className="bg-surface rounded-t-2xl sm:rounded-lg w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
+        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -44,12 +44,12 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Tab bar */}
-        <div className="flex gap-1 mb-5 bg-surface-hover rounded-lg p-1">
+        <div className="flex gap-1 mb-5 bg-surface-hover rounded-2xl p-1">
           <button
             onClick={() => setActiveTab('general')}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-colors ${
               activeTab === 'general'
-                ? 'bg-accent text-bg'
+                ? 'bg-accent text-accent-contrast'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -57,9 +57,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </button>
           <button
             onClick={() => setActiveTab('homescreen')}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-colors ${
               activeTab === 'homescreen'
-                ? 'bg-accent text-bg'
+                ? 'bg-accent text-accent-contrast'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -75,9 +75,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setTheme('light')}
-                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-md text-sm transition-colors ${
+                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-sm transition-colors ${
                     theme === 'light'
-                      ? 'bg-accent text-bg font-medium'
+                      ? 'bg-accent text-accent-contrast font-medium'
                       : 'bg-surface-hover text-text-primary hover:bg-border'
                   }`}
                 >
@@ -86,9 +86,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </button>
                 <button
                   onClick={() => setTheme('dark')}
-                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-md text-sm transition-colors ${
+                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-sm transition-colors ${
                     theme === 'dark'
-                      ? 'bg-accent text-bg font-medium'
+                      ? 'bg-accent text-accent-contrast font-medium'
                       : 'bg-surface-hover text-text-primary hover:bg-border'
                   }`}
                 >
@@ -97,9 +97,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </button>
                 <button
                   onClick={() => setTheme('system')}
-                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-md text-sm transition-colors ${
+                  className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-sm transition-colors ${
                     theme === 'system'
-                      ? 'bg-accent text-bg font-medium'
+                      ? 'bg-accent text-accent-contrast font-medium'
                       : 'bg-surface-hover text-text-primary hover:bg-border'
                   }`}
                 >
@@ -114,9 +114,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => handleViewChange('day')}
-                  className={`px-3 py-3 rounded-md text-sm transition-colors ${
+                  className={`px-3 py-3 rounded-xl text-sm transition-colors ${
                     defaultView === 'day'
-                      ? 'bg-accent text-bg font-medium'
+                      ? 'bg-accent text-accent-contrast font-medium'
                       : 'bg-surface-hover text-text-primary hover:bg-border'
                   }`}
                 >
@@ -124,9 +124,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </button>
                 <button
                   onClick={() => handleViewChange('week')}
-                  className={`px-3 py-3 rounded-md text-sm transition-colors ${
+                  className={`px-3 py-3 rounded-xl text-sm transition-colors ${
                     defaultView === 'week'
-                      ? 'bg-accent text-bg font-medium'
+                      ? 'bg-accent text-accent-contrast font-medium'
                       : 'bg-surface-hover text-text-primary hover:bg-border'
                   }`}
                 >
@@ -134,7 +134,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </button>
                 <button
                   disabled
-                  className="px-3 py-3 rounded-md text-sm transition-colors bg-surface-hover text-text-secondary opacity-50 cursor-not-allowed"
+                  className="px-3 py-3 rounded-xl text-sm transition-colors bg-surface-hover text-text-secondary opacity-50 cursor-not-allowed"
                 >
                   Mese
                   <span className="block text-xs">(in arrivo)</span>
@@ -151,7 +151,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </div>
 
             {/* iOS section */}
-            <div className="border border-border rounded-lg overflow-hidden">
+            <div className="border border-border rounded-2xl overflow-hidden">
               <button
                 onClick={() => setIosExpanded(!iosExpanded)}
                 className="w-full flex items-center justify-between px-4 py-3 bg-surface-hover hover:bg-border transition-colors"
@@ -169,22 +169,22 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {iosExpanded && (
                 <div className="p-4 space-y-3 border-t border-border">
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">1</span>
                     <p className="text-sm text-text-secondary pt-0.5">Apri <strong className="text-text-primary">Safari</strong> e vai alla pagina di Slate</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">2</span>
                     <p className="text-sm text-text-secondary pt-0.5">Tocca il pulsante <strong className="text-text-primary">Condividi</strong> <span className="inline-block text-text-primary">⎋</span> in basso al centro della pagina</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">3</span>
                     <p className="text-sm text-text-secondary pt-0.5">Scorri verso il basso e tocca <strong className="text-text-primary">Aggiungi alla schermata home</strong></p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">4</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">4</span>
                     <p className="text-sm text-text-secondary pt-0.5">Conferma toccando <strong className="text-text-primary">Aggiungi</strong> in alto a destra</p>
                   </div>
-                  <div className="mt-3 p-3 bg-surface-hover rounded-md text-xs text-text-secondary">
+                  <div className="mt-3 p-3 bg-surface-hover rounded-xl text-xs text-text-secondary">
                     L&apos;app si aprirà a schermo intero senza la barra di Safari, come un&apos;app nativa.
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </div>
 
             {/* Android section */}
-            <div className="border border-border rounded-lg overflow-hidden">
+            <div className="border border-border rounded-2xl overflow-hidden">
               <button
                 onClick={() => setAndroidExpanded(!androidExpanded)}
                 className="w-full flex items-center justify-between px-4 py-3 bg-surface-hover hover:bg-border transition-colors"
@@ -210,22 +210,22 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {androidExpanded && (
                 <div className="p-4 space-y-3 border-t border-border">
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">1</span>
                     <p className="text-sm text-text-secondary pt-0.5">Apri <strong className="text-text-primary">Chrome</strong> e vai alla pagina di Slate</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">2</span>
                     <p className="text-sm text-text-secondary pt-0.5">Tocca il menu <strong className="text-text-primary">⋮</strong> in alto a destra</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">3</span>
                     <p className="text-sm text-text-secondary pt-0.5">Tocca <strong className="text-text-primary">Aggiungi a schermata Home</strong> (o &ldquo;Installa app&rdquo;)</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-bg flex items-center justify-center text-xs font-bold">4</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-contrast flex items-center justify-center text-xs font-bold">4</span>
                     <p className="text-sm text-text-secondary pt-0.5">Conferma toccando <strong className="text-text-primary">Aggiungi</strong></p>
                   </div>
-                  <div className="mt-3 p-3 bg-surface-hover rounded-md text-xs text-text-secondary">
+                  <div className="mt-3 p-3 bg-surface-hover rounded-xl text-xs text-text-secondary">
                     L&apos;app apparirà come un&apos;icona sulla tua home screen e si aprirà a schermo intero.
                   </div>
                 </div>

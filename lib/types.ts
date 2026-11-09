@@ -44,10 +44,10 @@ export interface BlockFormData {
 }
 
 export const CATEGORY_COLORS: Record<BlockCategory, string> = {
-  studio: '#6366f1',
-  lavoro: '#10b981',
-  lezione: '#f59e0b',
-  altro: '#8b5cf6',
+  studio: '#BB86FC',
+  lavoro: '#E49C69',
+  lezione: '#FFD9A0',
+  altro: '#CF6679',
 };
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -67,14 +67,14 @@ export const CATEGORY_ICONS: Record<BlockCategory, string> = {
 export const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
 export const COLOR_PALETTE = [
-  '#6366f1', // indigo
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#8b5cf6', // violet
-  '#ef4444', // red
-  '#06b6d4', // cyan
-  '#ec4899', // pink
-  '#14b8a6', // teal
+  '#E49C69', // apricot dust
+  '#FFD9A0', // sand nougat
+  '#F2C299', // dune beach
+  '#5C3B2E', // cacao husk
+  '#BB86FC', // violet
+  '#CF6679', // rose
+  '#6BB6A3', // teal
+  '#7AA7D9', // sky blue
 ];
 
 export const DURATION_OPTIONS = [

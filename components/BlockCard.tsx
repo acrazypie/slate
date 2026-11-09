@@ -1,6 +1,6 @@
 'use client';
 
-import { Block, getContrastColor } from '@/lib/types';
+import { Block, CATEGORY_ICONS, BlockCategory } from '@/lib/types';
 import { Repeat } from 'lucide-react';
 
 interface BlockCardProps {
@@ -16,29 +16,35 @@ export function BlockCard({ block, onClick }: BlockCardProps) {
 
   const top = ((block.start_hour * 60 + block.start_minute) / (24 * 60)) * 100;
   const height = (block.duration_minutes / (24 * 60)) * 100;
-
-  const textColor = getContrastColor(block.color);
+  const isCompact = height < 6;
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-md border px-2 py-1 cursor-pointer overflow-hidden hover:brightness-110 transition-all"
+      className="absolute left-1 right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105"
       style={{
         top: `${top}%`,
         height: `${height}%`,
-        minHeight: '24px',
-        backgroundColor: block.color,
-        borderColor: block.color,
+        minHeight: '22px',
+        backgroundColor: `color-mix(in srgb, ${block.color} 22%, var(--color-surface))`,
+        borderLeft: `3px solid ${block.color}`,
       }}
       onClick={onClick}
     >
       <div className="flex flex-col h-full">
         <div className="flex items-start justify-between gap-1">
-          <span className="text-xs font-medium truncate" style={{ color: textColor }}>{block.title}</span>
-          {block.is_recurring && (
-            <Repeat className="w-3 h-3 flex-shrink-0" style={{ color: textColor }} />
+          <span className="text-xs font-medium truncate text-text-primary">
+            {!isCompact && (
+              <span className="mr-1">{CATEGORY_ICONS[block.category as BlockCategory]}</span>
+            )}
+            {block.title}
+          </span>
+          {block.is_recurring && !isCompact && (
+            <Repeat className="w-3 h-3 flex-shrink-0 text-text-secondary" />
           )}
         </div>
-        <span className="text-[10px]" style={{ color: textColor, opacity: 0.8 }}>{startTime} – {endTime}</span>
+        {!isCompact && (
+          <span className="text-[10px] text-text-secondary">{startTime} – {endTime}</span>
+        )}
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-end p-4">
           <button
             onClick={handleCloseSidebar}
-            className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
+            className="p-2 rounded-2xl hover:bg-surface-hover transition-colors"
             aria-label="Chiudi menu"
           >
             <X className="w-6 h-6 text-text-secondary" />

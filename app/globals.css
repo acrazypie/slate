@@ -3,33 +3,42 @@
 @theme {
   --font-sans: var(--font-dm-sans);
   --font-serif: var(--font-dm-serif);
-  --color-bg: var(--color-bg, #0f0f0f);
-  --color-surface: var(--color-surface, #1a1a1a);
-  --color-surface-hover: var(--color-surface-hover, #222222);
-  --color-border: var(--color-border, #2a2a2a);
-  --color-text-primary: var(--color-text-primary, #f5f5f5);
-  --color-text-secondary: var(--color-text-secondary, #888888);
-  --color-accent: var(--color-accent, #e8e0d0);
+  --color-bg: var(--color-bg, #121212);
+  --color-surface: var(--color-surface, #1e1e1e);
+  --color-surface-hover: var(--color-surface-hover, #272727);
+  --color-border: var(--color-border, #2e2e2e);
+  --color-border-strong: var(--color-border-strong, #383838);
+  --color-text-primary: var(--color-text-primary, #e0e0e0);
+  --color-text-secondary: var(--color-text-secondary, #a0a0a0);
+  --color-text-tertiary: var(--color-text-tertiary, #6c6c6c);
+  --color-accent: var(--color-accent, #e49c69);
+  --color-accent-contrast: var(--color-accent-contrast, #201a17);
 }
 
 :root {
-  --color-bg: #0f0f0f;
-  --color-surface: #1a1a1a;
-  --color-surface-hover: #222222;
-  --color-border: #2a2a2a;
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #888888;
-  --color-accent: #e8e0d0;
+  --color-bg: #121212;
+  --color-surface: #1e1e1e;
+  --color-surface-hover: #272727;
+  --color-border: #2e2e2e;
+  --color-border-strong: #383838;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #a0a0a0;
+  --color-text-tertiary: #6c6c6c;
+  --color-accent: #e49c69;
+  --color-accent-contrast: #201a17;
 }
 
 .light {
-  --color-bg: #f5f4f0;
+  --color-bg: #fff6ea;
   --color-surface: #ffffff;
-  --color-surface-hover: #f0eeea;
-  --color-border: #e0ddd8;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-accent: #1a1a1a;
+  --color-surface-hover: #fdefdb;
+  --color-border: #f2c299;
+  --color-border-strong: #e49c69;
+  --color-text-primary: #201a17;
+  --color-text-secondary: #5c3b2e;
+  --color-text-tertiary: #9b8176;
+  --color-accent: #e49c69;
+  --color-accent-contrast: #201a17;
 }
 
 html {

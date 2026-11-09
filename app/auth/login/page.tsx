@@ -61,11 +61,11 @@ export default function LoginPage() {
           Slate
         </h1>
 
-        <div className="bg-surface rounded-lg p-6 space-y-6">
+        <div className="bg-surface rounded-2xl p-6 space-y-6">
           <button
             onClick={() => handleOAuthSignIn('google')}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-md font-medium transition-colors hover:bg-border disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-xl font-medium transition-colors hover:bg-border disabled:opacity-50"
           >
             <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
             Continua con Google
@@ -74,7 +74,7 @@ export default function LoginPage() {
           <button
             onClick={() => handleOAuthSignIn('apple')}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-md font-medium transition-colors hover:bg-border disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-xl font-medium transition-colors hover:bg-border disabled:opacity-50"
           >
             Continua con Apple
           </button>
@@ -95,7 +95,7 @@ export default function LoginPage() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md placeholder-text-secondary border border-border focus:border-accent focus:outline-none transition-colors"
+                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl placeholder-text-secondary border border-border focus:border-accent focus:outline-none transition-colors"
                 required
               />
             </div>
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-md placeholder-text-secondary border border-border focus:border-accent focus:outline-none transition-colors"
+                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl placeholder-text-secondary border border-border focus:border-accent focus:outline-none transition-colors"
                 required
               />
             </div>
@@ -120,7 +120,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-3 bg-accent text-bg rounded-md font-medium transition-colors hover:opacity-90 disabled:opacity-50"
+              className="w-full px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {loading ? 'Caricamento...' : isSignUp ? 'Registrati' : 'Accedi'}
             </button>

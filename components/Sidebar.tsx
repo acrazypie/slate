@@ -47,7 +47,7 @@ export function Sidebar({ user, blocks, onSettingsClick, onClose }: SidebarProps
       <div className={`p-6 border-b border-border`}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-            <span className="text-bg font-medium">
+            <span className="text-accent-contrast font-medium">
               {user?.email?.[0]?.toUpperCase() || 'U'}
             </span>
           </div>
@@ -95,7 +95,7 @@ export function Sidebar({ user, blocks, onSettingsClick, onClose }: SidebarProps
         {onSettingsClick && (
           <button
             onClick={onSettingsClick}
-            className="w-full flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-md transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-xl transition-colors"
           >
             <SettingsIcon className="w-4 h-4" />
             Impostazioni
@@ -103,7 +103,7 @@ export function Sidebar({ user, blocks, onSettingsClick, onClose }: SidebarProps
         )}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-md transition-colors"
+          className="w-full flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-xl transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Esci

@@ -15,7 +15,7 @@ export default function Home() {
         
         <Link
           href="/auth/login"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-bg rounded-md font-medium text-lg transition-all duration-200 hover:opacity-90 hover:scale-105"
+          className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-accent-contrast rounded-xl font-medium text-lg transition-all duration-200 hover:opacity-90 hover:scale-105"
         >
           Inizia gratis
           <ArrowRight className="w-5 h-5" />
