@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
         <P>
           I presenti Termini di Servizio (&ldquo;Termini&rdquo;) regolano l&apos;utilizzo di Slate (il
           &ldquo;Servizio&rdquo;), fornito da{' '}
-          <strong className="text-text-primary">[NOME E COGNOME / RAGIONE SOCIALE]</strong>{' '}
+          <strong className="text-text-primary">Matteo Genesio</strong>{' '}
           (&ldquo;il Titolare&rdquo;, &ldquo;noi&rdquo;). Creando un account o utilizzando il Servizio,
           accetti integralmente questi Termini.
         </P>
@@ -143,7 +143,7 @@ export default function TermsOfServicePage() {
         <H2>11. Contatti</H2>
         <P>
           Per domande relative a questi Termini, scrivi a{' '}
-          <strong className="text-text-primary">[INSERISCI EMAIL DI CONTATTO]</strong>.
+          <strong className="text-text-primary">egenesio@proton.me</strong>.
         </P>
       </div>
     </div>

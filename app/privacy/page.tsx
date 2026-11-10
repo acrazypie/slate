@@ -42,18 +42,10 @@ export default function PrivacyPolicyPage() {
         <H2>1. Titolare del trattamento</H2>
         <P>
           Il Titolare del trattamento è{' '}
-          <strong className="text-text-primary">[NOME E COGNOME / RAGIONE SOCIALE]</strong>, contattabile
+          <strong className="text-text-primary">Matteo Genesio</strong>, contattabile
           all&apos;indirizzo e-mail{' '}
-          <strong className="text-text-primary">[INSERISCI EMAIL DI CONTATTO]</strong>.
+          <strong className="text-text-primary">egenesio@proton.me</strong>.
         </P>
-        <P>
-          <em>
-            Nota per lo sviluppatore: sostituisci i campi tra parentesi quadre con i tuoi dati reali prima
-            di pubblicare questa pagina — sono richiesti dall&apos;art. 13 GDPR per identificare il
-            Titolare.
-          </em>
-        </P>
-
         <H2>2. Dati raccolti</H2>
         <P>Trattiamo le seguenti categorie di dati personali:</P>
         <ul className="list-disc pl-5 text-sm text-text-secondary leading-relaxed space-y-2 mb-3">
@@ -154,7 +146,7 @@ export default function PrivacyPolicyPage() {
         </ul>
         <P>
           Puoi esercitare questi diritti in qualsiasi momento scrivendo a{' '}
-          <strong className="text-text-primary">[INSERISCI EMAIL DI CONTATTO]</strong>. Hai inoltre il
+          <strong className="text-text-primary">egenesio@proton.me</strong>. Hai inoltre il
           diritto di proporre reclamo all&apos;autorità di controllo competente:
         </P>
         <P>
@@ -184,7 +176,7 @@ export default function PrivacyPolicyPage() {
         <H2>11. Contatti</H2>
         <P>
           Per qualsiasi domanda relativa a questa informativa o al trattamento dei tuoi dati, scrivi a{' '}
-          <strong className="text-text-primary">[INSERISCI EMAIL DI CONTATTO]</strong>.
+          <strong className="text-text-primary">egenesio@proton.me</strong>.
         </P>
       </div>
     </div>
