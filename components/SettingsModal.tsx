@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { X, Sun, Moon, Monitor, Smartphone, ChevronDown, ChevronUp } from 'lucide-react';
 import { ViewMode } from '@/hooks/useWeek';
@@ -233,6 +234,15 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </div>
           </div>
         )}
+
+        <div className="mt-6 pt-4 border-t border-border flex gap-4 text-xs text-text-tertiary">
+          <Link href="/privacy" className="hover:text-text-secondary transition-colors">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:text-text-secondary transition-colors">
+            Termini di Servizio
+          </Link>
+        </div>
       </div>
     </div>
   );

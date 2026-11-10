@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
@@ -132,6 +133,18 @@ export default function LoginPage() {
             </button>
           </p>
         </div>
+
+        <p className="mt-6 text-center text-xs text-text-tertiary">
+          Continuando accetti i{' '}
+          <Link href="/terms" className="underline hover:text-text-secondary">
+            Termini di Servizio
+          </Link>{' '}
+          e l&apos;
+          <Link href="/privacy" className="underline hover:text-text-secondary">
+            Informativa sulla Privacy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

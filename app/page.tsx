@@ -25,6 +25,15 @@ export default function Home() {
           Organizza studio, lavoro e lezioni in una griglia visiva
         </div>
       </main>
+
+      <footer className="mt-16 flex gap-4 text-xs text-text-tertiary">
+        <Link href="/privacy" className="hover:text-text-secondary transition-colors">
+          Privacy
+        </Link>
+        <Link href="/terms" className="hover:text-text-secondary transition-colors">
+          Termini di Servizio
+        </Link>
+      </footer>
     </div>
   );
 }
