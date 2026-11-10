@@ -14,10 +14,10 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleOAuthSignIn = async (provider: 'google' | 'apple') => {
+  const handleOAuthSignIn = async (provider: 'google') => {
     setLoading(true);
     setError(null);
-    
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -69,14 +69,6 @@ export default function LoginPage() {
           >
             <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
             Continua con Google
-          </button>
-
-          <button
-            onClick={() => handleOAuthSignIn('apple')}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-xl font-medium transition-colors hover:bg-border disabled:opacity-50"
-          >
-            Continua con Apple
           </button>
 
           <div className="relative">
