@@ -7,6 +7,8 @@ interface DayHeaderProps {
 }
 
 export function DayHeader({ date, isToday }: DayHeaderProps) {
+  if (!date || isNaN(date.getTime())) return null;
+
   const dayName = format(date, 'EEE', { locale: it });
   const dayNum = format(date, 'd');
   const month = format(date, 'MMM');

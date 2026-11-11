@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { startOfWeek, addWeeks, format, eachDayOfInterval, isSameDay } from 'date-fns';
+import { startOfWeek, addWeeks, addDays, format, eachDayOfInterval, isSameDay } from 'date-fns';
 
 export type ViewMode = 'day' | 'week' | 'month';
 
@@ -18,7 +18,7 @@ export function useWeek() {
   const weekDays = useMemo(() => {
     return eachDayOfInterval({
       start: currentWeekStart,
-      end: addWeeks(currentWeekStart, 0),
+      end: addDays(currentWeekStart, 6),
     });
   }, [currentWeekStart]);
 
@@ -43,7 +43,7 @@ export function useWeek() {
 
   const formatWeekRange = useMemo(() => {
     const start = currentWeekStart;
-    const end = addWeeks(currentWeekStart, 0);
+    const end = addDays(currentWeekStart, 6);
     if (isSameDay(start, end)) {
       return format(start, 'd MMM');
     }
