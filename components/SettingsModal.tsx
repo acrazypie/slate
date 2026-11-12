@@ -134,11 +134,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   Settimana
                 </button>
                 <button
-                  disabled
-                  className="px-3 py-3 rounded-xl text-sm transition-colors bg-surface-hover text-text-secondary opacity-50 cursor-not-allowed"
+                  onClick={() => handleViewChange('month')}
+                  className={`px-3 py-3 rounded-xl text-sm transition-colors ${
+                    defaultView === 'month'
+                      ? 'bg-accent text-accent-contrast font-medium'
+                      : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
                 >
                   Mese
-                  <span className="block text-xs">(in arrivo)</span>
                 </button>
               </div>
             </div>

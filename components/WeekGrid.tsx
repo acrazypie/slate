@@ -1,16 +1,18 @@
 'use client';
 
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, addDays, addMonths, subMonths } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { useWeek } from '@/hooks/useWeek';
+import { useWeek, ViewMode } from '@/hooks/useWeek';
 import { useBlocks } from '@/hooks/useBlocks';
+import { weekOffsetForDate } from '@/hooks/useMonthBlocks';
 import { Block, BlockFormData } from '@/lib/types';
 import { DayHeader } from './DayHeader';
 import { BlockCard } from './BlockCard';
 import { BlockModal } from './BlockModal';
+import { MonthGrid } from './MonthGrid';
 
 interface WeekGridProps {
   user?: {
@@ -20,8 +22,23 @@ interface WeekGridProps {
   onOpenSidebar?: () => void;
 }
 
+const WEEK_HOUR_HEIGHT = 48; // px, matches h-12
+const DAY_HOUR_HEIGHT = 56; // px, matches h-14
+const STRIP_OFFSETS = [-2, -1, 0, 1, 2];
+
 export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
-  const { weekOffset, weekDays, today, goToNextWeek, goToPrevWeek, goToCurrentWeek, formatWeekRange } = useWeek();
+  const {
+    weekOffset,
+    weekDays,
+    today,
+    goToNextWeek,
+    goToPrevWeek,
+    goToCurrentWeek,
+    goToWeek,
+    formatWeekRange,
+    view,
+    setViewMode,
+  } = useWeek();
   const { blocks, createBlock, updateBlock, deleteBlock, refetch: fetchBlocks } = useBlocks(weekOffset);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
@@ -35,6 +52,8 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
     const todayIndex = (new Date().getDay() + 6) % 7;
     return todayIndex;
   });
+  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
+  const [monthCursor, setMonthCursor] = useState(() => new Date());
   const touchStartRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -91,7 +110,7 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
   const handleDeleteRecurring = async (deleteType: 'current' | 'this-and-following' | 'all') => {
     if (!selectedBlock?.recurrence_group_id) return;
-    
+
     if (deleteType === 'current') {
       await deleteBlock(selectedBlock.id);
     } else if (deleteType === 'this-and-following') {
@@ -132,208 +151,291 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
   const dayBlocksForSelectedDay = getBlocksForDay(selectedDayIndex);
   const isTodaySelectedDay = selectedDay ? isSameDay(selectedDay, today) : false;
 
-  const handleGoToNextDay = () => {
-    if (selectedDayIndex < 6) {
-      setSelectedDayIndex(selectedDayIndex + 1);
-    } else {
-      goToNextWeek();
-      setSelectedDayIndex(0);
-    }
-  };
-
-  const handleGoToPrevDay = () => {
-    if (selectedDayIndex > 0) {
-      setSelectedDayIndex(selectedDayIndex - 1);
-    } else {
-      goToPrevWeek();
-      setSelectedDayIndex(6);
-    }
-  };
+  // Moves the selected day by `delta` days, crossing week boundaries (and
+  // fetching the right week) as needed. Used by the day strip, arrows and swipe.
+  const goToDayOffset = useCallback(
+    (delta: number) => {
+      if (delta === 0) return;
+      setSlideDirection(delta > 0 ? 1 : -1);
+      const total = selectedDayIndex + delta;
+      const weeksMoved = Math.floor(total / 7);
+      const newIndex = ((total % 7) + 7) % 7;
+      if (weeksMoved !== 0) {
+        goToWeek(weekOffset + weeksMoved);
+      }
+      setSelectedDayIndex(newIndex);
+    },
+    [selectedDayIndex, weekOffset, goToWeek]
+  );
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartRef.current = e.touches[0].clientX;
   }, []);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartRef.current === null) return;
-    const diff = e.changedTouches[0].clientX - touchStartRef.current;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        handleGoToPrevDay();
-      } else {
-        handleGoToNextDay();
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartRef.current === null) return;
+      const diff = e.changedTouches[0].clientX - touchStartRef.current;
+      if (Math.abs(diff) > 50) {
+        goToDayOffset(diff > 0 ? -1 : 1);
       }
-    }
-    touchStartRef.current = null;
-  }, [selectedDayIndex]);
+      touchStartRef.current = null;
+    },
+    [goToDayOffset]
+  );
 
   const selectedDayName = selectedDay
     ? `${format(selectedDay, 'EEEE', { locale: it })} ${format(selectedDay, 'd MMM', { locale: it })}`
     : '';
 
+  const monthTitle = useMemo(() => {
+    const label = format(monthCursor, 'MMMM yyyy', { locale: it });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }, [monthCursor]);
+
+  const handleSelectDayFromMonth = (date: Date) => {
+    goToWeek(weekOffsetForDate(date));
+    setSelectedDayIndex((date.getDay() + 6) % 7);
+    setViewMode('day');
+  };
+
+  const handleViewChange = (newView: ViewMode) => {
+    if (newView === 'month') {
+      setMonthCursor(weekDays[0] || new Date());
+    }
+    setViewMode(newView);
+  };
+
+  const handlePrev = () => {
+    if (view === 'day') goToDayOffset(-1);
+    else if (view === 'week') goToPrevWeek();
+    else setMonthCursor((prev) => subMonths(prev, 1));
+  };
+
+  const handleNext = () => {
+    if (view === 'day') goToDayOffset(1);
+    else if (view === 'week') goToNextWeek();
+    else setMonthCursor((prev) => addMonths(prev, 1));
+  };
+
+  const handleToday = () => {
+    if (view === 'month') {
+      setMonthCursor(new Date());
+    } else {
+      goToCurrentWeek();
+    }
+  };
+
+  const headerTitle = view === 'day' ? selectedDayName : view === 'week' ? formatWeekRange : monthTitle;
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-bg">
-      {/* Mobile header */}
-      <div className="sm:hidden flex items-center justify-between px-3 py-2.5 bg-bg border-b border-border">
-        <div className="flex items-center gap-1">
+      {/* Unified header */}
+      <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 sm:py-4 bg-bg border-b border-border">
+        <div className="flex items-center gap-1 sm:gap-4 min-w-0">
           <button
-            onClick={handleGoToPrevDay}
-            className="p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
+            onClick={handlePrev}
+            className="p-1.5 sm:p-2 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
+            aria-label="Precedente"
           >
             <ChevronLeft className="w-5 h-5 text-text-secondary" />
           </button>
-          <h2 className="text-sm font-medium text-text-primary px-1">
-            {selectedDayName}
-          </h2>
+          <h2 className="text-sm sm:text-lg font-medium text-text-primary truncate">{headerTitle}</h2>
           <button
-            onClick={handleGoToNextDay}
-            className="p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
+            onClick={handleNext}
+            className="p-1.5 sm:p-2 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
+            aria-label="Successivo"
           >
             <ChevronRight className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
-        <button
-          onClick={onOpenSidebar}
-          className="p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
-          aria-label="Apri impostazioni"
-        >
-          <Settings className="w-5 h-5 text-text-secondary" />
-        </button>
-      </div>
 
-      {/* Desktop header */}
-      <div className="hidden sm:flex items-center justify-between px-6 py-4 bg-bg border-b border-border">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={goToPrevWeek}
-            className="p-2 rounded-xl hover:bg-surface-hover transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-text-secondary" />
-          </button>
-          <h2 className="text-lg font-medium text-text-primary">{formatWeekRange}</h2>
-          <button
-            onClick={goToNextWeek}
-            className="p-2 rounded-xl hover:bg-surface-hover transition-colors"
-          >
-            <ChevronRight className="w-5 h-5 text-text-secondary" />
-          </button>
-        </div>
-        <button
-          onClick={goToCurrentWeek}
-          className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
-        >
-          Oggi
-        </button>
-      </div>
-
-      {/* Mobile single day view */}
-      <div
-        className="sm:hidden flex-1 flex flex-col overflow-hidden"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <DayHeader date={selectedDay} isToday={isTodaySelectedDay} />
-        <div className="flex flex-1 overflow-y-auto">
-          <div className="flex flex-col w-12 flex-shrink-0 border-r border-border">
-            <div className="h-10" />
-            <div className="flex-1 flex flex-col relative">
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="flex-shrink-0 h-14 text-[10px] text-text-secondary text-right pr-1.5 pt-1"
-                >
-                  {hour.toString().padStart(2, '0')}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex-1 relative" style={{ height: `${24 * 56}px`, minHeight: `${24 * 56}px` }}>
-            {hours.map((hour) => (
-              <div
-                key={hour}
-                className="absolute w-full h-14 border-b border-border cursor-pointer"
-                style={{ top: `${hour * 56}px` }}
-                onClick={() => handleCellClick(selectedDayIndex, hour, 0)}
-              />
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center bg-surface rounded-xl p-0.5">
+            {(['day', 'week', 'month'] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => handleViewChange(v)}
+                className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-colors ${
+                  view === v ? 'bg-accent text-accent-contrast' : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                {v === 'day' ? 'Giorno' : v === 'week' ? 'Settimana' : 'Mese'}
+              </button>
             ))}
-            <div className="absolute inset-0 pointer-events-none">
-              {dayBlocksForSelectedDay.map((block) => (
-                <BlockCard
-                  key={block.id}
-                  block={block}
-                  onClick={(e) => handleBlockClick(block, e)}
-                />
-              ))}
-            </div>
-            {isTodaySelectedDay && currentTimePosition !== null && (
-              <div
-                className="absolute left-0 right-0 h-0.5 bg-[#ef4444] z-10 pointer-events-none"
-                style={{ top: `${currentTimePosition}%` }}
-              />
-            )}
           </div>
+          <button
+            onClick={handleToday}
+            className="hidden sm:block px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+          >
+            Oggi
+          </button>
+          <button
+            onClick={onOpenSidebar}
+            className="sm:hidden p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
+            aria-label="Apri impostazioni"
+          >
+            <Settings className="w-5 h-5 text-text-secondary" />
+          </button>
         </div>
       </div>
 
-      {/* Desktop week grid */}
-      <div className="hidden sm:flex flex-1 overflow-y-auto">
-        <div className="flex flex-1 min-w-0">
-          <div className="flex flex-col w-16 flex-shrink-0 border-r border-border">
-            <DayHeader date={weekDays[0]} isToday={false} />
-            <div className="flex flex-1 flex-col relative">
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="flex-shrink-0 h-12 text-xs text-text-secondary text-right pr-3 pt-1"
-                >
-                  {hour.toString().padStart(2, '0')}:00
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-1">
-            {weekDays.map((day, dayIndex) => {
-              const isToday = isSameDay(day, today);
-              const dayBlocks = getBlocksForDay(dayIndex);
-              const showCurrentTimeLine = isToday;
-
+      {/* Day view */}
+      {view === 'day' && (
+        <div
+          className="flex-1 flex flex-col overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Day strip: current day +/- 2 neighbours */}
+          <div className="flex items-center justify-center gap-1.5 sm:gap-3 py-2.5 border-b border-border">
+            {STRIP_OFFSETS.map((n) => {
+              const date = addDays(selectedDay || today, n);
+              const isSelected = n === 0;
+              const isToday = isSameDay(date, today);
               return (
-                <div
-                  key={dayIndex}
-                  className="flex-1 min-w-0 border-r border-border last:border-r-0"
+                <button
+                  key={n}
+                  onClick={() => goToDayOffset(n)}
+                  className="flex flex-col items-center gap-1 px-1.5 py-1 rounded-xl transition-colors"
                 >
-                  <DayHeader date={day} isToday={isToday} />
-                  <div className="relative flex-1 cursor-pointer" style={{ height: '288px' }}>
-                    {hours.map((hour) => (
-                      <div
-                        key={hour}
-                        className="flex-shrink-0 h-12 border-b border-border hover:bg-surface-hover/50 transition-colors"
-                        onClick={() => handleCellClick(dayIndex, hour, 0)}
-                      />
-                    ))}
-                    <div className="absolute inset-0 pointer-events-none">
-                      {dayBlocks.map((block) => (
-                        <BlockCard
-                          key={block.id}
-                          block={block}
-                          onClick={(e) => handleBlockClick(block, e)}
-                        />
-                      ))}
-                    </div>
-                    {showCurrentTimeLine && currentTimePosition !== null && (
-                      <div
-                        className="absolute left-0 right-0 h-0.5 bg-[#ef4444] z-10 pointer-events-none"
-                        style={{ top: `${currentTimePosition}%` }}
-                      />
-                    )}
-                  </div>
-                </div>
+                  <span className="text-[10px] uppercase tracking-wide text-text-secondary">
+                    {format(date, 'EEE', { locale: it })}
+                  </span>
+                  <span
+                    className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+                      isSelected
+                        ? 'bg-accent text-accent-contrast'
+                        : isToday
+                          ? 'border border-accent text-accent'
+                          : 'text-text-primary'
+                    }`}
+                  >
+                    {format(date, 'd')}
+                  </span>
+                </button>
               );
             })}
           </div>
+
+          <div
+            key={`${weekOffset}-${selectedDayIndex}`}
+            className={`flex flex-1 overflow-y-auto ${slideDirection > 0 ? 'animate-day-in-right' : 'animate-day-in-left'}`}
+          >
+            <div className="flex flex-col w-12 flex-shrink-0 border-r border-border">
+              <div className="flex-1 flex flex-col relative">
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    className="flex-shrink-0 h-14 text-[10px] text-text-secondary text-right pr-1.5 pt-1"
+                  >
+                    {hour.toString().padStart(2, '0')}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex-1 relative" style={{ height: `${24 * DAY_HOUR_HEIGHT}px`, minHeight: `${24 * DAY_HOUR_HEIGHT}px` }}>
+              {hours.map((hour) => (
+                <div
+                  key={hour}
+                  className="absolute w-full h-14 border-b border-border cursor-pointer"
+                  style={{ top: `${hour * DAY_HOUR_HEIGHT}px` }}
+                  onClick={() => handleCellClick(selectedDayIndex, hour, 0)}
+                />
+              ))}
+              <div className="absolute inset-0 pointer-events-none">
+                {dayBlocksForSelectedDay.map((block) => (
+                  <BlockCard
+                    key={block.id}
+                    block={block}
+                    onClick={(e) => handleBlockClick(block, e)}
+                  />
+                ))}
+              </div>
+              {isTodaySelectedDay && currentTimePosition !== null && (
+                <div
+                  className="absolute left-0 right-0 h-0.5 bg-[#ef4444] z-10 pointer-events-none"
+                  style={{ top: `${currentTimePosition}%` }}
+                />
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Week view — horizontally scrollable on narrow screens, full-width on larger ones */}
+      {view === 'week' && (
+        <div className="flex-1 overflow-auto">
+          <div className="flex min-w-[720px] sm:min-w-0 h-full">
+            <div className="flex flex-col w-12 sm:w-16 flex-shrink-0 border-r border-border sticky left-0 bg-bg z-10">
+              <div className="invisible">
+                <DayHeader date={today} isToday={false} />
+              </div>
+              <div className="flex flex-1 flex-col relative">
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    className="flex-shrink-0 text-[10px] sm:text-xs text-text-secondary text-right pr-2 sm:pr-3 pt-1"
+                    style={{ height: `${WEEK_HOUR_HEIGHT}px` }}
+                  >
+                    {hour.toString().padStart(2, '0')}:00
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-1">
+              {weekDays.map((day, dayIndex) => {
+                const isToday = isSameDay(day, today);
+                const dayBlocks = getBlocksForDay(dayIndex);
+                const showCurrentTimeLine = isToday;
+
+                return (
+                  <div
+                    key={dayIndex}
+                    className="flex-1 min-w-[90px] sm:min-w-0 border-r border-border last:border-r-0"
+                  >
+                    <DayHeader date={day} isToday={isToday} />
+                    <div
+                      className="relative cursor-pointer"
+                      style={{ height: `${24 * WEEK_HOUR_HEIGHT}px` }}
+                    >
+                      {hours.map((hour) => (
+                        <div
+                          key={hour}
+                          className="border-b border-border hover:bg-surface-hover/50 transition-colors"
+                          style={{ height: `${WEEK_HOUR_HEIGHT}px` }}
+                          onClick={() => handleCellClick(dayIndex, hour, 0)}
+                        />
+                      ))}
+                      <div className="absolute inset-0 pointer-events-none">
+                        {dayBlocks.map((block) => (
+                          <BlockCard
+                            key={block.id}
+                            block={block}
+                            onClick={(e) => handleBlockClick(block, e)}
+                          />
+                        ))}
+                      </div>
+                      {showCurrentTimeLine && currentTimePosition !== null && (
+                        <div
+                          className="absolute left-0 right-0 h-0.5 bg-[#ef4444] z-10 pointer-events-none"
+                          style={{ top: `${currentTimePosition}%` }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Month view */}
+      {view === 'month' && (
+        <MonthGrid monthDate={monthCursor} today={today} onSelectDay={handleSelectDayFromMonth} />
+      )}
 
       {isModalOpen && (
         <BlockModal

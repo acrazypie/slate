@@ -41,6 +41,10 @@ export function useWeek() {
     setWeekOffset(0);
   }, []);
 
+  const goToWeek = useCallback((offset: number) => {
+    setWeekOffset(offset);
+  }, []);
+
   const formatWeekRange = useMemo(() => {
     const start = currentWeekStart;
     const end = addDays(currentWeekStart, 6);
@@ -63,6 +67,7 @@ export function useWeek() {
     goToNextWeek,
     goToPrevWeek,
     goToCurrentWeek,
+    goToWeek,
     formatWeekRange,
     isCurrentWeek,
     view,
