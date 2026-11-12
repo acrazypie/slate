@@ -5,6 +5,18 @@ import { createClient } from '@/lib/supabase/client';
 import { Block, BlockFormData } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
+// Fire-and-forget: pushes to Google Calendar if the user has it connected,
+// silently no-ops otherwise. Never blocks the UI on a slow/failed network call.
+function syncToGoogleCalendar(body: { action: 'upsert'; blockIds: string[] } | { action: 'delete'; eventIds: string[] }) {
+  fetch('/api/google-calendar/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).catch(() => {
+    // Best-effort only; the local save already succeeded.
+  });
+}
+
 export function useBlocks(weekOffset: number = 0) {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +97,11 @@ export function useBlocks(weekOffset: number = 0) {
         if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
         return a.start_minute - b.start_minute;
       }));
-      
+
+      if (data && data.length > 0) {
+        syncToGoogleCalendar({ action: 'upsert', blockIds: data.map((b) => b.id) });
+      }
+
       return data?.[0] || null;
     }
 
@@ -112,7 +128,9 @@ export function useBlocks(weekOffset: number = 0) {
       if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
       return a.start_minute - b.start_minute;
     }));
-    
+
+    syncToGoogleCalendar({ action: 'upsert', blockIds: [data.id] });
+
     return data;
   };
 
@@ -136,11 +154,15 @@ export function useBlocks(weekOffset: number = 0) {
         return a.start_minute - b.start_minute;
       })
     );
-    
+
+    syncToGoogleCalendar({ action: 'upsert', blockIds: [id] });
+
     return data;
   };
 
   const deleteBlock = async (id: string): Promise<boolean> => {
+    const existing = blocks.find((b) => b.id === id);
+
     const { error } = await supabase
       .from('blocks')
       .delete()
@@ -152,6 +174,11 @@ export function useBlocks(weekOffset: number = 0) {
     }
 
     setBlocks((prev) => prev.filter((b) => b.id !== id));
+
+    if (existing?.google_event_id) {
+      syncToGoogleCalendar({ action: 'delete', eventIds: [existing.google_event_id] });
+    }
+
     return true;
   };
 

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { X, Sun, Moon, Monitor, Smartphone, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Sun, Moon, Monitor, Smartphone, ChevronDown, ChevronUp, CalendarCheck, Loader2 } from 'lucide-react';
 import { ViewMode } from '@/hooks/useWeek';
+import { useGoogleCalendarConnection } from '@/hooks/useGoogleCalendarConnection';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -21,6 +22,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>('general');
   const [iosExpanded, setIosExpanded] = useState(false);
   const [androidExpanded, setAndroidExpanded] = useState(false);
+  const { connected, connect, disconnect } = useGoogleCalendarConnection();
+  const [calendarActionLoading, setCalendarActionLoading] = useState(false);
+
+  const handleConnectCalendar = async () => {
+    setCalendarActionLoading(true);
+    await connect();
+    // connect() redirects the browser away, so loading state just covers the gap.
+  };
+
+  const handleDisconnectCalendar = async () => {
+    setCalendarActionLoading(true);
+    await disconnect();
+    setCalendarActionLoading(false);
+  };
 
   const handleViewChange = (view: ViewMode) => {
     setDefaultView(view);
@@ -144,6 +159,46 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   Mese
                 </button>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-text-secondary mb-3">Google Calendar</label>
+              {connected === null ? (
+                <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-surface-hover text-sm text-text-secondary">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Verifica collegamento...
+                </div>
+              ) : connected ? (
+                <div className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-surface-hover">
+                  <div className="flex items-center gap-2 text-sm text-text-primary">
+                    <CalendarCheck className="w-4 h-4 text-accent" />
+                    Collegato
+                  </div>
+                  <button
+                    onClick={handleDisconnectCalendar}
+                    disabled={calendarActionLoading}
+                    className="text-sm text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+                  >
+                    Disconnetti
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleConnectCalendar}
+                  disabled={calendarActionLoading}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-surface-hover text-text-primary hover:bg-border transition-colors text-sm disabled:opacity-50"
+                >
+                  {calendarActionLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CalendarCheck className="w-4 h-4" />
+                  )}
+                  Connetti Google Calendar
+                </button>
+              )}
+              <p className="text-xs text-text-tertiary mt-2">
+                I blocchi che crei verranno copiati nel tuo Google Calendar (sincronizzazione a senso unico).
+              </p>
             </div>
           </div>
         )}

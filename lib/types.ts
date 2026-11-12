@@ -18,6 +18,7 @@ export interface Block {
   recurrence_type?: RecurrenceType;
   recurrence_end_date?: string;
   recurrence_group_id?: string;
+  google_event_id?: string | null;
   created_at: string;
 }
 

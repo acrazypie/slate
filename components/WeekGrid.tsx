@@ -123,20 +123,51 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
   const deleteRecurringThisAndFollowing = async (currentId: string, groupId: string, currentWeekOffset: number) => {
     const supabase = createClient();
+    const { data: affected } = await supabase
+      .from('blocks')
+      .select('google_event_id')
+      .eq('recurrence_group_id', groupId)
+      .gte('week_offset', currentWeekOffset);
+
     await supabase
       .from('blocks')
       .delete()
       .eq('recurrence_group_id', groupId)
       .gte('week_offset', currentWeekOffset);
+
+    const eventIds = (affected || []).map((b) => b.google_event_id).filter(Boolean) as string[];
+    if (eventIds.length > 0) {
+      fetch('/api/google-calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', eventIds }),
+      }).catch(() => {});
+    }
+
     fetchBlocks();
   };
 
   const deleteRecurringAll = async (groupId: string) => {
     const supabase = createClient();
+    const { data: affected } = await supabase
+      .from('blocks')
+      .select('google_event_id')
+      .eq('recurrence_group_id', groupId);
+
     await supabase
       .from('blocks')
       .delete()
       .eq('recurrence_group_id', groupId);
+
+    const eventIds = (affected || []).map((b) => b.google_event_id).filter(Boolean) as string[];
+    if (eventIds.length > 0) {
+      fetch('/api/google-calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', eventIds }),
+      }).catch(() => {});
+    }
+
     fetchBlocks();
   };
 
