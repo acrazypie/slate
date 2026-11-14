@@ -13,6 +13,8 @@
   --color-text-tertiary: var(--color-text-tertiary, #6c6c6c);
   --color-accent: var(--color-accent, #e49c69);
   --color-accent-contrast: var(--color-accent-contrast, #201a17);
+  --color-accent-text: var(--color-accent-text, #e49c69);
+  --color-danger: var(--color-danger, #f87171);
 }
 
 :root {
@@ -23,22 +25,31 @@
   --color-border-strong: #383838;
   --color-text-primary: #e0e0e0;
   --color-text-secondary: #a0a0a0;
-  --color-text-tertiary: #6c6c6c;
+  /* Tertiary text is used at 10-12px, so it still has to clear 4.5:1 on every surface. */
+  --color-text-tertiary: #909090;
   --color-accent: #e49c69;
   --color-accent-contrast: #201a17;
+  /* The accent when it is used as text or as an icon. On dark it is the accent itself. */
+  --color-accent-text: var(--color-accent);
+  --color-danger: #f87171;
 }
 
 .light {
   --color-bg: #fff6ea;
   --color-surface: #ffffff;
   --color-surface-hover: #fdefdb;
-  --color-border: #f2c299;
-  --color-border-strong: #e49c69;
+  /* Neutral sand, so borders don't read as the accent's focus state. */
+  --color-border: #ecdcc8;
+  --color-border-strong: #d9bfa3;
   --color-text-primary: #201a17;
   --color-text-secondary: #5c3b2e;
-  --color-text-tertiary: #9b8176;
+  --color-text-tertiary: #7a6257;
   --color-accent: #e49c69;
   --color-accent-contrast: #201a17;
+  /* The raw accent is about 2:1 on white. Darkened halfway to the text colour
+     it clears 4.5:1, and it still follows a custom accent picked in Settings. */
+  --color-accent-text: color-mix(in srgb, var(--color-accent) 50%, #201a17);
+  --color-danger: #b91c1c;
 }
 
 html {
@@ -48,6 +59,11 @@ html {
 body {
   background: var(--color-bg);
   color: var(--color-text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-text);
+  outline-offset: 2px;
 }
 
 @keyframes slide-in-from-right {

@@ -117,13 +117,6 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   altro: 'Altro',
 };
 
-export const CATEGORY_ICONS: Record<BlockCategory, string> = {
-  studio: '📚',
-  lavoro: '💼',
-  lezione: '🎓',
-  altro: '📌',
-};
-
 export const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
 export const COLOR_PALETTE = [
@@ -136,6 +129,18 @@ export const COLOR_PALETTE = [
   '#6BB6A3', // teal
   '#7AA7D9', // sky blue
 ];
+
+/** Spoken names for the palette, so colour swatches aren't announced as hex codes. */
+export const COLOR_NAMES: Record<string, string> = {
+  '#E49C69': 'Albicocca',
+  '#FFD9A0': 'Sabbia',
+  '#F2C299': 'Duna',
+  '#5C3B2E': 'Cacao',
+  '#BB86FC': 'Viola',
+  '#CF6679': 'Rosa',
+  '#6BB6A3': 'Verde acqua',
+  '#7AA7D9': 'Azzurro',
+};
 
 export const DURATION_OPTIONS = [
   { value: 30, label: '30 min' },

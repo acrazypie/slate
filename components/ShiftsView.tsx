@@ -12,7 +12,8 @@ function formatDuration(minutes: number): string {
   return m === 0 ? `${h}h` : `${h}h ${m}m`;
 }
 
-export function ShiftsView() {
+/** `onDataChange` fires after a shift is saved or deleted, so the weekly summary can reload. */
+export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
   const { shifts, loading, error, createShift, updateShift, deleteShift } = useShifts();
   const [editing, setEditing] = useState<Shift | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,11 +30,17 @@ export function ShiftsView() {
 
   const handleSave = async (data: ShiftFormData) => {
     const saved = editing ? await updateShift(editing.id, data) : await createShift(data);
-    if (saved) setIsModalOpen(false);
+    if (saved) {
+      setIsModalOpen(false);
+      onDataChange?.();
+    }
   };
 
   const handleDelete = async () => {
-    if (editing && (await deleteShift(editing.id))) setIsModalOpen(false);
+    if (editing && (await deleteShift(editing.id))) {
+      setIsModalOpen(false);
+      onDataChange?.();
+    }
   };
 
   return (
@@ -53,7 +60,7 @@ export function ShiftsView() {
           Crea qui i tuoi turni, poi inseriscili nei giorni dal calendario.
         </p>
 
-        {error && <p className="text-sm text-red-500 mb-4">Non è stato possibile caricare o salvare i turni: {error}</p>}
+        {error && <p className="text-sm text-danger mb-4">Non è stato possibile caricare o salvare i turni: {error}</p>}
 
         {loading ? (
           <p className="text-sm text-text-secondary">Caricamento...</p>
@@ -61,7 +68,7 @@ export function ShiftsView() {
           <div className="flex flex-col items-center text-center gap-3 px-6 py-12 border border-dashed border-border-strong rounded-2xl">
             <Briefcase className="w-8 h-8 text-text-tertiary" />
             <p className="text-sm text-text-secondary">Non hai ancora nessun turno.</p>
-            <button onClick={openCreate} className="text-sm text-accent hover:underline">
+            <button onClick={openCreate} className="text-sm text-accent-text hover:underline">
               Crea il primo turno
             </button>
           </div>

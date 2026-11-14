@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { Shift, ShiftFormData, COLOR_PALETTE, SHIFT_DEFAULT_COLOR, formatTime } from '@/lib/types';
+import { Shift, ShiftFormData, COLOR_PALETTE, COLOR_NAMES, SHIFT_DEFAULT_COLOR, formatTime } from '@/lib/types';
+import { Dialog, DialogClose, ColorSwatch } from './Dialog';
 
 interface ShiftModalProps {
   isOpen: boolean;
@@ -26,6 +26,8 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
   const [color, setColor] = useState(SHIFT_DEFAULT_COLOR);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // Deleting a shift takes it off every day, so it asks once more first.
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,6 +43,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
       setColor(SHIFT_DEFAULT_COLOR);
     }
     setFormError(null);
+    setConfirmingDelete(false);
   }, [shift, isOpen]);
 
   if (!isOpen) return null;
@@ -68,84 +71,101 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
     setLoading(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
-      <div
-        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-medium text-text-primary">{shift ? 'Modifica turno' : 'Nuovo turno'}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded" aria-label="Chiudi">
-            <X className="w-5 h-5 text-text-secondary" />
-          </button>
-        </div>
+  const heading = shift ? 'Modifica turno' : 'Nuovo turno';
+  const labelClass = 'block text-sm text-text-secondary mb-2';
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+  return (
+    <Dialog label={heading} onClose={onClose} zClass="z-[60]">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-medium text-text-primary">{heading}</h2>
+        <DialogClose onClose={onClose} />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="shift-title" className={labelClass}>Nome del turno</label>
           <input
+            id="shift-title"
             type="text"
-            placeholder="Nome del turno (es. Mattina)"
+            placeholder="es. Mattina"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className={`${inputClass} placeholder-text-secondary`}
+            className={`${inputClass} placeholder-text-tertiary`}
             autoFocus={!shift}
           />
+        </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm text-text-secondary mb-2">Ora di inizio</label>
-              <input type="time" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-2">Ora di fine</label>
-              <input type="time" value={end} onChange={(e) => setEnd(e.target.value)} className={inputClass} />
-            </div>
-          </div>
-          {overnight && <p className="text-xs text-text-tertiary">Il turno termina il giorno successivo.</p>}
-
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm text-text-secondary mb-2">Colore</label>
-            <div className="flex flex-wrap gap-2">
-              {COLOR_PALETTE.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  aria-label={`Colore ${c}`}
-                  className={`w-8 h-8 rounded-full transition-transform ${
-                    color === c ? 'scale-110 ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
+            <label htmlFor="shift-start" className={labelClass}>Ora di inizio</label>
+            <input id="shift-start" type="time" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label htmlFor="shift-end" className={labelClass}>Ora di fine</label>
+            <input id="shift-end" type="time" value={end} onChange={(e) => setEnd(e.target.value)} className={inputClass} />
+          </div>
+        </div>
+        {overnight && <p className="text-xs text-text-tertiary">Il turno termina il giorno successivo.</p>}
+
+        <div role="group" aria-labelledby="shift-color-label">
+          <span id="shift-color-label" className={labelClass}>Colore</span>
+          <div className="flex flex-wrap -mx-1.5">
+            {COLOR_PALETTE.map((c) => (
+              <ColorSwatch key={c} color={c} name={COLOR_NAMES[c] ?? c} selected={color === c} onSelect={() => setColor(c)} />
+            ))}
+          </div>
+        </div>
+
+        {shift && (
+          <p className="text-xs text-text-tertiary">
+            Le modifiche valgono per tutti i giorni in cui questo turno è inserito.
+          </p>
+        )}
+        {formError && <p role="alert" className="text-sm text-danger">{formError}</p>}
+
+        {shift && onRemoveFromDay && !confirmingDelete && (
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => run(onRemoveFromDay)}
+            className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl text-sm hover:bg-border transition-colors disabled:opacity-50"
+          >
+            Rimuovi da {dayLabel || 'questo giorno'}
+          </button>
+        )}
+
+        {confirmingDelete && shift && onDelete ? (
+          <div className="pt-2">
+            <p className="text-sm text-text-secondary mb-3">
+              Eliminare il turno &ldquo;{shift.title}&rdquo;? Verrà tolto da tutti i giorni in cui è inserito e non si può
+              annullare.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
+              >
+                Annulla
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => run(onDelete)}
+                className="flex-1 px-4 py-3 text-danger bg-danger/10 hover:bg-danger/20 rounded-xl font-medium transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Eliminazione...' : 'Elimina turno'}
+              </button>
             </div>
           </div>
-
-          {shift && (
-            <p className="text-xs text-text-tertiary">
-              Le modifiche valgono per tutti i giorni in cui questo turno è inserito.
-            </p>
-          )}
-          {formError && <p className="text-sm text-red-500">{formError}</p>}
-
-          {shift && onRemoveFromDay && (
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => run(onRemoveFromDay)}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl text-sm hover:bg-border transition-colors disabled:opacity-50"
-            >
-              Rimuovi da {dayLabel || 'questo giorno'}
-            </button>
-          )}
-
+        ) : (
           <div className="flex gap-3 pt-2">
             {shift && onDelete && (
               <button
                 type="button"
                 disabled={loading}
-                onClick={() => run(onDelete)}
-                className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors disabled:opacity-50"
+                onClick={() => setConfirmingDelete(true)}
+                className="px-4 py-3 text-danger hover:bg-danger/10 rounded-xl transition-colors disabled:opacity-50"
               >
                 Elimina turno
               </button>
@@ -165,8 +185,8 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
               {loading ? 'Salvataggio...' : 'Salva'}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+      </form>
+    </Dialog>
   );
 }

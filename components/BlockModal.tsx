@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Block, BlockCategory, BlockFormData, DAY_NAMES, COLOR_PALETTE, DURATION_OPTIONS, CATEGORY_COLORS, RecurrenceType } from '@/lib/types';
-import { X } from 'lucide-react';
+import { Block, BlockCategory, BlockFormData, DAY_NAMES, COLOR_PALETTE, COLOR_NAMES, DURATION_OPTIONS, CATEGORY_COLORS, CATEGORY_LABELS, RecurrenceType } from '@/lib/types';
+import { Dialog, DialogClose, ColorSwatch } from './Dialog';
+import { CategoryIcon } from './CategoryIcon';
 
 interface BlockModalProps {
   isOpen: boolean;
@@ -33,6 +34,8 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
   const [recurrence_type, setRecurrenceType] = useState<RecurrenceType>('weekly');
   const [recurrence_end_date, setRecurrenceEndDate] = useState('');
   const [showDeleteRecurringMenu, setShowDeleteRecurringMenu] = useState(false);
+  // Deleting a single event asks once more before it happens.
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (block) {
@@ -60,7 +63,11 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
       setRecurrenceType('weekly');
       setRecurrenceEndDate('');
     }
-  }, [block, initialData]);
+    // The modal stays mounted between uses, so a delete prompt left open on one
+    // event must not still be showing when another one is opened.
+    setConfirmingDelete(false);
+    setShowDeleteRecurringMenu(false);
+  }, [block, initialData, isOpen]);
 
   const handleCategoryChange = (cat: BlockCategory) => {
     setCategory(cat);
@@ -99,6 +106,12 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
 
   if (!isOpen) return null;
 
+  const handleDelete = async () => {
+    setLoading(true);
+    await onDelete();
+    setLoading(false);
+  };
+
   const timeOptions = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 30) {
@@ -106,233 +119,238 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
     }
   }
 
-  const selectedRadio = 'inline-flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors';
-  const unselectedRadio = 'inline-flex items-center justify-center px-3 py-2.5 rounded-xl text-sm transition-colors bg-surface text-text-primary hover:bg-surface-hover';
+  const heading = block ? 'Modifica evento' : 'Nuovo evento';
+  const fieldClass =
+    'w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none';
+  const labelClass = 'block text-sm text-text-secondary mb-2';
+  const segment = (active: boolean) =>
+    `flex items-center justify-center px-2 min-h-11 rounded-xl text-sm transition-colors ${
+      active ? 'bg-accent text-accent-contrast font-medium' : 'bg-surface-hover text-text-primary hover:bg-border'
+    }`;
+  const isSeries = !!(block && onDeleteRecurring && block.is_recurring);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
-      <div 
-        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-medium text-text-primary">
-            {block ? 'Modifica blocco' : 'Nuovo blocco'}
-          </h2>
-          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded">
-            <X className="w-5 h-5 text-text-secondary" />
-          </button>
+    <Dialog label={heading} onClose={onClose}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-medium text-text-primary">{heading}</h2>
+        <DialogClose onClose={onClose} />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="block-title" className={labelClass}>Titolo</label>
+          <input
+            id="block-title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={fieldClass}
+            autoFocus
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              placeholder="Titolo"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl placeholder-text-secondary border border-border focus:border-accent focus:outline-none"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-text-secondary mb-2">Categoria</label>
-            <div className="grid grid-cols-4 gap-2">
-              {(['studio', 'lavoro', 'lezione', 'altro'] as BlockCategory[]).map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => handleCategoryChange(cat)}
-                  className={`px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                    category === cat
-                      ? 'bg-accent text-accent-contrast font-medium'
-                      : 'bg-surface-hover text-text-primary hover:bg-border'
-                  }`}
-                >
-                  {cat === 'studio' && '📚'}
-                  {cat === 'lavoro' && '💼'}
-                  {cat === 'lezione' && '🎓'}
-                  {cat === 'altro' && '📌'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-text-secondary mb-2">Colore</label>
-            <div className="flex gap-2">
-              {COLOR_PALETTE.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={`w-8 h-8 rounded-full transition-transform ${
-                    color === c ? 'scale-110 ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-text-secondary mb-2">Giorno</label>
-              <select
-                value={day_of_week}
-                onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
+        <div role="group" aria-labelledby="block-category-label">
+          <span id="block-category-label" className={labelClass}>Categoria</span>
+          <div className="grid grid-cols-4 gap-2">
+            {(['studio', 'lavoro', 'lezione', 'altro'] as BlockCategory[]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => handleCategoryChange(cat)}
+                aria-pressed={category === cat}
+                className={`flex flex-col items-center gap-1 px-1 py-2.5 rounded-xl text-xs transition-colors ${
+                  category === cat
+                    ? 'bg-accent text-accent-contrast font-medium'
+                    : 'bg-surface-hover text-text-primary hover:bg-border'
+                }`}
               >
-                {DAY_NAMES.map((day, i) => (
-                  <option key={i} value={i}>{day}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-2">Durata</label>
-              <select
-                value={duration_minutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
-              >
-                {DURATION_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
+                <CategoryIcon category={cat} className="w-5 h-5" />
+                {CATEGORY_LABELS[cat]}
+              </button>
+            ))}
           </div>
+        </div>
 
+        <div role="group" aria-labelledby="block-color-label">
+          <span id="block-color-label" className={labelClass}>Colore</span>
+          <div className="flex flex-wrap -mx-1.5">
+            {COLOR_PALETTE.map((c) => (
+              <ColorSwatch key={c} color={c} name={COLOR_NAMES[c] ?? c} selected={color === c} onSelect={() => setColor(c)} />
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-text-secondary mb-2">Ora di inizio</label>
+            <label htmlFor="block-day" className={labelClass}>Giorno</label>
             <select
-              value={`${start_hour}:${start_minute.toString().padStart(2, '0')}`}
-              onChange={(e) => {
-                const [h, m] = e.target.value.split(':').map(Number);
-                setStartHour(h);
-                setStartMinute(m);
-              }}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
+              id="block-day"
+              value={day_of_week}
+              onChange={(e) => setDayOfWeek(Number(e.target.value))}
+              className={fieldClass}
             >
-              {timeOptions.map((opt) => (
-                <option key={`${opt.hour}:${opt.minute}`} value={`${opt.hour}:${opt.minute}`}>
-                  {opt.hour.toString().padStart(2, '0')}:{opt.minute.toString().padStart(2, '0')}
-                </option>
+              {DAY_NAMES.map((day, i) => (
+                <option key={i} value={i}>{day}</option>
               ))}
             </select>
           </div>
-
           <div>
-            <label className="block text-sm text-text-secondary mb-2">Note (opzionale)</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Aggiungi note..."
-              rows={3}
-              className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl placeholder-text-secondary border border-border focus:border-accent focus:outline-none resize-none"
-            />
+            <label htmlFor="block-duration" className={labelClass}>Durata</label>
+            <select
+              id="block-duration"
+              value={duration_minutes}
+              onChange={(e) => setDurationMinutes(Number(e.target.value))}
+              className={fieldClass}
+            >
+              {DURATION_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm text-text-secondary mb-2">Ripetizione</label>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => setIsRecurring(false)}
-                className={`w-full ${!is_recurring ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
-              >
-                Nessuna
+        <div>
+          <label htmlFor="block-start" className={labelClass}>Ora di inizio</label>
+          <select
+            id="block-start"
+            value={`${start_hour}:${start_minute.toString().padStart(2, '0')}`}
+            onChange={(e) => {
+              const [h, m] = e.target.value.split(':').map(Number);
+              setStartHour(h);
+              setStartMinute(m);
+            }}
+            className={fieldClass}
+          >
+            {timeOptions.map((opt) => (
+              <option key={`${opt.hour}:${opt.minute}`} value={`${opt.hour}:${opt.minute.toString().padStart(2, '0')}`}>
+                {opt.hour.toString().padStart(2, '0')}:{opt.minute.toString().padStart(2, '0')}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="block-notes" className={labelClass}>Note (opzionale)</label>
+          <textarea
+            id="block-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            className={`${fieldClass} resize-none`}
+          />
+        </div>
+
+        <div role="group" aria-labelledby="block-repeat-label">
+          <span id="block-repeat-label" className={labelClass}>Ripetizione</span>
+          <div className="grid grid-cols-3 gap-2">
+            <button type="button" aria-pressed={!is_recurring} onClick={() => setIsRecurring(false)} className={segment(!is_recurring)}>
+              Nessuna
+            </button>
+            <button
+              type="button"
+              aria-pressed={is_recurring && recurrence_type === 'weekly'}
+              onClick={() => { setIsRecurring(true); setRecurrenceType('weekly'); }}
+              className={segment(is_recurring && recurrence_type === 'weekly')}
+            >
+              Settimanale
+            </button>
+            <button
+              type="button"
+              aria-pressed={is_recurring && recurrence_type === 'monthly'}
+              onClick={() => { setIsRecurring(true); setRecurrenceType('monthly'); }}
+              className={segment(is_recurring && recurrence_type === 'monthly')}
+            >
+              Mensile
+            </button>
+          </div>
+        </div>
+
+        {is_recurring && (
+          <div role="group" aria-labelledby="block-repeat-end-label">
+            <span id="block-repeat-end-label" className={labelClass}>Fine ripetizione</span>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" aria-pressed={!recurrence_end_date} onClick={() => setRecurrenceEndDate('')} className={segment(!recurrence_end_date)}>
+                Mai
               </button>
               <button
                 type="button"
-                onClick={() => { setIsRecurring(true); setRecurrenceType('weekly'); }}
-                className={`w-full ${is_recurring && recurrence_type === 'weekly' ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
+                aria-pressed={!!recurrence_end_date}
+                onClick={() => setRecurrenceEndDate(recurrence_end_date || new Date().toISOString().split('T')[0])}
+                className={segment(!!recurrence_end_date)}
               >
-                Settimanale
+                Fino al
+              </button>
+            </div>
+            {recurrence_end_date && (
+              <input
+                type="date"
+                aria-label="Data di fine ripetizione"
+                value={recurrence_end_date}
+                onChange={(e) => setRecurrenceEndDate(e.target.value)}
+                className={`${fieldClass} mt-2`}
+              />
+            )}
+          </div>
+        )}
+
+        {isSeries && showDeleteRecurringMenu && (
+          <div className="space-y-1 p-3 bg-surface-hover rounded-xl">
+            <p className="px-3 pb-1 text-sm text-text-secondary">Cosa vuoi eliminare?</p>
+            {([
+              ['current', 'Solo questo evento'],
+              ['this-and-following', 'Questo e i seguenti'],
+              ['all', 'Tutti gli eventi della serie'],
+            ] as const).map(([type, text]) => (
+              <button
+                key={type}
+                type="button"
+                disabled={loading}
+                onClick={() => handleDeleteRecurring(type)}
+                className="w-full px-3 min-h-11 text-sm text-danger hover:bg-danger/10 rounded-xl text-left disabled:opacity-50"
+              >
+                {text}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {confirmingDelete ? (
+          <div className="pt-2">
+            <p className="text-sm text-text-secondary mb-3">Eliminare questo evento? Non si può annullare.</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
+              >
+                Annulla
               </button>
               <button
                 type="button"
-                onClick={() => { setIsRecurring(true); setRecurrenceType('monthly'); }}
-                className={`w-full ${is_recurring && recurrence_type === 'monthly' ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
+                disabled={loading}
+                onClick={handleDelete}
+                className="flex-1 px-4 py-3 text-danger bg-danger/10 hover:bg-danger/20 rounded-xl font-medium transition-colors disabled:opacity-50"
               >
-                Mensile
+                {loading ? 'Eliminazione...' : 'Elimina evento'}
               </button>
             </div>
           </div>
-
-          {is_recurring && (
-            <div>
-              <label className="block text-sm text-text-secondary mb-2">Fine ripetizione</label>
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => setRecurrenceEndDate('')}
-                  className={`w-full ${!recurrence_end_date ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
-                >
-                  Mai
-                </button>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRecurrenceEndDate(recurrence_end_date || new Date().toISOString().split('T')[0])}
-                    className={`flex-1 ${recurrence_end_date ? selectedRadio + ' bg-accent text-accent-contrast font-medium' : unselectedRadio}`}
-                  >
-                    Fino al:
-                  </button>
-                  {recurrence_end_date && (
-                    <input
-                      type="date"
-                      value={recurrence_end_date}
-                      onChange={(e) => setRecurrenceEndDate(e.target.value)}
-                      className="flex-1 px-3 py-2.5 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none"
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
+        ) : (
           <div className="flex gap-3 pt-2">
-            {block && onDeleteRecurring && block.is_recurring ? (
-              <div className="flex-1">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteRecurringMenu(!showDeleteRecurringMenu)}
-                  className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors w-full text-left"
-                >
-                  {showDeleteRecurringMenu ? 'Annulla' : 'Elimina'}
-                </button>
-                {showDeleteRecurringMenu && (
-                  <div className="mt-2 space-y-2 p-3 bg-surface-hover rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRecurring('current')}
-                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-xl text-left"
-                    >
-                      Solo questo blocco
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRecurring('this-and-following')}
-                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-xl text-left"
-                    >
-                      Questo e i seguenti
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRecurring('all')}
-                      className="w-full px-3 py-2 text-sm text-text-primary hover:bg-border rounded-xl text-left"
-                    >
-                      Tutti i blocchi della serie
-                    </button>
-                  </div>
-                )}
-              </div>
+            {isSeries ? (
+              <button
+                type="button"
+                aria-expanded={showDeleteRecurringMenu}
+                onClick={() => setShowDeleteRecurringMenu(!showDeleteRecurringMenu)}
+                className="px-4 py-3 text-danger hover:bg-danger/10 rounded-xl transition-colors"
+              >
+                Elimina
+              </button>
             ) : block ? (
               <button
                 type="button"
-                onClick={onDelete}
-                className="px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                onClick={() => setConfirmingDelete(true)}
+                className="px-4 py-3 text-danger hover:bg-danger/10 rounded-xl transition-colors"
               >
                 Elimina
               </button>
@@ -352,8 +370,8 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               {loading ? 'Salvataggio...' : 'Salva'}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+      </form>
+    </Dialog>
   );
 }

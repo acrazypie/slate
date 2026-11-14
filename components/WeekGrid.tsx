@@ -3,7 +3,7 @@
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { format, isSameDay, addDays, addMonths, subMonths } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChartNoAxesColumn } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
 import { useBlocks } from '@/hooks/useBlocks';
@@ -26,13 +26,15 @@ interface WeekGridProps {
     name?: string;
   };
   onOpenSidebar?: () => void;
+  /** Called after anything is created, edited or deleted, so the weekly summary can reload. */
+  onDataChange?: () => void;
 }
 
 const WEEK_HOUR_HEIGHT = 48; // px, matches h-12
 const DAY_HOUR_HEIGHT = 56; // px, matches h-14
 const STRIP_OFFSETS = [-2, -1, 0, 1, 2];
 
-export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
+export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
   const {
     weekOffset,
     weekDays,
@@ -78,7 +80,10 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
   // Tells the month view to reload after anything changes.
   const [refreshKey, setRefreshKey] = useState(0);
-  const bumpRefresh = () => setRefreshKey((k) => k + 1);
+  const bumpRefresh = () => {
+    setRefreshKey((k) => k + 1);
+    onDataChange?.();
+  };
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
     const todayIndex = (new Date().getDay() + 6) % 7;
@@ -396,59 +401,77 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
       setMonthCursor(new Date());
     } else {
       goToCurrentWeek();
+      // Already on this week the offset doesn't change, so pick the day here too.
+      setSelectedDayIndex((new Date().getDay() + 6) % 7);
     }
   };
+
+  // The grids start at midnight; open them an hour before now instead. These are
+  // stable callback refs, so they run when a grid mounts and not on every render.
+  const scrollWeekToNow = useCallback((el: HTMLDivElement | null) => {
+    if (el) el.scrollTop = Math.max(0, new Date().getHours() - 1) * WEEK_HOUR_HEIGHT;
+  }, []);
+  const scrollDayToNow = useCallback((el: HTMLDivElement | null) => {
+    if (el) el.scrollTop = Math.max(0, new Date().getHours() - 1) * DAY_HOUR_HEIGHT;
+  }, []);
 
   const headerTitle = view === 'day' ? selectedDayName : view === 'week' ? formatWeekRange : monthTitle;
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-bg">
-      {/* Unified header */}
-      <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 sm:py-4 bg-bg border-b border-border">
-        <div className="flex items-center gap-1 sm:gap-4 min-w-0">
+      {/* Unified header. On phones the view switch drops to its own row so
+          "Oggi" and 44px targets fit; from `sm` up it is a single row. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 px-2 sm:px-6 py-2 sm:py-3 bg-bg border-b border-border">
+        <div className="flex items-center gap-0 sm:gap-2 min-w-0 flex-1 sm:flex-none">
           <button
             onClick={handlePrev}
-            className="p-1.5 sm:p-2 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
+            className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
             aria-label="Precedente"
           >
             <ChevronLeft className="w-5 h-5 text-text-secondary" />
           </button>
-          <h2 className="text-sm sm:text-lg font-medium text-text-primary truncate">{headerTitle}</h2>
+          <h2 className="text-sm sm:text-lg font-medium text-text-primary truncate text-center flex-1 sm:flex-none">{headerTitle}</h2>
           <button
             onClick={handleNext}
-            className="p-1.5 sm:p-2 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
+            className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
             aria-label="Successivo"
           >
             <ChevronRight className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <div className="flex items-center bg-surface rounded-xl p-0.5">
-            {(['day', 'week', 'month'] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => handleViewChange(v)}
-                className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-colors ${
-                  view === v ? 'bg-accent text-accent-contrast' : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                {v === 'day' ? 'Giorno' : v === 'week' ? 'Settimana' : 'Mese'}
-              </button>
-            ))}
-          </div>
+        <div
+          role="group"
+          aria-label="Vista"
+          className="order-last sm:order-none w-full sm:w-auto flex items-center bg-surface rounded-xl p-0.5"
+        >
+          {(['day', 'week', 'month'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => handleViewChange(v)}
+              aria-pressed={view === v}
+              className={`flex-1 sm:flex-none px-3 h-10 sm:h-9 rounded-lg text-sm transition-colors ${
+                view === v ? 'bg-accent text-accent-contrast font-medium' : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              {v === 'day' ? 'Giorno' : v === 'week' ? 'Settimana' : 'Mese'}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-0 sm:gap-1 flex-shrink-0">
           <button
             onClick={handleToday}
-            className="hidden sm:block px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+            className="px-3 h-11 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
           >
             Oggi
           </button>
           <button
             onClick={onOpenSidebar}
-            className="md:hidden p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
-            aria-label="Apri riepilogo"
+            className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors"
+            aria-label="Riepilogo della settimana"
           >
-            <Menu className="w-5 h-5 text-text-secondary" />
+            <ChartNoAxesColumn className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
       </div>
@@ -470,7 +493,9 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
                 <button
                   key={n}
                   onClick={() => goToDayOffset(n)}
-                  className="flex flex-col items-center gap-1 px-1.5 py-1 rounded-xl transition-colors"
+                  aria-current={isSelected ? 'date' : undefined}
+                  aria-label={format(date, 'EEEE d MMMM', { locale: it })}
+                  className="flex flex-col items-center gap-1 min-w-11 px-1.5 py-1 rounded-xl transition-colors"
                 >
                   <span className="text-[10px] uppercase tracking-wide text-text-secondary">
                     {format(date, 'EEE', { locale: it })}
@@ -480,7 +505,7 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
                       isSelected
                         ? 'bg-accent text-accent-contrast'
                         : isToday
-                          ? 'border border-accent text-accent'
+                          ? 'border border-accent text-accent-text'
                           : 'text-text-primary'
                     }`}
                   >
@@ -493,6 +518,7 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
           <div
             key={`${weekOffset}-${selectedDayIndex}`}
+            ref={scrollDayToNow}
             className={`flex-1 overflow-y-auto ${slideDirection > 0 ? 'animate-day-in-right' : 'animate-day-in-left'}`}
           >
             {/* Inner row sized by its content, so the hour column's border runs all 24 hours. */}
@@ -511,9 +537,11 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
             </div>
             <div className="flex-1 relative" style={{ height: `${24 * DAY_HOUR_HEIGHT}px`, minHeight: `${24 * DAY_HOUR_HEIGHT}px` }}>
               {hours.map((hour) => (
-                <div
+                <button
                   key={hour}
-                  className="absolute w-full h-14 border-b border-border cursor-pointer"
+                  type="button"
+                  aria-label={`Aggiungi alle ${hour.toString().padStart(2, '0')}:00`}
+                  className="absolute block w-full h-14 border-b border-border cursor-pointer hover:bg-surface-hover/50 transition-colors focus-visible:-outline-offset-2"
                   style={{ top: `${hour * DAY_HOUR_HEIGHT}px` }}
                   onClick={() => handleCellClick(selectedDayIndex, hour)}
                 />
@@ -553,14 +581,17 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
       {/* Week view — horizontally scrollable on narrow screens, full-width on larger ones */}
       {view === 'week' && (
-        <div className="flex-1 overflow-auto">
+        <div ref={scrollWeekToNow} className="flex-1 overflow-auto">
           {/* No fixed height here: with h-full the columns were clamped to the
               visible area, so their vertical borders stopped where the screen
               ended instead of running the full 24 hours. */}
           <div className="flex min-w-[720px] sm:min-w-0">
-            <div className="flex flex-col w-12 sm:w-16 flex-shrink-0 border-r border-border sticky left-0 bg-bg z-10">
-              <div className="invisible">
-                <DayHeader date={today} isToday={false} />
+            <div className="flex flex-col w-12 sm:w-16 flex-shrink-0 border-r border-border sticky left-0 bg-bg z-30">
+              {/* Corner cell: stays put in both directions, above the day headers. */}
+              <div className="sticky top-0 z-30 bg-bg border-b border-border" aria-hidden="true">
+                <div className="invisible">
+                  <DayHeader date={today} isToday={false} />
+                </div>
               </div>
               <div className="flex flex-1 flex-col relative">
                 {hours.map((hour) => (
@@ -588,7 +619,15 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
                     key={dayIndex}
                     className="flex-1 min-w-[90px] sm:min-w-0 border-r border-border last:border-r-0"
                   >
-                    <DayHeader date={day} isToday={isToday} />
+                    {/* Stays visible while the hours scroll, and opens that day. */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectDayFromMonth(day)}
+                      aria-label={`Apri ${format(day, 'EEEE d MMMM', { locale: it })}`}
+                      className="sticky top-0 z-20 block w-full bg-bg border-b border-border hover:bg-surface-hover transition-colors focus-visible:-outline-offset-2"
+                    >
+                      <DayHeader date={day} isToday={isToday} />
+                    </button>
                     <div
                       className="relative cursor-pointer"
                       style={{ height: `${24 * WEEK_HOUR_HEIGHT}px` }}

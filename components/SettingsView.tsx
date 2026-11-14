@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Monitor, ChevronDown, ChevronUp, CalendarCheck, Loader2, LogOut, Check } from 'lucide-react';
+import { Sun, Moon, Monitor, ChevronDown, ChevronUp, CalendarCheck, Loader2, LogOut, Check, Smartphone } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ViewMode } from '@/hooks/useWeek';
 import { useGoogleCalendarConnection } from '@/hooks/useGoogleCalendarConnection';
@@ -17,7 +17,6 @@ interface SettingsViewProps {
 const INSTALL_GUIDES = [
   {
     id: 'ios',
-    icon: '🍎',
     title: 'iPhone / iPad (Safari)',
     steps: [
       'Apri Safari e vai alla pagina di Slate',
@@ -28,7 +27,6 @@ const INSTALL_GUIDES = [
   },
   {
     id: 'android',
-    icon: '🤖',
     title: 'Android (Chrome)',
     steps: [
       'Apri Chrome e vai alla pagina di Slate',
@@ -110,7 +108,7 @@ export function SettingsView({ user }: SettingsViewProps) {
             <button
               onClick={handleLogout}
               disabled={loggingOut}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50 flex-shrink-0"
+              className="flex items-center gap-2 px-3 min-h-11 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 flex-shrink-0"
             >
               {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
               Esci
@@ -140,7 +138,7 @@ export function SettingsView({ user }: SettingsViewProps) {
         </Section>
 
         <Section title="Colore principale">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center -mx-1.5">
             {ACCENT_OPTIONS.map((option) => {
               const isSelected = option.value.toLowerCase() === accent.toLowerCase();
               return (
@@ -150,23 +148,31 @@ export function SettingsView({ user }: SettingsViewProps) {
                   aria-label={option.label}
                   aria-pressed={isSelected}
                   title={option.label}
-                  className={`flex items-center justify-center w-9 h-9 rounded-full transition-transform ${
-                    isSelected ? 'scale-110 ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
-                  }`}
-                  style={{ backgroundColor: option.value }}
+                  className="flex items-center justify-center w-11 h-11 rounded-full"
                 >
-                  {isSelected && <Check className="w-4 h-4 text-black/70" />}
+                  <span
+                    className={`flex items-center justify-center w-8 h-8 rounded-full transition-transform ${
+                      isSelected ? 'scale-110 ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
+                    }`}
+                    style={{ backgroundColor: option.value }}
+                  >
+                    {isSelected && <Check className="w-4 h-4 text-black/70" />}
+                  </span>
                 </button>
               );
             })}
             <label
-              className={`relative flex items-center justify-center w-9 h-9 rounded-full border border-dashed border-border-strong cursor-pointer overflow-hidden ${
-                !isPreset ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
-              }`}
+              className="relative flex items-center justify-center w-11 h-11 rounded-full cursor-pointer focus-within:outline-2 focus-within:outline-accent-text"
               title="Colore personalizzato"
-              style={!isPreset ? { backgroundColor: accent } : undefined}
             >
-              {isPreset && <span className="text-text-secondary text-lg leading-none">+</span>}
+              <span
+                className={`flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-border-strong ${
+                  !isPreset ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
+                }`}
+                style={!isPreset ? { backgroundColor: accent } : undefined}
+              >
+                {isPreset && <span className="text-text-secondary text-lg leading-none">+</span>}
+              </span>
               <input
                 type="color"
                 value={accent}
@@ -210,13 +216,13 @@ export function SettingsView({ user }: SettingsViewProps) {
           ) : connected ? (
             <div className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-surface-hover">
               <div className="flex items-center gap-2 text-sm text-text-primary">
-                <CalendarCheck className="w-4 h-4 text-accent" />
+                <CalendarCheck className="w-4 h-4 text-accent-text" />
                 Collegato
               </div>
               <button
                 onClick={handleDisconnectCalendar}
                 disabled={calendarActionLoading}
-                className="text-sm text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+                className="px-3 min-h-11 -my-2 -mr-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors disabled:opacity-50"
               >
                 Disconnetti
               </button>
@@ -252,7 +258,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                     className="w-full flex items-center justify-between px-4 py-3 bg-surface-hover hover:bg-border transition-colors"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="text-lg">{guide.icon}</span>
+                      <Smartphone className="w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <span className="text-sm font-medium text-text-primary">{guide.title}</span>
                     </span>
                     {isOpen ? (

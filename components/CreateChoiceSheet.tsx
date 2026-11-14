@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CalendarDays, Briefcase, Plus, X, ChevronLeft } from 'lucide-react';
+import { CalendarDays, Briefcase, Plus, ChevronLeft } from 'lucide-react';
 import { Shift, formatTime } from '@/lib/types';
+import { Dialog, DialogClose } from './Dialog';
 
 interface CreateChoiceSheetProps {
   isOpen: boolean;
@@ -37,42 +38,40 @@ export function CreateChoiceSheet({
   const rowClass =
     'w-full flex items-center gap-3 px-4 py-3 bg-surface-hover rounded-xl hover:bg-border transition-colors text-left';
 
+  const heading = step === 'choice' ? 'Cosa vuoi aggiungere?' : 'Aggiungi un turno';
+
   return (
-    <div className="fixed inset-0 z-[55] flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
-      <div
-        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm mx-0 sm:mx-4 p-5 max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog label={heading} onClose={onClose} size="sheet" zClass="z-[55]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 min-w-0">
             {step === 'shift' && initialStep === 'choice' && (
-              <button onClick={() => setStep('choice')} className="p-1 -ml-1 hover:bg-surface-hover rounded" aria-label="Indietro">
-                <ChevronLeft className="w-4 h-4 text-text-secondary" />
+              <button
+                onClick={() => setStep('choice')}
+                className="flex items-center justify-center w-11 h-11 -my-2 -ml-2 flex-shrink-0 rounded-xl hover:bg-surface-hover transition-colors"
+                aria-label="Indietro"
+              >
+                <ChevronLeft className="w-5 h-5 text-text-secondary" />
               </button>
             )}
             <div className="min-w-0">
-              <h2 className="text-base font-medium text-text-primary">
-                {step === 'choice' ? 'Cosa vuoi aggiungere?' : 'Aggiungi un turno'}
-              </h2>
+              <h2 className="text-base font-medium text-text-primary">{heading}</h2>
               <p className="text-xs text-text-secondary capitalize truncate">{dateLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded" aria-label="Chiudi">
-            <X className="w-4 h-4 text-text-secondary" />
-          </button>
+          <DialogClose onClose={onClose} />
         </div>
 
         {step === 'choice' ? (
           <div className="flex flex-col gap-2">
             <button onClick={onChooseEvent} className={rowClass}>
-              <CalendarDays className="w-5 h-5 text-accent flex-shrink-0" />
+              <CalendarDays className="w-5 h-5 text-accent-text flex-shrink-0" />
               <div>
                 <div className="text-sm font-medium text-text-primary">Evento</div>
                 <div className="text-xs text-text-secondary">Studio, lavoro, lezione o altro</div>
               </div>
             </button>
             <button onClick={() => setStep('shift')} className={rowClass}>
-              <Briefcase className="w-5 h-5 text-accent flex-shrink-0" />
+              <Briefcase className="w-5 h-5 text-accent-text flex-shrink-0" />
               <div>
                 <div className="text-sm font-medium text-text-primary">Turno</div>
                 <div className="text-xs text-text-secondary">Inserisci uno dei tuoi turni in questo giorno</div>
@@ -104,7 +103,6 @@ export function CreateChoiceSheet({
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </Dialog>
   );
 }

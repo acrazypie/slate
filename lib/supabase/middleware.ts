@@ -29,7 +29,10 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isAuthenticated = !!user;
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
+  // /auth/callback is left alone: someone already signed in who opens a
+  // password-reset link still has to reach it to be sent on to /reset-password.
+  const isAuthRoute =
+    request.nextUrl.pathname.startsWith('/auth') && !request.nextUrl.pathname.startsWith('/auth/callback');
   const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
 
   if (isAuthenticated && isAuthRoute) {

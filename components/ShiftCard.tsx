@@ -20,8 +20,10 @@ export function ShiftCard({ assignment, onClick, half }: ShiftCardProps) {
   const isCompact = height < 6;
 
   return (
-    <div
-      className={`absolute left-1 ${half ? 'right-1/2' : 'right-1'} rounded-lg px-2 py-1 cursor-pointer overflow-hidden transition-all hover:brightness-105 pointer-events-auto border border-dashed`}
+    <button
+      type="button"
+      aria-label={`Turno ${shift.title}, ${formatTime(shift.start_hour, shift.start_minute)}–${formatTime(shift.end_hour, shift.end_minute)}`}
+      className={`absolute block text-left left-1 ${half ? 'right-1/2' : 'right-1'} rounded-lg px-2 py-1 cursor-pointer overflow-hidden transition-all hover:brightness-105 pointer-events-auto border border-dashed`}
       style={{
         top: `${top}%`,
         height: `${height}%`,
@@ -31,15 +33,15 @@ export function ShiftCard({ assignment, onClick, half }: ShiftCardProps) {
       }}
       onClick={onClick}
     >
-      <div className="flex items-center gap-1 min-w-0">
+      <span className="flex items-center gap-1 min-w-0">
         {!isCompact && <Briefcase className="w-3 h-3 flex-shrink-0" style={{ color: shift.color }} />}
         <span className="text-xs font-medium truncate text-text-primary">{shift.title}</span>
-      </div>
+      </span>
       {!isCompact && (
         <span className="block text-[10px] text-text-secondary truncate">
           {formatTime(shift.start_hour, shift.start_minute)} – {formatTime(shift.end_hour, shift.end_minute)}
         </span>
       )}
-    </div>
+    </button>
   );
 }

@@ -14,8 +14,8 @@ export function DayHeader({ date, isToday }: DayHeaderProps) {
   const month = format(date, 'MMM');
 
   return (
-    <div className="flex flex-col items-center py-3 gap-1">
-      <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? 'text-accent' : 'text-text-secondary'}`}>
+    <span className="flex flex-col items-center py-3 gap-1">
+      <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? 'text-accent-text' : 'text-text-secondary'}`}>
         {dayName}
       </span>
       <span
@@ -26,6 +26,6 @@ export function DayHeader({ date, isToday }: DayHeaderProps) {
         {dayNum}
       </span>
       <span className="text-[10px] text-text-tertiary">{month}</span>
-    </div>
+    </span>
   );
 }

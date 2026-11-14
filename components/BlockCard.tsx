@@ -1,6 +1,7 @@
 'use client';
 
-import { Block, CATEGORY_ICONS, BlockCategory } from '@/lib/types';
+import { Block, BlockCategory, CATEGORY_LABELS } from '@/lib/types';
+import { CategoryIcon } from './CategoryIcon';
 import { Repeat } from 'lucide-react';
 
 interface BlockCardProps {
@@ -21,8 +22,10 @@ export function BlockCard({ block, onClick, half }: BlockCardProps) {
   const isCompact = height < 6;
 
   return (
-    <div
-      className={`absolute ${half ? 'left-1/2' : 'left-1'} right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105 pointer-events-auto`}
+    <button
+      type="button"
+      aria-label={`${block.title}, ${CATEGORY_LABELS[block.category as BlockCategory] ?? 'Evento'}, ${startTime}–${endTime}${block.is_recurring ? ', ricorrente' : ''}`}
+      className={`absolute block text-left ${half ? 'left-1/2' : 'left-1'} right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105 pointer-events-auto`}
       style={{
         top: `${top}%`,
         height: `${height}%`,
@@ -32,22 +35,22 @@ export function BlockCard({ block, onClick, half }: BlockCardProps) {
       }}
       onClick={onClick}
     >
-      <div className="flex flex-col h-full">
-        <div className="flex items-start justify-between gap-1">
-          <span className="text-xs font-medium truncate text-text-primary">
+      <span className="flex flex-col h-full">
+        <span className="flex items-start justify-between gap-1">
+          <span className="flex items-center gap-1 min-w-0 text-xs font-medium text-text-primary">
             {!isCompact && (
-              <span className="mr-1">{CATEGORY_ICONS[block.category as BlockCategory]}</span>
+              <CategoryIcon category={block.category as BlockCategory} className="w-3 h-3 flex-shrink-0" />
             )}
-            {block.title}
+            <span className="truncate">{block.title}</span>
           </span>
           {block.is_recurring && !isCompact && (
             <Repeat className="w-3 h-3 flex-shrink-0 text-text-secondary" />
           )}
-        </div>
+        </span>
         {!isCompact && (
           <span className="text-[10px] text-text-secondary">{startTime} – {endTime}</span>
         )}
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }

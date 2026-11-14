@@ -2,8 +2,10 @@
 
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, X, Briefcase, ArrowUpRight } from 'lucide-react';
-import { Block, ShiftAssignment, CATEGORY_ICONS, BlockCategory, formatTime, blockEndTime } from '@/lib/types';
+import { Plus, Briefcase, ArrowUpRight } from 'lucide-react';
+import { Block, ShiftAssignment, BlockCategory, formatTime, blockEndTime } from '@/lib/types';
+import { Dialog, DialogClose } from './Dialog';
+import { CategoryIcon } from './CategoryIcon';
 
 interface DaySheetProps {
   date: Date | null;
@@ -31,31 +33,24 @@ export function DaySheet({
 }: DaySheetProps) {
   if (!date) return null;
 
+  const dayLabel = format(date, 'EEEE d MMMM', { locale: it });
   const isEmpty = blocks.length === 0 && assignments.length === 0;
   const rowClass =
     'w-full flex items-center gap-3 px-3 py-2.5 bg-surface-hover rounded-xl hover:bg-border transition-colors text-left';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>
-      <div
-        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm mx-0 sm:mx-4 p-5 max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog label={dayLabel} onClose={onClose} size="sheet">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-medium text-text-primary capitalize">
-            {format(date, 'EEEE d MMMM', { locale: it })}
-          </h2>
+          <h2 className="text-base font-medium text-text-primary capitalize">{dayLabel}</h2>
           <div className="flex items-center gap-1">
             <button
               onClick={onOpenDay}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg transition-colors"
+              className="flex items-center gap-1 px-3 min-h-11 -my-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-xl transition-colors"
             >
               Apri giorno
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
-            <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded" aria-label="Chiudi">
-              <X className="w-4 h-4 text-text-secondary" />
-            </button>
+            <DialogClose onClose={onClose} />
           </div>
         </div>
 
@@ -85,10 +80,10 @@ export function DaySheet({
             return (
               <button key={`${block.id}-${block.week_offset}`} onClick={() => onEditBlock(block)} className={rowClass}>
                 <span
-                  className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 text-sm"
+                  className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 text-text-primary"
                   style={{ backgroundColor: `color-mix(in srgb, ${block.color} 25%, var(--color-surface))` }}
                 >
-                  {CATEGORY_ICONS[block.category as BlockCategory]}
+                  <CategoryIcon category={block.category as BlockCategory} className="w-4 h-4" />
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-sm font-medium text-text-primary truncate">{block.title}</span>
@@ -118,7 +113,6 @@ export function DaySheet({
             Evento
           </button>
         </div>
-      </div>
-    </div>
+    </Dialog>
   );
 }

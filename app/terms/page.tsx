@@ -73,7 +73,7 @@ export default function TermsOfServicePage() {
           contenuti esclusivamente al fine di fornirti il Servizio (ad esempio sincronizzarli tra i tuoi
           dispositivi). Non rivendichiamo alcun diritto sui tuoi contenuti e non li condividiamo con terzi
           al di fuori di quanto indicato nella nostra{' '}
-          <Link href="/privacy" className="text-accent hover:underline">
+          <Link href="/privacy" className="text-accent-text hover:underline">
             Informativa sulla Privacy
           </Link>
           .
@@ -109,7 +109,7 @@ export default function TermsOfServicePage() {
         <P>
           Puoi cancellare il tuo account in qualsiasi momento; alla cancellazione, i tuoi dati saranno
           trattati come descritto nella nostra{' '}
-          <Link href="/privacy" className="text-accent hover:underline">
+          <Link href="/privacy" className="text-accent-text hover:underline">
             Informativa sulla Privacy
           </Link>
           . Ci riserviamo il diritto di sospendere o terminare account che violino questi Termini,
@@ -133,7 +133,7 @@ export default function TermsOfServicePage() {
             href="https://ec.europa.eu/consumers/odr"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent hover:underline"
+            className="text-accent-text hover:underline"
           >
             ec.europa.eu/consumers/odr
           </a>

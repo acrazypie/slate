@@ -10,5 +10,10 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(new URL('/dashboard', request.url));
+  // `next` lets the password-reset email land on /reset-password. Only a path on
+  // this site is accepted, so the link can't be used to redirect somewhere else.
+  const next = searchParams.get('next');
+  const destination = next && next.startsWith('/') && !next.startsWith('//') && !next.includes('\\') ? next : '/dashboard';
+
+  return NextResponse.redirect(new URL(destination, request.url));
 }
