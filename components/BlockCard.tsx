@@ -6,9 +6,11 @@ import { Repeat } from 'lucide-react';
 interface BlockCardProps {
   block: Block;
   onClick: (e: React.MouseEvent) => void;
+  /** Take only the right half of the column, leaving the left half for a shift. */
+  half?: boolean;
 }
 
-export function BlockCard({ block, onClick }: BlockCardProps) {
+export function BlockCard({ block, onClick, half }: BlockCardProps) {
   const startTime = `${block.start_hour.toString().padStart(2, '0')}:${block.start_minute.toString().padStart(2, '0')}`;
   const endHour = block.start_hour + Math.floor((block.start_minute + block.duration_minutes) / 60);
   const endMinute = (block.start_minute + block.duration_minutes) % 60;
@@ -20,7 +22,7 @@ export function BlockCard({ block, onClick }: BlockCardProps) {
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105"
+      className={`absolute ${half ? 'left-1/2' : 'left-1'} right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105 pointer-events-auto`}
       style={{
         top: `${top}%`,
         height: `${height}%`,

@@ -3,17 +3,21 @@
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { format, isSameDay, addDays, addMonths, subMonths } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
 import { useBlocks } from '@/hooks/useBlocks';
+import { useShifts, useShiftAssignments } from '@/hooks/useShifts';
 import { weekOffsetForDate } from '@/hooks/useMonthBlocks';
 import { dateForWeekOffset, getSeriesOccurrenceWeekOffsets, SeriesLike } from '@/lib/recurrence';
 import { syncToGoogleCalendar } from '@/lib/googleCalendarClient';
-import { Block, BlockFormData } from '@/lib/types';
+import { Block, BlockFormData, Shift, ShiftAssignment, ShiftFormData } from '@/lib/types';
 import { DayHeader } from './DayHeader';
 import { BlockCard } from './BlockCard';
 import { BlockModal } from './BlockModal';
+import { ShiftCard } from './ShiftCard';
+import { ShiftModal } from './ShiftModal';
+import { CreateChoiceSheet } from './CreateChoiceSheet';
 import { MonthGrid } from './MonthGrid';
 
 interface WeekGridProps {
@@ -42,6 +46,13 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
     setViewMode,
   } = useWeek();
   const { blocks, createBlock, updateBlock, deleteBlock, refetch: fetchBlocks } = useBlocks(weekOffset);
+  const { shifts, createShift, updateShift, deleteShift } = useShifts();
+  const {
+    assignments,
+    assign,
+    unassign,
+    refetch: fetchAssignments,
+  } = useShiftAssignments(weekDays[0], weekDays[6]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,6 +61,25 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
     start_hour: number;
     start_minute: number;
   } | null>(null);
+  // Week a new event is created in. Usually the visible week, but the month
+  // view can create one in any week.
+  const [blockTargetWeekOffset, setBlockTargetWeekOffset] = useState<number | null>(null);
+
+  // Tapping an empty slot first asks "event or shift?".
+  const [createContext, setCreateContext] = useState<{ date: Date; hour: number } | null>(null);
+  const [createStep, setCreateStep] = useState<'choice' | 'shift'>('choice');
+
+  const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+  const [editingShift, setEditingShift] = useState<Shift | null>(null);
+  // Set when the shift modal was opened from a shift placed on a day.
+  const [editingAssignment, setEditingAssignment] = useState<ShiftAssignment | null>(null);
+  // Set when a new shift is being created from a day: it gets placed there once saved.
+  const [assignAfterCreate, setAssignAfterCreate] = useState<string | null>(null);
+
+  // Tells the month view to reload after anything changes.
+  const [refreshKey, setRefreshKey] = useState(0);
+  const bumpRefresh = () => setRefreshKey((k) => k + 1);
+
   const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
     const todayIndex = (new Date().getDay() + 6) % 7;
     return todayIndex;
@@ -81,33 +111,118 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
     return blocks.filter((b) => b.day_of_week === dayIndex);
   };
 
-  const handleCellClick = (dayOfWeek: number, hour: number, minute: number = 0) => {
-    setModalInitialData({ day_of_week: dayOfWeek, start_hour: hour, start_minute: minute });
+  const getAssignmentsForDay = (dayIndex: number) => {
+    const day = weekDays[dayIndex];
+    if (!day) return [];
+    const dateKey = format(day, 'yyyy-MM-dd');
+    return assignments.filter((a) => a.shift_date === dateKey);
+  };
+
+  // ---- Creating: slot click -> "event or shift?" ----
+
+  const handleCellClick = (dayOfWeek: number, hour: number) => {
+    const date = weekDays[dayOfWeek];
+    if (!date) return;
+    setCreateStep('choice');
+    setCreateContext({ date, hour });
+  };
+
+  const openEventCreate = (date: Date, hour: number) => {
+    setModalInitialData({ day_of_week: (date.getDay() + 6) % 7, start_hour: hour, start_minute: 0 });
+    setBlockTargetWeekOffset(weekOffsetForDate(date));
     setSelectedBlock(null);
+    setCreateContext(null);
+    setIsModalOpen(true);
+  };
+
+  const openShiftPicker = (date: Date) => {
+    setCreateStep('shift');
+    setCreateContext({ date, hour: 9 });
+  };
+
+  const handlePickShift = async (shift: Shift) => {
+    if (!createContext) return;
+    await assign(shift.id, format(createContext.date, 'yyyy-MM-dd'));
+    setCreateContext(null);
+    bumpRefresh();
+  };
+
+  const handleCreateShiftFromDay = () => {
+    if (!createContext) return;
+    setAssignAfterCreate(format(createContext.date, 'yyyy-MM-dd'));
+    setEditingShift(null);
+    setEditingAssignment(null);
+    setCreateContext(null);
+    setIsShiftModalOpen(true);
+  };
+
+  // ---- Events (blocks) ----
+
+  const openBlockEdit = (block: Block) => {
+    setSelectedBlock(block);
+    setModalInitialData(null);
     setIsModalOpen(true);
   };
 
   const handleBlockClick = (block: Block, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedBlock(block);
-    setModalInitialData(null);
-    setIsModalOpen(true);
+    openBlockEdit(block);
   };
 
   const handleSaveBlock = async (formData: BlockFormData) => {
     if (selectedBlock) {
       await updateBlock(selectedBlock.id, formData);
     } else {
-      await createBlock(formData);
+      await createBlock(formData, blockTargetWeekOffset ?? undefined);
     }
     setIsModalOpen(false);
+    bumpRefresh();
   };
 
   const handleDeleteBlock = async () => {
     if (selectedBlock) {
-      await deleteBlock(selectedBlock.id);
+      await deleteBlock(selectedBlock.id, selectedBlock.google_event_id);
       setIsModalOpen(false);
+      bumpRefresh();
     }
+  };
+
+  // ---- Shifts ----
+
+  const openAssignmentEdit = (assignment: ShiftAssignment) => {
+    setEditingShift(assignment.shift);
+    setEditingAssignment(assignment);
+    setAssignAfterCreate(null);
+    setIsShiftModalOpen(true);
+  };
+
+  const handleSaveShift = async (data: ShiftFormData) => {
+    if (editingShift) {
+      await updateShift(editingShift.id, data);
+    } else {
+      const created = await createShift(data);
+      if (created && assignAfterCreate) {
+        await assign(created.id, assignAfterCreate);
+      }
+    }
+    setIsShiftModalOpen(false);
+    await fetchAssignments();
+    bumpRefresh();
+  };
+
+  const handleDeleteShift = async () => {
+    if (!editingShift) return;
+    await deleteShift(editingShift.id);
+    setIsShiftModalOpen(false);
+    await fetchAssignments();
+    bumpRefresh();
+  };
+
+  const handleRemoveShiftFromDay = async () => {
+    if (!editingAssignment) return;
+    await unassign(editingAssignment.id);
+    setIsShiftModalOpen(false);
+    bumpRefresh();
   };
 
   const handleDeleteRecurring = async (deleteType: 'current' | 'this-and-following' | 'all') => {
@@ -127,6 +242,7 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
       await deleteEntireSeries(seriesId);
     }
     setIsModalOpen(false);
+    bumpRefresh();
   };
 
   /** Skips just one occurrence of a series, without touching the others. */
@@ -204,6 +320,8 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
   const selectedDay = weekDays[selectedDayIndex];
   const dayBlocksForSelectedDay = getBlocksForDay(selectedDayIndex);
+  const dayAssignmentsForSelectedDay = getAssignmentsForDay(selectedDayIndex);
+  const splitSelectedDay = dayBlocksForSelectedDay.length > 0 && dayAssignmentsForSelectedDay.length > 0;
   const isTodaySelectedDay = selectedDay ? isSameDay(selectedDay, today) : false;
 
   // Moves the selected day by `delta` days, crossing week boundaries (and
@@ -327,10 +445,10 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
           </button>
           <button
             onClick={onOpenSidebar}
-            className="sm:hidden p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
-            aria-label="Apri impostazioni"
+            className="md:hidden p-1.5 rounded-xl hover:bg-surface-hover transition-colors"
+            aria-label="Apri riepilogo"
           >
-            <Settings className="w-5 h-5 text-text-secondary" />
+            <Menu className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
       </div>
@@ -375,8 +493,10 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
           <div
             key={`${weekOffset}-${selectedDayIndex}`}
-            className={`flex flex-1 overflow-y-auto ${slideDirection > 0 ? 'animate-day-in-right' : 'animate-day-in-left'}`}
+            className={`flex-1 overflow-y-auto ${slideDirection > 0 ? 'animate-day-in-right' : 'animate-day-in-left'}`}
           >
+            {/* Inner row sized by its content, so the hour column's border runs all 24 hours. */}
+            <div className="flex">
             <div className="flex flex-col w-12 flex-shrink-0 border-r border-border">
               <div className="flex-1 flex flex-col relative">
                 {hours.map((hour) => (
@@ -395,14 +515,26 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
                   key={hour}
                   className="absolute w-full h-14 border-b border-border cursor-pointer"
                   style={{ top: `${hour * DAY_HOUR_HEIGHT}px` }}
-                  onClick={() => handleCellClick(selectedDayIndex, hour, 0)}
+                  onClick={() => handleCellClick(selectedDayIndex, hour)}
                 />
               ))}
               <div className="absolute inset-0 pointer-events-none">
+                {dayAssignmentsForSelectedDay.map((assignment) => (
+                  <ShiftCard
+                    key={assignment.id}
+                    assignment={assignment}
+                    half={splitSelectedDay}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAssignmentEdit(assignment);
+                    }}
+                  />
+                ))}
                 {dayBlocksForSelectedDay.map((block) => (
                   <BlockCard
                     key={block.id}
                     block={block}
+                    half={splitSelectedDay}
                     onClick={(e) => handleBlockClick(block, e)}
                   />
                 ))}
@@ -414,6 +546,7 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
                 />
               )}
             </div>
+            </div>
           </div>
         </div>
       )}
@@ -421,7 +554,10 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
       {/* Week view — horizontally scrollable on narrow screens, full-width on larger ones */}
       {view === 'week' && (
         <div className="flex-1 overflow-auto">
-          <div className="flex min-w-[720px] sm:min-w-0 h-full">
+          {/* No fixed height here: with h-full the columns were clamped to the
+              visible area, so their vertical borders stopped where the screen
+              ended instead of running the full 24 hours. */}
+          <div className="flex min-w-[720px] sm:min-w-0">
             <div className="flex flex-col w-12 sm:w-16 flex-shrink-0 border-r border-border sticky left-0 bg-bg z-10">
               <div className="invisible">
                 <DayHeader date={today} isToday={false} />
@@ -443,6 +579,8 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
               {weekDays.map((day, dayIndex) => {
                 const isToday = isSameDay(day, today);
                 const dayBlocks = getBlocksForDay(dayIndex);
+                const dayAssignments = getAssignmentsForDay(dayIndex);
+                const splitDay = dayBlocks.length > 0 && dayAssignments.length > 0;
                 const showCurrentTimeLine = isToday;
 
                 return (
@@ -460,14 +598,26 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
                           key={hour}
                           className="border-b border-border hover:bg-surface-hover/50 transition-colors"
                           style={{ height: `${WEEK_HOUR_HEIGHT}px` }}
-                          onClick={() => handleCellClick(dayIndex, hour, 0)}
+                          onClick={() => handleCellClick(dayIndex, hour)}
                         />
                       ))}
                       <div className="absolute inset-0 pointer-events-none">
+                        {dayAssignments.map((assignment) => (
+                          <ShiftCard
+                            key={assignment.id}
+                            assignment={assignment}
+                            half={splitDay}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAssignmentEdit(assignment);
+                            }}
+                          />
+                        ))}
                         {dayBlocks.map((block) => (
                           <BlockCard
                             key={block.id}
                             block={block}
+                            half={splitDay}
                             onClick={(e) => handleBlockClick(block, e)}
                           />
                         ))}
@@ -489,8 +639,42 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
 
       {/* Month view */}
       {view === 'month' && (
-        <MonthGrid monthDate={monthCursor} today={today} onSelectDay={handleSelectDayFromMonth} />
+        <MonthGrid
+          monthDate={monthCursor}
+          today={today}
+          refreshKey={refreshKey}
+          onAddEvent={(date) => openEventCreate(date, 9)}
+          onAddShift={openShiftPicker}
+          onEditBlock={openBlockEdit}
+          onEditAssignment={openAssignmentEdit}
+          onOpenDay={handleSelectDayFromMonth}
+        />
       )}
+
+      <CreateChoiceSheet
+        isOpen={createContext !== null}
+        initialStep={createStep}
+        dateLabel={createContext ? format(createContext.date, 'EEEE d MMMM', { locale: it }) : ''}
+        shifts={shifts}
+        onClose={() => setCreateContext(null)}
+        onChooseEvent={() => createContext && openEventCreate(createContext.date, createContext.hour)}
+        onPickShift={handlePickShift}
+        onCreateShift={handleCreateShiftFromDay}
+      />
+
+      <ShiftModal
+        isOpen={isShiftModalOpen}
+        onClose={() => setIsShiftModalOpen(false)}
+        onSave={handleSaveShift}
+        onDelete={editingShift ? handleDeleteShift : undefined}
+        onRemoveFromDay={editingAssignment ? handleRemoveShiftFromDay : undefined}
+        dayLabel={
+          editingAssignment
+            ? format(new Date(`${editingAssignment.shift_date}T00:00:00`), 'EEEE d MMMM', { locale: it })
+            : undefined
+        }
+        shift={editingShift}
+      />
 
       {isModalOpen && (
         <BlockModal

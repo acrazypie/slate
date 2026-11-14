@@ -81,7 +81,10 @@ export function useBlocks(weekOffset: number = 0) {
     fetchBlocks();
   }, [fetchBlocks]);
 
-  const createBlock = async (formData: BlockFormData): Promise<Block | null> => {
+  // `weekOffsetOverride` lets a caller (the month view) create a block in a
+  // week other than the one this hook is currently showing.
+  const createBlock = async (formData: BlockFormData, weekOffsetOverride?: number): Promise<Block | null> => {
+    const targetWeekOffset = weekOffsetOverride ?? weekOffset;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
@@ -92,7 +95,7 @@ export function useBlocks(weekOffset: number = 0) {
       ...formData,
       id,
       user_id: user.id,
-      week_offset: weekOffset,
+      week_offset: targetWeekOffset,
       notes: formData.notes || null,
       is_recurring: isRecurring,
       recurrence_type: isRecurring ? formData.recurrence_type : undefined,
@@ -114,11 +117,13 @@ export function useBlocks(weekOffset: number = 0) {
       return null;
     }
 
-    setBlocks((prev) => [...prev, data].sort((a, b) => {
-      if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
-      if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
-      return a.start_minute - b.start_minute;
-    }));
+    if (targetWeekOffset === weekOffset) {
+      setBlocks((prev) => [...prev, data].sort((a, b) => {
+        if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+        if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
+        return a.start_minute - b.start_minute;
+      }));
+    }
 
     syncToGoogleCalendar({ action: 'upsert', blockIds: [data.id] });
 
@@ -154,7 +159,7 @@ export function useBlocks(weekOffset: number = 0) {
     return data;
   };
 
-  const deleteBlock = async (id: string): Promise<boolean> => {
+  const deleteBlock = async (id: string, googleEventId?: string | null): Promise<boolean> => {
     // For a non-recurring block only - deleting one occurrence or a whole
     // recurring series goes through the dedicated recurrence-aware handlers
     // in WeekGrid (deleteOccurrence / truncateSeriesBefore / deleteEntireSeries),
@@ -174,8 +179,11 @@ export function useBlocks(weekOffset: number = 0) {
 
     setBlocks((prev) => prev.filter((b) => b.id !== id));
 
-    if (existing?.google_event_id) {
-      syncToGoogleCalendar({ action: 'delete', eventIds: [existing.google_event_id] });
+    // The block may not be in this hook's week (deleted from the month view),
+    // so the caller can pass its Google event id directly.
+    const eventId = existing?.google_event_id ?? googleEventId;
+    if (eventId) {
+      syncToGoogleCalendar({ action: 'delete', eventIds: [eventId] });
     }
 
     return true;

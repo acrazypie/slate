@@ -1,0 +1,104 @@
+'use client';
+
+import { useState } from 'react';
+import { Plus, Briefcase, ChevronRight } from 'lucide-react';
+import { useShifts } from '@/hooks/useShifts';
+import { Shift, ShiftFormData, formatTime, isOvernightShift, shiftDurationMinutes } from '@/lib/types';
+import { ShiftModal } from './ShiftModal';
+
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
+}
+
+export function ShiftsView() {
+  const { shifts, loading, error, createShift, updateShift, deleteShift } = useShifts();
+  const [editing, setEditing] = useState<Shift | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openCreate = () => {
+    setEditing(null);
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (shift: Shift) => {
+    setEditing(shift);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (data: ShiftFormData) => {
+    const saved = editing ? await updateShift(editing.id, data) : await createShift(data);
+    if (saved) setIsModalOpen(false);
+  };
+
+  const handleDelete = async () => {
+    if (editing && (await deleteShift(editing.id))) setIsModalOpen(false);
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-bg">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <h1 className="font-serif text-2xl sm:text-3xl text-text-primary">Turni</h1>
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent text-accent-contrast rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            Nuovo turno
+          </button>
+        </div>
+        <p className="text-sm text-text-secondary mb-6">
+          Crea qui i tuoi turni, poi inseriscili nei giorni dal calendario.
+        </p>
+
+        {error && <p className="text-sm text-red-500 mb-4">Non è stato possibile caricare o salvare i turni: {error}</p>}
+
+        {loading ? (
+          <p className="text-sm text-text-secondary">Caricamento...</p>
+        ) : shifts.length === 0 ? (
+          <div className="flex flex-col items-center text-center gap-3 px-6 py-12 border border-dashed border-border-strong rounded-2xl">
+            <Briefcase className="w-8 h-8 text-text-tertiary" />
+            <p className="text-sm text-text-secondary">Non hai ancora nessun turno.</p>
+            <button onClick={openCreate} className="text-sm text-accent hover:underline">
+              Crea il primo turno
+            </button>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {shifts.map((shift) => (
+              <li key={shift.id}>
+                <button
+                  onClick={() => openEdit(shift)}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 bg-surface rounded-2xl hover:bg-surface-hover transition-colors text-left"
+                  style={{ borderLeft: `4px solid ${shift.color}` }}
+                >
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium text-text-primary truncate">{shift.title}</span>
+                    <span className="block text-xs text-text-secondary">
+                      {formatTime(shift.start_hour, shift.start_minute)} – {formatTime(shift.end_hour, shift.end_minute)}
+                      {isOvernightShift(shift) && ' (giorno dopo)'}
+                    </span>
+                  </span>
+                  <span className="text-xs text-text-tertiary flex-shrink-0">
+                    {formatDuration(shiftDurationMinutes(shift))}
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-text-tertiary flex-shrink-0" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <ShiftModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        onDelete={editing ? handleDelete : undefined}
+        shift={editing}
+      />
+    </div>
+  );
+}

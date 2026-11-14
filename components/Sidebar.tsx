@@ -1,9 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { Block, CATEGORY_LABELS, CATEGORY_COLORS, BlockCategory } from '@/lib/types';
-import { LogOut, Clock, Settings as SettingsIcon } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface SidebarProps {
   user?: {
@@ -11,20 +9,9 @@ interface SidebarProps {
     name?: string;
   };
   blocks: Block[];
-  onSettingsClick?: () => void;
-  onClose?: () => void;
 }
 
-export function Sidebar({ user, blocks, onSettingsClick, onClose }: SidebarProps) {
-  const router = useRouter();
-  const supabase = createClient();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
-    onClose?.();
-  };
-
+export function Sidebar({ user, blocks }: SidebarProps) {
   const categoryHours = blocks.reduce((acc, block) => {
     const category = block.category as BlockCategory;
     if (!acc[category]) {
@@ -91,24 +78,6 @@ export function Sidebar({ user, blocks, onSettingsClick, onClose }: SidebarProps
         </div>
       </div>
 
-      <div className="p-4 border-t border-border space-y-1">
-        {onSettingsClick && (
-          <button
-            onClick={onSettingsClick}
-            className="w-full flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-xl transition-colors"
-          >
-            <SettingsIcon className="w-4 h-4" />
-            Impostazioni
-          </button>
-        )}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-xl transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          Esci
-        </button>
-      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   startOfMonth,
   endOfMonth,
@@ -11,47 +11,86 @@ import {
   isSameDay,
   format,
 } from 'date-fns';
-import { it } from 'date-fns/locale';
 import { useMonthBlocks, weekOffsetForDate } from '@/hooks/useMonthBlocks';
+import { useShiftAssignments } from '@/hooks/useShifts';
+import { Block, ShiftAssignment, blockEndTime, formatCompactRange } from '@/lib/types';
+import { DaySheet } from './DaySheet';
 
 interface MonthGridProps {
   monthDate: Date;
   today: Date;
-  onSelectDay: (date: Date) => void;
+  /** Bumped by the parent after any create/edit/delete so the grid reloads. */
+  refreshKey: number;
+  onAddEvent: (date: Date) => void;
+  onAddShift: (date: Date) => void;
+  onEditBlock: (block: Block) => void;
+  onEditAssignment: (assignment: ShiftAssignment) => void;
+  onOpenDay: (date: Date) => void;
 }
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-const MAX_VISIBLE_CHIPS = 3;
+const MAX_CHIPS_MOBILE = 2;
+const MAX_CHIPS_DESKTOP = 3;
 
-export function MonthGrid({ monthDate, today, onSelectDay }: MonthGridProps) {
+interface Chip {
+  key: string;
+  title: string;
+  time: string;
+  color: string;
+  isShift: boolean;
+  startMinutes: number;
+}
+
+export function MonthGrid({
+  monthDate,
+  today,
+  refreshKey,
+  onAddEvent,
+  onAddShift,
+  onEditBlock,
+  onEditAssignment,
+  onOpenDay,
+}: MonthGridProps) {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   const gridStart = useMemo(() => startOfWeek(startOfMonth(monthDate), { weekStartsOn: 1 }), [monthDate]);
   const gridEnd = useMemo(() => endOfWeek(endOfMonth(monthDate), { weekStartsOn: 1 }), [monthDate]);
 
-  const days = useMemo(
-    () => eachDayOfInterval({ start: gridStart, end: gridEnd }),
-    [gridStart, gridEnd]
-  );
+  const days = useMemo(() => eachDayOfInterval({ start: gridStart, end: gridEnd }), [gridStart, gridEnd]);
+  const weekOffsets = useMemo(() => days.map((d) => weekOffsetForDate(d)), [days]);
 
-  const weekOffsets = useMemo(
-    () => days.map((d) => weekOffsetForDate(d)),
-    [days]
-  );
+  const { blocks, refetch: refetchBlocks } = useMonthBlocks(weekOffsets);
+  const { assignments, refetch: refetchAssignments } = useShiftAssignments(gridStart, gridEnd);
 
-  const { blocks } = useMonthBlocks(weekOffsets);
+  useEffect(() => {
+    if (refreshKey === 0) return;
+    refetchBlocks();
+    refetchAssignments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
 
   const blocksByKey = useMemo(() => {
-    const map = new Map<string, typeof blocks>();
+    const map = new Map<string, Block[]>();
     for (const block of blocks) {
       const key = `${block.week_offset}:${block.day_of_week}`;
-      const existing = map.get(key);
-      if (existing) {
-        existing.push(block);
-      } else {
-        map.set(key, [block]);
-      }
+      map.set(key, [...(map.get(key) || []), block]);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => a.start_hour - b.start_hour || a.start_minute - b.start_minute);
     }
     return map;
   }, [blocks]);
+
+  const assignmentsByDate = useMemo(() => {
+    const map = new Map<string, ShiftAssignment[]>();
+    for (const a of assignments) {
+      map.set(a.shift_date, [...(map.get(a.shift_date) || []), a]);
+    }
+    return map;
+  }, [assignments]);
+
+  const blocksFor = (day: Date) => blocksByKey.get(`${weekOffsetForDate(day)}:${(day.getDay() + 6) % 7}`) || [];
+  const assignmentsFor = (day: Date) => assignmentsByDate.get(format(day, 'yyyy-MM-dd')) || [];
 
   const weeks = useMemo(() => {
     const result: Date[][] = [];
@@ -76,23 +115,38 @@ export function MonthGrid({ monthDate, today, onSelectDay }: MonthGridProps) {
 
       <div className="flex-1 flex flex-col">
         {weeks.map((week, weekIdx) => (
-          <div key={weekIdx} className="flex-1 grid grid-cols-7 min-h-[88px] sm:min-h-[120px]">
+          <div key={weekIdx} className="flex-1 grid grid-cols-7 min-h-[104px] sm:min-h-[132px]">
             {week.map((day) => {
               const inMonth = isSameMonth(day, monthDate);
               const isToday = isSameDay(day, today);
-              const dayOfWeek = (day.getDay() + 6) % 7;
-              const key = `${weekOffsetForDate(day)}:${dayOfWeek}`;
-              const dayBlocks = (blocksByKey.get(key) || [])
-                .slice()
-                .sort((a, b) => a.start_hour - b.start_hour || a.start_minute - b.start_minute);
-              const visible = dayBlocks.slice(0, MAX_VISIBLE_CHIPS);
-              const hiddenCount = dayBlocks.length - visible.length;
+
+              const chips: Chip[] = [
+                ...assignmentsFor(day).map((a) => ({
+                  key: `s-${a.id}`,
+                  title: a.shift.title,
+                  time: formatCompactRange(a.shift.start_hour, a.shift.start_minute, a.shift.end_hour, a.shift.end_minute),
+                  color: a.shift.color,
+                  isShift: true,
+                  startMinutes: a.shift.start_hour * 60 + a.shift.start_minute,
+                })),
+                ...blocksFor(day).map((b) => {
+                  const end = blockEndTime(b);
+                  return {
+                    key: `b-${b.id}`,
+                    title: b.title,
+                    time: formatCompactRange(b.start_hour, b.start_minute, end.hour, end.minute),
+                    color: b.color,
+                    isShift: false,
+                    startMinutes: b.start_hour * 60 + b.start_minute,
+                  };
+                }),
+              ].sort((a, b) => a.startMinutes - b.startMinutes);
 
               return (
                 <button
                   key={day.toISOString()}
-                  onClick={() => onSelectDay(day)}
-                  className={`flex flex-col items-stretch text-left p-1.5 sm:p-2 border-r border-b border-border last:border-r-0 hover:bg-surface-hover/50 transition-colors ${
+                  onClick={() => setSelectedDate(day)}
+                  className={`flex flex-col items-stretch text-left p-1 sm:p-2 min-w-0 border-r border-b border-border [&:nth-child(7n)]:border-r-0 hover:bg-surface-hover/50 transition-colors ${
                     inMonth ? '' : 'opacity-40'
                   }`}
                 >
@@ -101,23 +155,37 @@ export function MonthGrid({ monthDate, today, onSelectDay }: MonthGridProps) {
                       isToday ? 'bg-accent text-accent-contrast' : 'text-text-primary'
                     }`}
                   >
-                    {format(day, 'd', { locale: it })}
+                    {format(day, 'd')}
                   </span>
                   <div className="flex flex-col gap-0.5 min-w-0">
-                    {visible.map((block) => (
+                    {chips.slice(0, MAX_CHIPS_DESKTOP).map((chip, i) => (
                       <div
-                        key={block.id}
-                        className="truncate text-[10px] sm:text-[11px] leading-tight rounded px-1 py-0.5"
+                        key={chip.key}
+                        className={`rounded px-1 py-0.5 min-w-0 ${i >= MAX_CHIPS_MOBILE ? 'hidden sm:block' : ''} ${
+                          chip.isShift ? 'border border-dashed' : ''
+                        }`}
                         style={{
-                          backgroundColor: `color-mix(in srgb, ${block.color} 22%, var(--color-surface))`,
-                          borderLeft: `2px solid ${block.color}`,
+                          backgroundColor: `color-mix(in srgb, ${chip.color} 22%, var(--color-surface))`,
+                          ...(chip.isShift ? { borderColor: chip.color } : { borderLeft: `2px solid ${chip.color}` }),
                         }}
                       >
-                        {block.title}
+                        <div className="truncate text-[10px] sm:text-[11px] leading-tight text-text-primary">
+                          {chip.title}
+                        </div>
+                        <div className="truncate text-[9px] sm:text-[10px] leading-tight text-text-secondary">
+                          {chip.time}
+                        </div>
                       </div>
                     ))}
-                    {hiddenCount > 0 && (
-                      <div className="text-[10px] text-text-tertiary px-1">+{hiddenCount} altri</div>
+                    {chips.length > MAX_CHIPS_MOBILE && (
+                      <div className="sm:hidden text-[10px] text-text-tertiary px-1">
+                        +{chips.length - MAX_CHIPS_MOBILE}
+                      </div>
+                    )}
+                    {chips.length > MAX_CHIPS_DESKTOP && (
+                      <div className="hidden sm:block text-[10px] text-text-tertiary px-1">
+                        +{chips.length - MAX_CHIPS_DESKTOP} altri
+                      </div>
                     )}
                   </div>
                 </button>
@@ -126,6 +194,23 @@ export function MonthGrid({ monthDate, today, onSelectDay }: MonthGridProps) {
           </div>
         ))}
       </div>
+
+      <DaySheet
+        date={selectedDate}
+        blocks={selectedDate ? blocksFor(selectedDate) : []}
+        assignments={selectedDate ? assignmentsFor(selectedDate) : []}
+        onClose={() => setSelectedDate(null)}
+        onAddEvent={() => selectedDate && onAddEvent(selectedDate)}
+        onAddShift={() => selectedDate && onAddShift(selectedDate)}
+        onEditBlock={onEditBlock}
+        onEditAssignment={onEditAssignment}
+        onOpenDay={() => {
+          if (!selectedDate) return;
+          const date = selectedDate;
+          setSelectedDate(null);
+          onOpenDay(date);
+        }}
+      />
     </div>
   );
 }

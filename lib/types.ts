@@ -22,6 +22,65 @@ export interface Block {
   created_at: string;
 }
 
+/** A reusable shift definition (e.g. "Mattina 09:00-13:00"). Never recurring. */
+export interface Shift {
+  id: string;
+  user_id: string;
+  title: string;
+  start_hour: number;
+  start_minute: number;
+  end_hour: number;
+  end_minute: number;
+  color: string;
+  created_at: string;
+}
+
+export interface ShiftFormData {
+  title: string;
+  start_hour: number;
+  start_minute: number;
+  end_hour: number;
+  end_minute: number;
+  color: string;
+}
+
+/** A shift placed on one specific calendar day. */
+export interface ShiftAssignment {
+  id: string;
+  user_id: string;
+  shift_id: string;
+  shift_date: string; // 'yyyy-MM-dd'
+  shift: Shift;
+}
+
+export const SHIFT_DEFAULT_COLOR = '#6BB6A3';
+
+export function formatTime(hour: number, minute: number): string {
+  return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+}
+
+/** Short form for tight spaces: "9–13", "9:30–13". */
+export function formatCompactRange(sh: number, sm: number, eh: number, em: number): string {
+  const part = (h: number, m: number) => (m === 0 ? `${h}` : `${h}:${m.toString().padStart(2, '0')}`);
+  return `${part(sh, sm)}–${part(eh, em)}`;
+}
+
+export function blockEndTime(block: Pick<Block, 'start_hour' | 'start_minute' | 'duration_minutes'>) {
+  const total = block.start_hour * 60 + block.start_minute + block.duration_minutes;
+  return { hour: Math.floor(total / 60) % 24, minute: total % 60 };
+}
+
+/** A shift whose end is at or before its start runs past midnight. */
+export function isOvernightShift(shift: Pick<Shift, 'start_hour' | 'start_minute' | 'end_hour' | 'end_minute'>): boolean {
+  return shift.end_hour * 60 + shift.end_minute <= shift.start_hour * 60 + shift.start_minute;
+}
+
+export function shiftDurationMinutes(shift: Pick<Shift, 'start_hour' | 'start_minute' | 'end_hour' | 'end_minute'>): number {
+  const start = shift.start_hour * 60 + shift.start_minute;
+  const end = shift.end_hour * 60 + shift.end_minute;
+  return end > start ? end - start : end + 24 * 60 - start;
+}
+
 export function getContrastColor(hexColor: string): string {
   const r = parseInt(hexColor.slice(1, 3), 16);
   const g = parseInt(hexColor.slice(3, 5), 16);

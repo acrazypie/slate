@@ -6,13 +6,15 @@ import { User } from '@supabase/supabase-js';
 import { X } from 'lucide-react';
 import { WeekGrid } from '@/components/WeekGrid';
 import { Sidebar } from '@/components/Sidebar';
-import { SettingsModal } from '@/components/SettingsModal';
+import { SettingsView } from '@/components/SettingsView';
+import { ShiftsView } from '@/components/ShiftsView';
+import { BottomNav, AppTab } from '@/components/BottomNav';
 import { useBlocks } from '@/hooks/useBlocks';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [tab, setTab] = useState<AppTab>('calendar');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const supabase = createClient();
   const { blocks } = useBlocks(0);
@@ -45,6 +47,8 @@ export default function DashboardPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const currentUser = user ? { email: user.email || '', name: user.user_metadata?.name } : undefined;
+
   const handleOpenSidebar = () => setSidebarOpen(true);
   const handleCloseSidebar = () => setSidebarOpen(false);
 
@@ -57,14 +61,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-bg text-text-primary">
+    <div className="flex h-dvh bg-bg text-text-primary">
       {/* Desktop sidebar - always visible */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-surface">
         <Sidebar 
           user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
           blocks={blocks}
-          onSettingsClick={() => setIsSettingsOpen(true)}
-          onClose={handleCloseSidebar}
         />
       </aside>
 
@@ -101,20 +103,18 @@ export default function DashboardPage() {
           <Sidebar 
             user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined} 
             blocks={blocks}
-            onSettingsClick={() => { setIsSettingsOpen(true); handleCloseSidebar(); }}
-            onClose={handleCloseSidebar}
           />
         </div>
       </div>
 
-      <WeekGrid 
-        user={user ? { email: user.email || '', name: user.user_metadata?.name } : undefined}
-        onOpenSidebar={handleOpenSidebar}
-      />
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      <div className="flex flex-1 min-w-0 flex-col">
+        <div className="flex flex-1 min-h-0 flex-col">
+          {tab === 'calendar' && <WeekGrid user={currentUser} onOpenSidebar={handleOpenSidebar} />}
+          {tab === 'shifts' && <ShiftsView />}
+          {tab === 'settings' && <SettingsView user={currentUser} />}
+        </div>
+        <BottomNav active={tab} onChange={setTab} />
+      </div>
     </div>
   );
 }
