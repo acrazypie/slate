@@ -1,105 +1,91 @@
 # Slate
 
-Pianificatore a blocchi orari per studenti, universitari e giovani lavoratori.
+*La tua settimana, a blocchi.*
 
-## Prerequisites
+Slate is a time-block planner for students and young workers. You lay out your
+week as coloured blocks (study, work, classes, anything else), keep a set of
+reusable work shifts, and optionally copy everything you plan into Google
+Calendar.
 
-- Node.js 18+
-- npm or yarn
-- Supabase account
-
-## Setup
-
-### 1. Create Supabase Project
-
-1. Go to [supabase.com](https://supabase.com) and create a new project
-2. Wait for the project to be ready
-3. Go to **Settings > API** to find your `URL` and `anon key`
-
-### 2. Database Setup
-
-In the Supabase Dashboard, go to **SQL Editor** and run:
-
-```sql
--- Create blocks table
-create table blocks (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users(id) on delete cascade not null,
-  title text not null,
-  category text not null default 'altro',
-  color text not null default '#6366f1',
-  day_of_week integer not null,
-  start_hour integer not null,
-  start_minute integer not null default 0,
-  duration_minutes integer not null default 60,
-  week_offset integer not null default 0,
-  notes text,
-  created_at timestamp with time zone default now()
-);
-
--- Enable Row Level Security
-alter table blocks enable row level security;
-
--- Create policy
-create policy "Users can manage their own blocks"
-  on blocks for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-```
-
-### 3. Auth Configuration
-
-1. Go to **Authentication > Providers**
-2. Enable **Email** (or configure Google/Apple OAuth)
-3. Go to **Authentication > URL Configuration**
-4. Add to **Redirect URLs**:
-   - Local: `http://localhost:3000/auth/callback`
-   - Production: `https://yourdomain.com/auth/callback`
-
-### 4. Environment Variables
-
-Create `.env.local`:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-Replace the values with your Supabase credentials from Settings > API.
-
-## Run Locally
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
-
-## Deploy
-
-### Vercel
-
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com) and import the repository
-3. Add the environment variables in the Vercel dashboard
-4. Deploy
+The interface is in Italian. Live at [slate.egenesio.com](https://slate.egenesio.com).
 
 ## Features
 
-- Weekly time block planning grid
-- Categories: Studio, Lavoro, Lezione, Altro
-- Custom colors for each block
-- Week navigation (previous/next)
-- Real-time current time indicator
-- User authentication with Supabase
-- Automatic data synchronization
+- **Day, week and month views** of the same calendar, with swipe and day-strip
+  navigation on phones.
+- **Events (blocks)** with a title, category, colour, start time, duration and
+  notes.
+- **Recurring events**, weekly or monthly ("every second Wednesday"), with an
+  optional end date. One occurrence, this-and-following, or the whole series
+  can be deleted.
+- **Shifts**: define a shift once ("Mattina 09:00–13:00") and drop it on any
+  day. Overnight shifts are supported.
+- **Weekly summary** of hours per category, shifts included.
+- **Google Calendar sync**, one way (Slate → Google), for events.
+- **Accounts** with email and password or Google sign-in, plus password reset.
+- **Light, dark and system themes**, a configurable accent colour and a
+  default view, stored per device.
+- Installable on a phone's home screen.
 
-## Tech Stack
+## Tech stack
 
-- Next.js 14 (App Router)
-- TypeScript
-- Supabase (Auth + Database)
-- Tailwind CSS
-- date-fns
-- lucide-react
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Data and auth | Supabase (Postgres with row-level security, Supabase Auth) |
+| Styling | Tailwind CSS 4, `next-themes` |
+| Dates | `date-fns` |
+| Icons | `lucide-react` |
+| Hosting | Vercel |
+
+## Quick start
+
+You need Node.js 20.9 or newer and a Supabase project.
+
+```bash
+npm install
+```
+
+Create `.env.local` in the project root:
+
+```bash
+# Required
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+
+# Only for Google Calendar sync
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+```
+
+Create the database tables by running the SQL in
+[docs/database.md](docs/database.md#full-schema) in the Supabase SQL editor,
+then start the app:
+
+```bash
+npm run dev
+```
+
+Open <http://localhost:3000>. The full walkthrough, including auth providers
+and redirect URLs, is in [docs/setup.md](docs/setup.md).
+
+## Documentation
+
+| Doc | What it covers |
+|---|---|
+| [Setup](docs/setup.md) | Local environment, Supabase project, auth providers, environment variables |
+| [Architecture](docs/architecture.md) | Project layout, routes, data flow, auth, theming, known limitations |
+| [Database](docs/database.md) | Tables, row-level security, the full schema SQL |
+| [Recurrence](docs/recurrence.md) | How recurring events are stored, expanded and deleted |
+| [Google Calendar sync](docs/google-calendar.md) | Google Cloud setup, the connect flow, how events are pushed |
+| [Deployment](docs/deployment.md) | Deploying to Vercel and the production checklist |
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
+| `npx tsx scripts/test-recurrence.ts` | Print a sanity check of the recurrence date math |
