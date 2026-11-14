@@ -1,10 +1,14 @@
-import { startOfWeek, addWeeks, addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Block } from './types';
+import { dateForWeekOffset, weekdayPositionInMonth } from './recurrence';
 
 // Slate's working timezone. Blocks don't currently carry a per-user timezone,
 // so every synced event is created in this one.
 const APP_TIME_ZONE = 'Europe/Rome';
+
+// 0 = Monday ... 6 = Sunday, matching the rest of the app.
+const ISO_WEEKDAY_CODES = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
 interface GoogleTokenRow {
   access_token: string;
@@ -66,16 +70,44 @@ export async function getValidAccessToken(
   return { accessToken: newAccessToken, calendarId: data.calendar_id };
 }
 
-/** The real calendar date a block's (week_offset, day_of_week) pair refers to right now. */
-export function dateForBlock(block: Pick<Block, 'week_offset' | 'day_of_week'>): Date {
-  const weekStart = startOfWeek(addWeeks(new Date(), block.week_offset), { weekStartsOn: 1 });
-  return addDays(weekStart, block.day_of_week);
+function pad(n: number): string {
+  return n.toString().padStart(2, '0');
 }
 
-function toGoogleEvent(block: Block) {
-  const day = dateForBlock(block);
+/** RFC5545 local-time stamp (no offset - paired with a TZID param instead), e.g. 20261125T090000 */
+function toLocalStamp(date: Date, hour: number, minute: number): string {
+  return `${format(date, 'yyyyMMdd')}T${pad(hour)}${pad(minute)}00`;
+}
+
+/** Builds the RRULE (+ EXDATE per skipped occurrence) for a recurring block. */
+function buildRecurrenceLines(block: Block, exceptionDates: Date[]): string[] {
+  const startDate = dateForWeekOffset(block.week_offset, block.day_of_week);
+
+  let rule: string;
+  if (block.recurrence_type === 'monthly') {
+    const position = weekdayPositionInMonth(startDate);
+    const isLast = position === 5;
+    const byday = `${isLast ? '-1' : position}${ISO_WEEKDAY_CODES[block.day_of_week]}`;
+    rule = `RRULE:FREQ=MONTHLY;BYDAY=${byday}`;
+  } else {
+    rule = 'RRULE:FREQ=WEEKLY';
+  }
+
+  if (block.recurrence_end_date) {
+    const until = format(new Date(block.recurrence_end_date), "yyyyMMdd'T'235959'Z'");
+    rule += `;UNTIL=${until}`;
+  }
+
+  const lines = [rule];
+  for (const exDate of exceptionDates) {
+    lines.push(`EXDATE;TZID=${APP_TIME_ZONE}:${toLocalStamp(exDate, block.start_hour, block.start_minute)}`);
+  }
+  return lines;
+}
+
+function toGoogleEvent(block: Block, exceptionDates: Date[]) {
+  const day = dateForWeekOffset(block.week_offset, block.day_of_week);
   const datePart = format(day, 'yyyy-MM-dd');
-  const pad = (n: number) => n.toString().padStart(2, '0');
 
   const startMinutesTotal = block.start_hour * 60 + block.start_minute;
   const endMinutesTotal = startMinutesTotal + block.duration_minutes;
@@ -87,16 +119,22 @@ function toGoogleEvent(block: Block) {
     description: block.notes || undefined,
     start: { dateTime: `${datePart}T${startTime}`, timeZone: APP_TIME_ZONE },
     end: { dateTime: `${datePart}T${endTime}`, timeZone: APP_TIME_ZONE },
+    ...(block.is_recurring ? { recurrence: buildRecurrenceLines(block, exceptionDates) } : {}),
   };
 }
 
-/** Creates or updates (if the block already has a google_event_id) the matching Calendar event. */
+/**
+ * Creates or updates (if the block already has a google_event_id) the matching
+ * Calendar event — a single recurring event (RRULE, with EXDATE for any
+ * skipped occurrences) if the block is recurring, otherwise a single instance.
+ */
 export async function upsertGoogleEvent(
   accessToken: string,
   calendarId: string,
-  block: Block
+  block: Block,
+  exceptionDates: Date[] = []
 ): Promise<string | null> {
-  const event = toGoogleEvent(block);
+  const event = toGoogleEvent(block, exceptionDates);
   const base = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
   const url = block.google_event_id ? `${base}/${block.google_event_id}` : base;
   const method = block.google_event_id ? 'PATCH' : 'POST';

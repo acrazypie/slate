@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getValidAccessToken, upsertGoogleEvent, deleteGoogleEvent } from '@/lib/googleCalendar';
+import { dateForWeekOffset } from '@/lib/recurrence';
 import { Block } from '@/lib/types';
 
 /**
@@ -52,7 +53,18 @@ export async function POST(request: Request) {
 
     let synced = 0;
     for (const block of blocks as Block[]) {
-      const eventId = await upsertGoogleEvent(auth.accessToken, auth.calendarId, block);
+      let exceptionDates: Date[] = [];
+      if (block.is_recurring) {
+        const { data: exceptions } = await supabase
+          .from('block_exceptions')
+          .select('occurrence_week_offset')
+          .eq('block_id', block.id);
+        exceptionDates = (exceptions || []).map((e) =>
+          dateForWeekOffset(e.occurrence_week_offset, block.day_of_week)
+        );
+      }
+
+      const eventId = await upsertGoogleEvent(auth.accessToken, auth.calendarId, block, exceptionDates);
       if (eventId && eventId !== block.google_event_id) {
         await supabase.from('blocks').update({ google_event_id: eventId }).eq('id', block.id);
       }

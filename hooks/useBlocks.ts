@@ -4,18 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Block, BlockFormData } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
-
-// Fire-and-forget: pushes to Google Calendar if the user has it connected,
-// silently no-ops otherwise. Never blocks the UI on a slow/failed network call.
-function syncToGoogleCalendar(body: { action: 'upsert'; blockIds: string[] } | { action: 'delete'; eventIds: string[] }) {
-  fetch('/api/google-calendar/sync', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }).catch(() => {
-    // Best-effort only; the local save already succeeded.
-  });
-}
+import { syncToGoogleCalendar } from '@/lib/googleCalendarClient';
+import { dateForWeekOffset, isWeekOffsetInSeries, SeriesLike } from '@/lib/recurrence';
 
 export function useBlocks(weekOffset: number = 0) {
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -26,20 +16,64 @@ export function useBlocks(weekOffset: number = 0) {
   const fetchBlocks = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
-    const { data, error: fetchError } = await supabase
+
+    // Plain, non-recurring blocks that actually live in this week.
+    const plainPromise = supabase
       .from('blocks')
       .select('*')
       .eq('week_offset', weekOffset)
-      .order('start_hour', { ascending: true })
-      .order('start_minute', { ascending: true });
+      .eq('is_recurring', false);
 
-    if (fetchError) {
-      setError(fetchError.message);
+    // Candidate recurring series that could plausibly reach this week (started
+    // on/before it, and not already ended before it). Exact membership for
+    // monthly series still needs the real recurrence math below - this is
+    // just a cheap DB-side prefilter.
+    const weekDate = dateForWeekOffset(weekOffset, 0).toISOString().slice(0, 10);
+    const seriesPromise = supabase
+      .from('blocks')
+      .select('*')
+      .eq('is_recurring', true)
+      .lte('week_offset', weekOffset)
+      .or(`recurrence_end_date.is.null,recurrence_end_date.gte.${weekDate}`);
+
+    const [{ data: plain, error: plainError }, { data: series, error: seriesError }] = await Promise.all([
+      plainPromise,
+      seriesPromise,
+    ]);
+
+    if (plainError || seriesError) {
+      setError((plainError || seriesError)?.message || 'Errore nel caricamento');
       setBlocks([]);
-    } else {
-      setBlocks(data || []);
+      setLoading(false);
+      return;
     }
+
+    const matchingSeries = (series || []).filter((s: Block) => isWeekOffsetInSeries(s as SeriesLike, weekOffset));
+
+    let occurrences: Block[] = [];
+    if (matchingSeries.length > 0) {
+      const { data: exceptions } = await supabase
+        .from('block_exceptions')
+        .select('block_id')
+        .in(
+          'block_id',
+          matchingSeries.map((s: Block) => s.id)
+        )
+        .eq('occurrence_week_offset', weekOffset);
+
+      const skipped = new Set((exceptions || []).map((e) => e.block_id));
+      occurrences = matchingSeries
+        .filter((s: Block) => !skipped.has(s.id))
+        .map((s: Block) => ({ ...s, week_offset: weekOffset }));
+    }
+
+    const combined = [...(plain || []), ...occurrences].sort((a, b) => {
+      if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+      if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
+      return a.start_minute - b.start_minute;
+    });
+
+    setBlocks(combined);
     setLoading(false);
   }, [weekOffset, supabase]);
 
@@ -51,65 +85,22 @@ export function useBlocks(weekOffset: number = 0) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    if (formData.is_recurring && formData.recurrence_type) {
-      const groupId = uuidv4();
-      const blocks: Partial<Block>[] = [];
-      const maxOccurrences = 52;
-      
-      const baseDate = new Date();
-      
-      for (let i = 0; i < maxOccurrences; i++) {
-        const weekOffsetInc = formData.recurrence_type === 'weekly' ? i : Math.floor((i * 30) / 7);
-        
-        if (formData.recurrence_end_date) {
-          const occurrenceDate = new Date(baseDate);
-          occurrenceDate.setDate(occurrenceDate.getDate() + (weekOffsetInc * 7));
-          if (occurrenceDate > new Date(formData.recurrence_end_date)) {
-            break;
-          }
-        }
-        
-        blocks.push({
-          ...formData,
-          user_id: user.id,
-          week_offset: weekOffset + weekOffsetInc,
-          notes: formData.notes || null,
-          is_recurring: true,
-          recurrence_type: formData.recurrence_type,
-          recurrence_end_date: formData.recurrence_end_date,
-          recurrence_group_id: groupId,
-          id: uuidv4(),
-        });
-      }
-
-      const { data, error } = await supabase
-        .from('blocks')
-        .insert(blocks as any)
-        .select();
-
-      if (error) {
-        setError(error.message);
-        return null;
-      }
-
-      setBlocks((prev) => [...prev, ...(data || [])].sort((a, b) => {
-        if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
-        if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
-        return a.start_minute - b.start_minute;
-      }));
-
-      if (data && data.length > 0) {
-        syncToGoogleCalendar({ action: 'upsert', blockIds: data.map((b) => b.id) });
-      }
-
-      return data?.[0] || null;
-    }
+    const id = uuidv4();
+    const isRecurring = !!(formData.is_recurring && formData.recurrence_type);
 
     const newBlock = {
       ...formData,
+      id,
       user_id: user.id,
       week_offset: weekOffset,
       notes: formData.notes || null,
+      is_recurring: isRecurring,
+      recurrence_type: isRecurring ? formData.recurrence_type : undefined,
+      recurrence_end_date: isRecurring ? formData.recurrence_end_date : undefined,
+      // One row IS the whole series now - this is just a stable "is this a
+      // series root" marker (recurrence_group_id === id), kept for
+      // compatibility with existing checks like `block.recurrence_group_id`.
+      recurrence_group_id: isRecurring ? id : undefined,
     };
 
     const { data, error } = await supabase
@@ -135,6 +126,9 @@ export function useBlocks(weekOffset: number = 0) {
   };
 
   const updateBlock = async (id: string, formData: Partial<BlockFormData>): Promise<Block | null> => {
+    // NOTE: for a recurring series, `id` is the series root - this edits the
+    // template, so the change applies to every future occurrence at once,
+    // not just the one that was clicked.
     const { data, error } = await supabase
       .from('blocks')
       .update(formData)
@@ -148,7 +142,7 @@ export function useBlocks(weekOffset: number = 0) {
     }
 
     setBlocks((prev) =>
-      prev.map((b) => (b.id === id ? data : b)).sort((a, b) => {
+      prev.map((b) => (b.id === id ? { ...data, week_offset: b.week_offset } : b)).sort((a, b) => {
         if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
         if (a.start_hour !== b.start_hour) return a.start_hour - b.start_hour;
         return a.start_minute - b.start_minute;
@@ -161,6 +155,11 @@ export function useBlocks(weekOffset: number = 0) {
   };
 
   const deleteBlock = async (id: string): Promise<boolean> => {
+    // For a non-recurring block only - deleting one occurrence or a whole
+    // recurring series goes through the dedicated recurrence-aware handlers
+    // in WeekGrid (deleteOccurrence / truncateSeriesBefore / deleteEntireSeries),
+    // since those need exception rows and start-date bookkeeping this
+    // single-row delete doesn't know about.
     const existing = blocks.find((b) => b.id === id);
 
     const { error } = await supabase

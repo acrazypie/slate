@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
 import { useBlocks } from '@/hooks/useBlocks';
 import { weekOffsetForDate } from '@/hooks/useMonthBlocks';
+import { dateForWeekOffset, getSeriesOccurrenceWeekOffsets, SeriesLike } from '@/lib/recurrence';
+import { syncToGoogleCalendar } from '@/lib/googleCalendarClient';
 import { Block, BlockFormData } from '@/lib/types';
 import { DayHeader } from './DayHeader';
 import { BlockCard } from './BlockCard';
@@ -111,61 +113,83 @@ export function WeekGrid({ user, onOpenSidebar }: WeekGridProps) {
   const handleDeleteRecurring = async (deleteType: 'current' | 'this-and-following' | 'all') => {
     if (!selectedBlock?.recurrence_group_id) return;
 
+    // A recurring block is one row (the series root): selectedBlock.id is
+    // always that root, and selectedBlock.week_offset is the specific
+    // occurrence that was clicked (synthesized per-occurrence at fetch time).
+    const seriesId = selectedBlock.recurrence_group_id;
+    const occurrenceWeekOffset = selectedBlock.week_offset;
+
     if (deleteType === 'current') {
-      await deleteBlock(selectedBlock.id);
+      await deleteOccurrence(seriesId, occurrenceWeekOffset);
     } else if (deleteType === 'this-and-following') {
-      await deleteRecurringThisAndFollowing(selectedBlock.id, selectedBlock.recurrence_group_id, selectedBlock.week_offset);
+      await truncateSeriesBefore(seriesId, occurrenceWeekOffset);
     } else {
-      await deleteRecurringAll(selectedBlock.recurrence_group_id);
+      await deleteEntireSeries(seriesId);
     }
     setIsModalOpen(false);
   };
 
-  const deleteRecurringThisAndFollowing = async (currentId: string, groupId: string, currentWeekOffset: number) => {
+  /** Skips just one occurrence of a series, without touching the others. */
+  const deleteOccurrence = async (seriesId: string, occurrenceWeekOffset: number) => {
     const supabase = createClient();
-    const { data: affected } = await supabase
-      .from('blocks')
-      .select('google_event_id')
-      .eq('recurrence_group_id', groupId)
-      .gte('week_offset', currentWeekOffset);
+    const { data: root } = await supabase.from('blocks').select('*').eq('id', seriesId).single();
+    if (!root) return;
 
-    await supabase
-      .from('blocks')
-      .delete()
-      .eq('recurrence_group_id', groupId)
-      .gte('week_offset', currentWeekOffset);
-
-    const eventIds = (affected || []).map((b) => b.google_event_id).filter(Boolean) as string[];
-    if (eventIds.length > 0) {
-      fetch('/api/google-calendar/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', eventIds }),
-      }).catch(() => {});
+    if (root.week_offset === occurrenceWeekOffset) {
+      // This IS the series' own start - advance the start to the next
+      // occurrence instead of leaving a dangling exception before it.
+      const remaining = getSeriesOccurrenceWeekOffsets(root as SeriesLike).filter((o) => o > occurrenceWeekOffset);
+      if (remaining.length === 0) {
+        await deleteEntireSeries(seriesId);
+        return;
+      }
+      await supabase.from('blocks').update({ week_offset: remaining[0] }).eq('id', seriesId);
+    } else {
+      await supabase
+        .from('block_exceptions')
+        .insert({ block_id: seriesId, occurrence_week_offset: occurrenceWeekOffset });
     }
 
+    syncToGoogleCalendar({ action: 'upsert', blockIds: [seriesId] });
     fetchBlocks();
   };
 
-  const deleteRecurringAll = async (groupId: string) => {
+  /** Ends the series the day before this occurrence, dropping it and every later one. */
+  const truncateSeriesBefore = async (seriesId: string, occurrenceWeekOffset: number) => {
     const supabase = createClient();
-    const { data: affected } = await supabase
-      .from('blocks')
-      .select('google_event_id')
-      .eq('recurrence_group_id', groupId);
+    const { data: root } = await supabase.from('blocks').select('*').eq('id', seriesId).single();
+    if (!root) return;
 
+    if (root.week_offset === occurrenceWeekOffset) {
+      // Truncating from the very first occurrence removes the whole series.
+      await deleteEntireSeries(seriesId);
+      return;
+    }
+
+    const occurrenceDate = dateForWeekOffset(occurrenceWeekOffset, root.day_of_week);
+    const newEndDate = format(addDays(occurrenceDate, -1), 'yyyy-MM-dd');
+
+    await supabase.from('blocks').update({ recurrence_end_date: newEndDate }).eq('id', seriesId);
+    // Exceptions at/after the new cutoff are moot now, but tidy them up anyway.
     await supabase
-      .from('blocks')
+      .from('block_exceptions')
       .delete()
-      .eq('recurrence_group_id', groupId);
+      .eq('block_id', seriesId)
+      .gte('occurrence_week_offset', occurrenceWeekOffset);
 
-    const eventIds = (affected || []).map((b) => b.google_event_id).filter(Boolean) as string[];
-    if (eventIds.length > 0) {
-      fetch('/api/google-calendar/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', eventIds }),
-      }).catch(() => {});
+    syncToGoogleCalendar({ action: 'upsert', blockIds: [seriesId] });
+    fetchBlocks();
+  };
+
+  /** Removes the whole series (and, via cascade, its exceptions). */
+  const deleteEntireSeries = async (seriesId: string) => {
+    const supabase = createClient();
+    const { data: root } = await supabase.from('blocks').select('google_event_id').eq('id', seriesId).single();
+
+    await supabase.from('blocks').delete().eq('id', seriesId);
+
+    if (root?.google_event_id) {
+      syncToGoogleCalendar({ action: 'delete', eventIds: [root.google_event_id] });
     }
 
     fetchBlocks();
