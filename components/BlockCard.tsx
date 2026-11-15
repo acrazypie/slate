@@ -1,6 +1,7 @@
 'use client';
 
-import { Block, BlockCategory, CATEGORY_LABELS } from '@/lib/types';
+import { Block, BlockCategory } from '@/lib/types';
+import { useI18n } from './LanguageProvider';
 import { CategoryIcon } from './CategoryIcon';
 import { Repeat } from 'lucide-react';
 
@@ -12,6 +13,7 @@ interface BlockCardProps {
 }
 
 export function BlockCard({ block, onClick, half }: BlockCardProps) {
+  const { t } = useI18n();
   const startTime = `${block.start_hour.toString().padStart(2, '0')}:${block.start_minute.toString().padStart(2, '0')}`;
   const endHour = block.start_hour + Math.floor((block.start_minute + block.duration_minutes) / 60);
   const endMinute = (block.start_minute + block.duration_minutes) % 60;
@@ -24,7 +26,12 @@ export function BlockCard({ block, onClick, half }: BlockCardProps) {
   return (
     <button
       type="button"
-      aria-label={`${block.title}, ${CATEGORY_LABELS[block.category as BlockCategory] ?? 'Evento'}, ${startTime}–${endTime}${block.is_recurring ? ', ricorrente' : ''}`}
+      aria-label={[
+        block.title,
+        t.categories[block.category as BlockCategory] ?? t.common.event,
+        `${startTime}–${endTime}`,
+        ...(block.is_recurring ? [t.calendar.recurring] : []),
+      ].join(', ')}
       className={`absolute block text-left ${half ? 'left-1/2' : 'left-1'} right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105 pointer-events-auto`}
       style={{
         top: `${top}%`,

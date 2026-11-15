@@ -9,33 +9,12 @@ import { createClient } from '@/lib/supabase/client';
 import { ViewMode } from '@/hooks/useWeek';
 import { useGoogleCalendarConnection } from '@/hooks/useGoogleCalendarConnection';
 import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
+import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
+import { useI18n } from './LanguageProvider';
 
 interface SettingsViewProps {
   user?: { email: string; name?: string };
 }
-
-const INSTALL_GUIDES = [
-  {
-    id: 'ios',
-    title: 'iPhone / iPad (Safari)',
-    steps: [
-      'Apri Safari e vai alla pagina di Slate',
-      'Tocca il pulsante Condividi in basso al centro della pagina',
-      'Scorri verso il basso e tocca "Aggiungi alla schermata Home"',
-      'Conferma toccando "Aggiungi" in alto a destra',
-    ],
-  },
-  {
-    id: 'android',
-    title: 'Android (Chrome)',
-    steps: [
-      'Apri Chrome e vai alla pagina di Slate',
-      'Tocca il menu ⋮ in alto a destra',
-      'Tocca "Aggiungi a schermata Home" (o "Installa app")',
-      'Conferma toccando "Aggiungi"',
-    ],
-  },
-];
 
 const selected = 'bg-accent text-accent-contrast font-medium';
 const unselected = 'bg-surface-hover text-text-primary hover:bg-border';
@@ -52,6 +31,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function SettingsView({ user }: SettingsViewProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { locale, t, setLocale } = useI18n();
   const [defaultView, setDefaultView] = useState<ViewMode>(
     () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'week'
   );
@@ -89,20 +69,25 @@ export function SettingsView({ user }: SettingsViewProps) {
     router.push('/auth/login');
   };
 
+  const installGuides = [
+    { id: 'ios', title: t.settings.iosTitle, steps: t.settings.iosSteps },
+    { id: 'android', title: t.settings.androidTitle, steps: t.settings.androidSteps },
+  ];
+
   const isPreset = ACCENT_OPTIONS.some((o) => o.value.toLowerCase() === accent.toLowerCase());
 
   return (
     <div className="flex-1 overflow-y-auto bg-bg">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-        <h1 className="font-serif text-2xl sm:text-3xl text-text-primary mb-2">Impostazioni</h1>
+        <h1 className="font-serif text-2xl sm:text-3xl text-text-primary mb-2">{t.settings.title}</h1>
 
-        <Section title="Account">
+        <Section title={t.settings.account}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
               <span className="text-accent-contrast font-medium">{user?.email?.[0]?.toUpperCase() || 'U'}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-text-primary font-medium truncate">{user?.name || 'Utente'}</p>
+              <p className="text-sm text-text-primary font-medium truncate">{user?.name || t.common.user}</p>
               <p className="text-xs text-text-secondary truncate">{user?.email}</p>
             </div>
             <button
@@ -111,17 +96,34 @@ export function SettingsView({ user }: SettingsViewProps) {
               className="flex items-center gap-2 px-3 min-h-11 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 flex-shrink-0"
             >
               {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-              Esci
+              {t.settings.logout}
             </button>
           </div>
         </Section>
 
-        <Section title="Tema">
+        <Section title={t.common.language}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {LOCALES.map((code) => (
+              <button
+                key={code}
+                lang={code}
+                onClick={() => setLocale(code)}
+                aria-pressed={locale === code}
+                className={`px-3 py-3 rounded-xl text-sm transition-colors ${locale === code ? selected : unselected}`}
+              >
+                {LOCALE_NAMES[code]}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-text-tertiary mt-3">{t.settings.languageHint}</p>
+        </Section>
+
+        <Section title={t.settings.theme}>
           <div className="grid grid-cols-3 gap-2">
             {([
-              ['light', 'Chiaro', Sun],
-              ['dark', 'Scuro', Moon],
-              ['system', 'Sistema', Monitor],
+              ['light', t.settings.themeLight, Sun],
+              ['dark', t.settings.themeDark, Moon],
+              ['system', t.settings.themeSystem, Monitor],
             ] as const).map(([value, label, Icon]) => (
               <button
                 key={value}
@@ -137,7 +139,7 @@ export function SettingsView({ user }: SettingsViewProps) {
           </div>
         </Section>
 
-        <Section title="Colore principale">
+        <Section title={t.settings.accent}>
           <div className="flex flex-wrap items-center -mx-1.5">
             {ACCENT_OPTIONS.map((option) => {
               const isSelected = option.value.toLowerCase() === accent.toLowerCase();
@@ -145,9 +147,9 @@ export function SettingsView({ user }: SettingsViewProps) {
                 <button
                   key={option.value}
                   onClick={() => handleAccentChange(option.value)}
-                  aria-label={option.label}
+                  aria-label={t.colors[option.name]}
                   aria-pressed={isSelected}
-                  title={option.label}
+                  title={t.colors[option.name]}
                   className="flex items-center justify-center w-11 h-11 rounded-full"
                 >
                   <span
@@ -163,7 +165,7 @@ export function SettingsView({ user }: SettingsViewProps) {
             })}
             <label
               className="relative flex items-center justify-center w-11 h-11 rounded-full cursor-pointer focus-within:outline-2 focus-within:outline-accent-text"
-              title="Colore personalizzato"
+              title={t.settings.customColor}
             >
               <span
                 className={`flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-border-strong ${
@@ -178,22 +180,18 @@ export function SettingsView({ user }: SettingsViewProps) {
                 value={accent}
                 onChange={(e) => handleAccentChange(e.target.value)}
                 className="absolute inset-0 opacity-0 cursor-pointer"
-                aria-label="Colore personalizzato"
+                aria-label={t.settings.customColor}
               />
             </label>
           </div>
           <p className="text-xs text-text-tertiary mt-3">
-            Vale per pulsanti, selezioni e il giorno di oggi in tutta l&apos;app, su questo dispositivo.
+            {t.settings.accentHint}
           </p>
         </Section>
 
-        <Section title="Vista predefinita">
+        <Section title={t.settings.defaultView}>
           <div className="grid grid-cols-3 gap-2">
-            {([
-              ['day', 'Giorno'],
-              ['week', 'Settimana'],
-              ['month', 'Mese'],
-            ] as const).map(([value, label]) => (
+            {(['day', 'week', 'month'] as const).map((value) => (
               <button
                 key={value}
                 onClick={() => handleViewChange(value)}
@@ -201,7 +199,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                   defaultView === value ? selected : unselected
                 }`}
               >
-                {label}
+                {t.views[value]}
               </button>
             ))}
           </div>
@@ -211,20 +209,20 @@ export function SettingsView({ user }: SettingsViewProps) {
           {connected === null ? (
             <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-surface-hover text-sm text-text-secondary">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Verifica collegamento...
+              {t.settings.gcalChecking}
             </div>
           ) : connected ? (
             <div className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-surface-hover">
               <div className="flex items-center gap-2 text-sm text-text-primary">
                 <CalendarCheck className="w-4 h-4 text-accent-text" />
-                Collegato
+                {t.settings.gcalConnected}
               </div>
               <button
                 onClick={handleDisconnectCalendar}
                 disabled={calendarActionLoading}
                 className="px-3 min-h-11 -my-2 -mr-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors disabled:opacity-50"
               >
-                Disconnetti
+                {t.settings.gcalDisconnect}
               </button>
             </div>
           ) : (
@@ -234,21 +232,20 @@ export function SettingsView({ user }: SettingsViewProps) {
               className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-surface-hover text-text-primary hover:bg-border transition-colors text-sm disabled:opacity-50"
             >
               {calendarActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarCheck className="w-4 h-4" />}
-              Connetti Google Calendar
+              {t.settings.gcalConnect}
             </button>
           )}
           <p className="text-xs text-text-tertiary mt-2">
-            Gli eventi che crei vengono copiati nel tuo Google Calendar (sincronizzazione a senso unico). I turni
-            non vengono ancora sincronizzati.
+            {t.settings.gcalHint}
           </p>
         </Section>
 
-        <Section title="Installa come app">
+        <Section title={t.settings.installTitle}>
           <p className="text-sm text-text-secondary leading-relaxed mb-3">
-            Aggiungi Slate alla schermata Home per usarla a schermo intero.
+            {t.settings.installIntro}
           </p>
           <div className="space-y-2">
-            {INSTALL_GUIDES.map((guide) => {
+            {installGuides.map((guide) => {
               const isOpen = openGuide === guide.id;
               return (
                 <div key={guide.id} className="border border-border rounded-2xl overflow-hidden">
@@ -287,10 +284,10 @@ export function SettingsView({ user }: SettingsViewProps) {
 
         <div className="flex gap-4 px-1 pt-2 text-xs text-text-tertiary">
           <Link href="/privacy" className="hover:text-text-secondary transition-colors">
-            Privacy
+            {t.common.privacy}
           </Link>
           <Link href="/terms" className="hover:text-text-secondary transition-colors">
-            Termini di Servizio
+            {t.common.terms}
           </Link>
         </div>
       </div>

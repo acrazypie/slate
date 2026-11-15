@@ -15,6 +15,8 @@ import { useMonthBlocks, weekOffsetForDate } from '@/hooks/useMonthBlocks';
 import { useShiftAssignments } from '@/hooks/useShifts';
 import { Block, ShiftAssignment, blockEndTime, formatCompactRange } from '@/lib/types';
 import { DaySheet } from './DaySheet';
+import { fill, weekdayNames } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 
 interface MonthGridProps {
   monthDate: Date;
@@ -28,7 +30,6 @@ interface MonthGridProps {
   onOpenDay: (date: Date) => void;
 }
 
-const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 const MAX_CHIPS_MOBILE = 2;
 const MAX_CHIPS_DESKTOP = 3;
 
@@ -51,6 +52,8 @@ export function MonthGrid({
   onEditAssignment,
   onOpenDay,
 }: MonthGridProps) {
+  const { locale, t } = useI18n();
+  const weekdayLabels = useMemo(() => weekdayNames(locale), [locale]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const gridStart = useMemo(() => startOfWeek(startOfMonth(monthDate), { weekStartsOn: 1 }), [monthDate]);
@@ -103,7 +106,7 @@ export function MonthGrid({
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="grid grid-cols-7 border-b border-border">
-        {WEEKDAY_LABELS.map((label) => (
+        {weekdayLabels.map((label) => (
           <div
             key={label}
             className="py-2 text-center text-[11px] font-medium uppercase tracking-wide text-text-secondary"
@@ -184,7 +187,7 @@ export function MonthGrid({
                     )}
                     {chips.length > MAX_CHIPS_DESKTOP && (
                       <div className="hidden sm:block text-[10px] text-text-tertiary px-1">
-                        +{chips.length - MAX_CHIPS_DESKTOP} altri
+                        {fill(t.calendar.more, { count: chips.length - MAX_CHIPS_DESKTOP })}
                       </div>
                     )}
                   </div>

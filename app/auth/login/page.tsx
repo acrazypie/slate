@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { authErrorMessage } from '@/lib/authErrors';
 import { GoogleLogo } from '@/components/GoogleLogo';
+import { LanguageSelect } from '@/components/LanguageSelect';
+import { useI18n } from '@/components/LanguageProvider';
 
 type Mode = 'signin' | 'signup' | 'reset';
 
@@ -23,6 +25,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useI18n();
 
   const switchMode = (next: Mode) => {
     setMode(next);
@@ -42,7 +45,7 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError(authErrorMessage(error.message));
+      setError(authErrorMessage(error.message, t));
       setLoading(false);
     }
   };
@@ -58,8 +61,8 @@ export default function LoginPage() {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
         });
-        if (error) setError(authErrorMessage(error.message));
-        else setMessage('Se esiste un account con questa email, ti abbiamo inviato un link per reimpostare la password.');
+        if (error) setError(authErrorMessage(error.message, t));
+        else setMessage(t.auth.resetSent);
         return;
       }
 
@@ -68,17 +71,17 @@ export default function LoginPage() {
           ? await supabase.auth.signUp({ email, password })
           : await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) setError(authErrorMessage(error.message));
-      else if (mode === 'signup') setMessage("Ti abbiamo inviato un'email: aprila per confermare l'account.");
+      if (error) setError(authErrorMessage(error.message, t));
+      else if (mode === 'signup') setMessage(t.auth.signupSent);
       else router.push('/dashboard');
     } catch (err) {
-      setError(authErrorMessage(err instanceof Error ? err.message : ''));
+      setError(authErrorMessage(err instanceof Error ? err.message : '', t));
     } finally {
       setLoading(false);
     }
   };
 
-  const submitLabel = mode === 'signup' ? 'Registrati' : mode === 'reset' ? 'Invia il link' : 'Accedi';
+  const submitLabel = mode === 'signup' ? t.auth.signUp : mode === 'reset' ? t.auth.sendLink : t.auth.signIn;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg px-4 py-8">
@@ -90,9 +93,9 @@ export default function LoginPage() {
         <div className="bg-surface rounded-2xl p-6 space-y-6">
           {mode === 'reset' ? (
             <div>
-              <h2 className="text-lg font-medium text-text-primary mb-1">Reimposta la password</h2>
+              <h2 className="text-lg font-medium text-text-primary mb-1">{t.auth.resetTitle}</h2>
               <p className="text-sm text-text-secondary">
-                Scrivi la tua email: ti mandiamo un link per sceglierne una nuova.
+                {t.auth.resetHint}
               </p>
             </div>
           ) : (
@@ -103,7 +106,7 @@ export default function LoginPage() {
                 className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-xl font-medium transition-colors hover:bg-border disabled:opacity-50"
               >
                 <GoogleLogo className="w-5 h-5" />
-                Continua con Google
+                {t.auth.continueWithGoogle}
               </button>
 
               <div className="relative">
@@ -111,7 +114,7 @@ export default function LoginPage() {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-surface text-text-secondary">oppure</span>
+                  <span className="px-4 bg-surface text-text-secondary">{t.auth.or}</span>
                 </div>
               </div>
             </>
@@ -119,7 +122,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className={labelClass}>Email</label>
+              <label htmlFor="email" className={labelClass}>{t.auth.email}</label>
               <input
                 id="email"
                 type="email"
@@ -134,10 +137,10 @@ export default function LoginPage() {
             {mode !== 'reset' && (
               <div>
                 <div className="flex items-baseline justify-between mb-2">
-                  <label htmlFor="password" className="block text-sm text-text-secondary">Password</label>
+                  <label htmlFor="password" className="block text-sm text-text-secondary">{t.auth.password}</label>
                   {mode === 'signin' && (
                     <button type="button" onClick={() => switchMode('reset')} className={`text-sm ${linkClass}`}>
-                      Password dimenticata?
+                      {t.auth.forgotPassword}
                     </button>
                   )}
                 </div>
@@ -153,7 +156,7 @@ export default function LoginPage() {
                   required
                 />
                 {mode === 'signup' && (
-                  <p id="password-hint" className="text-xs text-text-tertiary mt-2">Almeno 6 caratteri.</p>
+                  <p id="password-hint" className="text-xs text-text-tertiary mt-2">{t.auth.passwordHint}</p>
                 )}
               </div>
             )}
@@ -170,20 +173,20 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
             >
-              {loading ? 'Caricamento...' : submitLabel}
+              {loading ? t.common.loading : submitLabel}
             </button>
           </form>
 
           <p className="text-center text-text-secondary text-sm">
             {mode === 'reset' ? (
               <button onClick={() => switchMode('signin')} className={linkClass}>
-                Torna all&apos;accesso
+                {t.auth.backToSignIn}
               </button>
             ) : (
               <>
-                {mode === 'signup' ? 'Hai già un account?' : 'Non hai un account?'}{' '}
+                {mode === 'signup' ? t.auth.haveAccount : t.auth.noAccount}{' '}
                 <button onClick={() => switchMode(mode === 'signup' ? 'signin' : 'signup')} className={linkClass}>
-                  {mode === 'signup' ? 'Accedi' : 'Registrati'}
+                  {mode === 'signup' ? t.auth.signIn : t.auth.signUp}
                 </button>
               </>
             )}
@@ -191,16 +194,20 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-text-tertiary">
-          Continuando accetti i{' '}
+          {t.auth.legalBefore}
           <Link href="/terms" className="underline hover:text-text-secondary">
-            Termini di Servizio
-          </Link>{' '}
-          e l&apos;
-          <Link href="/privacy" className="underline hover:text-text-secondary">
-            Informativa sulla Privacy
+            {t.common.terms}
           </Link>
-          .
+          {t.auth.legalBetween}
+          <Link href="/privacy" className="underline hover:text-text-secondary">
+            {t.common.privacyPolicy}
+          </Link>
+          {t.auth.legalAfter}
         </p>
+
+        <div className="mt-2 flex justify-center">
+          <LanguageSelect />
+        </div>
       </div>
     </div>
   );

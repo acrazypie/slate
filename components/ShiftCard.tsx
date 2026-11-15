@@ -2,6 +2,8 @@
 
 import { Briefcase } from 'lucide-react';
 import { ShiftAssignment, formatTime, isOvernightShift } from '@/lib/types';
+import { fill } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 
 interface ShiftCardProps {
   assignment: ShiftAssignment;
@@ -11,6 +13,7 @@ interface ShiftCardProps {
 }
 
 export function ShiftCard({ assignment, onClick, half }: ShiftCardProps) {
+  const { t } = useI18n();
   const { shift } = assignment;
   const startMinutes = shift.start_hour * 60 + shift.start_minute;
   // An overnight shift is drawn up to midnight on the day it starts.
@@ -22,7 +25,7 @@ export function ShiftCard({ assignment, onClick, half }: ShiftCardProps) {
   return (
     <button
       type="button"
-      aria-label={`Turno ${shift.title}, ${formatTime(shift.start_hour, shift.start_minute)}–${formatTime(shift.end_hour, shift.end_minute)}`}
+      aria-label={`${fill(t.calendar.shiftLabel, { title: shift.title })}, ${formatTime(shift.start_hour, shift.start_minute)}–${formatTime(shift.end_hour, shift.end_minute)}`}
       className={`absolute block text-left left-1 ${half ? 'right-1/2' : 'right-1'} rounded-lg px-2 py-1 cursor-pointer overflow-hidden transition-all hover:brightness-105 pointer-events-auto border border-dashed`}
       style={{
         top: `${top}%`,

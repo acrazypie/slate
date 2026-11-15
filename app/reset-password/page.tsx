@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { authErrorMessage } from '@/lib/authErrors';
+import { useI18n } from '@/components/LanguageProvider';
 
 // Reached from the link in the password-reset email, which signs the person in
 // through /auth/callback first. It sits outside /auth because signed-in visitors
@@ -14,6 +15,7 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +23,10 @@ export default function ResetPasswordPage() {
     setError(null);
     try {
       const { error } = await createClient().auth.updateUser({ password });
-      if (error) setError(authErrorMessage(error.message));
+      if (error) setError(authErrorMessage(error.message, t));
       else router.push('/dashboard');
     } catch (err) {
-      setError(authErrorMessage(err instanceof Error ? err.message : ''));
+      setError(authErrorMessage(err instanceof Error ? err.message : '', t));
     } finally {
       setLoading(false);
     }
@@ -36,11 +38,11 @@ export default function ResetPasswordPage() {
         <p className="font-serif text-4xl text-text-primary text-center mb-8">Slate</p>
 
         <div className="bg-surface rounded-2xl p-6 space-y-6">
-          <h1 className="text-lg font-medium text-text-primary">Scegli una nuova password</h1>
+          <h1 className="text-lg font-medium text-text-primary">{t.auth.chooseNewPassword}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="new-password" className="block text-sm text-text-secondary mb-2">Nuova password</label>
+              <label htmlFor="new-password" className="block text-sm text-text-secondary mb-2">{t.auth.newPassword}</label>
               <input
                 id="new-password"
                 type="password"
@@ -52,7 +54,7 @@ export default function ResetPasswordPage() {
                 className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none transition-colors"
                 required
               />
-              <p id="new-password-hint" className="text-xs text-text-tertiary mt-2">Almeno 6 caratteri.</p>
+              <p id="new-password-hint" className="text-xs text-text-tertiary mt-2">{t.auth.passwordHint}</p>
             </div>
 
             {error && <p role="alert" className="text-danger text-sm">{error}</p>}
@@ -62,13 +64,13 @@ export default function ResetPasswordPage() {
               disabled={loading}
               className="w-full px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
             >
-              {loading ? 'Salvataggio...' : 'Salva la password'}
+              {loading ? t.common.saving : t.auth.savePassword}
             </button>
           </form>
 
           <p className="text-center text-sm">
             <Link href="/auth/login" className="text-accent-text hover:underline">
-              Torna all&apos;accesso
+              {t.auth.backToSignIn}
             </Link>
           </p>
         </div>

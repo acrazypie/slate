@@ -1,5 +1,8 @@
+'use client';
+
 import { format } from 'date-fns';
-import { it } from 'date-fns/locale';
+import { formatDate } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 
 interface DayHeaderProps {
   date: Date;
@@ -7,11 +10,12 @@ interface DayHeaderProps {
 }
 
 export function DayHeader({ date, isToday }: DayHeaderProps) {
+  const { locale } = useI18n();
   if (!date || isNaN(date.getTime())) return null;
 
-  const dayName = format(date, 'EEE', { locale: it });
+  const dayName = formatDate(locale, date, 'weekdayShort');
   const dayNum = format(date, 'd');
-  const month = format(date, 'MMM');
+  const month = formatDate(locale, date, 'monthShort');
 
   return (
     <span className="flex flex-col items-center py-3 gap-1">

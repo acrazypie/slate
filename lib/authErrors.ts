@@ -1,22 +1,28 @@
-// Supabase returns auth errors in English. The app is in Italian, so the ones a
-// person can actually run into are translated here; anything else gets a
-// generic message instead of raw API text.
-const MESSAGES: [RegExp, string][] = [
-  [/invalid login credentials/i, 'Email o password non corretti.'],
-  [/email not confirmed/i, "Conferma la tua email prima di accedere: controlla la posta."],
-  [/user already registered/i, 'Esiste già un account con questa email. Prova ad accedere.'],
-  [/password should be at least (\d+)/i, 'La password deve avere almeno $1 caratteri.'],
-  [/same password|different from the old/i, 'La nuova password deve essere diversa da quella attuale.'],
-  [/rate limit|too many requests|only request this after/i, 'Troppi tentativi. Aspetta un momento e riprova.'],
-  [/invalid.*email|unable to validate email/i, "L'indirizzo email non è valido."],
-  [/session missing|not authenticated|jwt/i, 'Il link è scaduto o non è valido. Richiedine uno nuovo.'],
-  [/failed to fetch|network/i, 'Connessione non riuscita. Controlla la rete e riprova.'],
+import type { Dictionary } from './i18n/dictionaries';
+import { fill } from './i18n/format';
+
+type AuthErrorKey = keyof Dictionary['authErrors'];
+
+// Supabase returns auth errors in English. The ones a person can actually run
+// into are mapped to translated messages here; anything else gets a generic
+// message instead of raw API text.
+const MESSAGES: [RegExp, AuthErrorKey][] = [
+  [/invalid login credentials/i, 'invalidCredentials'],
+  [/email not confirmed/i, 'emailNotConfirmed'],
+  [/user already registered/i, 'alreadyRegistered'],
+  [/password should be at least (\d+)/i, 'passwordTooShort'],
+  [/same password|different from the old/i, 'samePassword'],
+  [/rate limit|too many requests|only request this after/i, 'rateLimit'],
+  [/invalid.*email|unable to validate email/i, 'invalidEmail'],
+  [/session missing|not authenticated|jwt/i, 'linkExpired'],
+  [/failed to fetch|network/i, 'network'],
 ];
 
-export function authErrorMessage(message: string): string {
-  for (const [pattern, text] of MESSAGES) {
+/** `t` is the current dictionary, from `useI18n()`. */
+export function authErrorMessage(message: string, t: Dictionary): string {
+  for (const [pattern, key] of MESSAGES) {
     const match = message.match(pattern);
-    if (match) return text.replace('$1', match[1] ?? '');
+    if (match) return fill(t.authErrors[key], { count: match[1] ?? '' });
   }
-  return 'Qualcosa è andato storto. Riprova.';
+  return t.authErrors.generic;
 }

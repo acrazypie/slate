@@ -110,14 +110,10 @@ export const CATEGORY_COLORS: Record<BlockCategory, string> = {
   altro: '#CF6679',
 };
 
-export const CATEGORY_LABELS: Record<BlockCategory, string> = {
-  studio: 'Studio',
-  lavoro: 'Lavoro',
-  lezione: 'Lezione',
-  altro: 'Altro',
-};
-
-export const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+// Category and weekday names are translated: see `t.categories` and
+// `weekdayNames()` in lib/i18n. The category keys themselves are stored in the
+// database, so they stay as they are.
+export const CATEGORIES: BlockCategory[] = ['studio', 'lavoro', 'lezione', 'altro'];
 
 export const COLOR_PALETTE = [
   '#E49C69', // apricot dust
@@ -130,17 +126,27 @@ export const COLOR_PALETTE = [
   '#7AA7D9', // sky blue
 ];
 
-/** Spoken names for the palette, so colour swatches aren't announced as hex codes. */
-export const COLOR_NAMES: Record<string, string> = {
-  '#E49C69': 'Albicocca',
-  '#FFD9A0': 'Sabbia',
-  '#F2C299': 'Duna',
-  '#5C3B2E': 'Cacao',
-  '#BB86FC': 'Viola',
-  '#CF6679': 'Rosa',
-  '#6BB6A3': 'Verde acqua',
-  '#7AA7D9': 'Azzurro',
-};
+/**
+ * Keys into `t.colors` for the palette, so colour swatches are announced by a
+ * translated name and not as hex codes.
+ */
+export const COLOR_KEYS = {
+  '#E49C69': 'apricot',
+  '#FFD9A0': 'sand',
+  '#F2C299': 'dune',
+  '#5C3B2E': 'cacao',
+  '#BB86FC': 'violet',
+  '#CF6679': 'raspberry',
+  '#6BB6A3': 'teal',
+  '#7AA7D9': 'skyBlue',
+} as const satisfies Record<string, ColorKey>;
+
+export type ColorKey =
+  | 'apricot' | 'sand' | 'dune' | 'cacao' | 'violet' | 'raspberry' | 'teal' | 'skyBlue' | 'amber' | 'sage' | 'pink';
+
+export function colorKey(hex: string): ColorKey | undefined {
+  return (COLOR_KEYS as Record<string, ColorKey>)[hex];
+}
 
 export const DURATION_OPTIONS = [
   { value: 30, label: '30 min' },

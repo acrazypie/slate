@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Block, BlockCategory, BlockFormData, DAY_NAMES, COLOR_PALETTE, COLOR_NAMES, DURATION_OPTIONS, CATEGORY_COLORS, CATEGORY_LABELS, RecurrenceType } from '@/lib/types';
+import { Block, BlockCategory, BlockFormData, CATEGORIES, COLOR_PALETTE, colorKey, DURATION_OPTIONS, CATEGORY_COLORS, RecurrenceType } from '@/lib/types';
+import { weekdayNames } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 import { Dialog, DialogClose, ColorSwatch } from './Dialog';
 import { CategoryIcon } from './CategoryIcon';
 
@@ -20,6 +22,7 @@ interface BlockModalProps {
 }
 
 export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurring, initialData, block }: BlockModalProps) {
+  const { locale, t } = useI18n();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<BlockCategory>('studio');
   const [color, setColor] = useState(CATEGORY_COLORS.studio);
@@ -119,7 +122,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
     }
   }
 
-  const heading = block ? 'Modifica evento' : 'Nuovo evento';
+  const heading = block ? t.blockModal.editTitle : t.blockModal.newTitle;
   const fieldClass =
     'w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none';
   const labelClass = 'block text-sm text-text-secondary mb-2';
@@ -138,7 +141,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="block-title" className={labelClass}>Titolo</label>
+          <label htmlFor="block-title" className={labelClass}>{t.blockModal.title}</label>
           <input
             id="block-title"
             type="text"
@@ -150,9 +153,9 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
         </div>
 
         <div role="group" aria-labelledby="block-category-label">
-          <span id="block-category-label" className={labelClass}>Categoria</span>
+          <span id="block-category-label" className={labelClass}>{t.blockModal.category}</span>
           <div className="grid grid-cols-4 gap-2">
-            {(['studio', 'lavoro', 'lezione', 'altro'] as BlockCategory[]).map((cat) => (
+            {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 type="button"
@@ -165,37 +168,37 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 }`}
               >
                 <CategoryIcon category={cat} className="w-5 h-5" />
-                {CATEGORY_LABELS[cat]}
+                {t.categories[cat]}
               </button>
             ))}
           </div>
         </div>
 
         <div role="group" aria-labelledby="block-color-label">
-          <span id="block-color-label" className={labelClass}>Colore</span>
+          <span id="block-color-label" className={labelClass}>{t.common.color}</span>
           <div className="flex flex-wrap -mx-1.5">
             {COLOR_PALETTE.map((c) => (
-              <ColorSwatch key={c} color={c} name={COLOR_NAMES[c] ?? c} selected={color === c} onSelect={() => setColor(c)} />
+              <ColorSwatch key={c} color={c} name={colorKey(c) ? t.colors[colorKey(c)!] : c} selected={color === c} onSelect={() => setColor(c)} />
             ))}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="block-day" className={labelClass}>Giorno</label>
+            <label htmlFor="block-day" className={labelClass}>{t.blockModal.day}</label>
             <select
               id="block-day"
               value={day_of_week}
               onChange={(e) => setDayOfWeek(Number(e.target.value))}
               className={fieldClass}
             >
-              {DAY_NAMES.map((day, i) => (
+              {weekdayNames(locale).map((day, i) => (
                 <option key={i} value={i}>{day}</option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="block-duration" className={labelClass}>Durata</label>
+            <label htmlFor="block-duration" className={labelClass}>{t.blockModal.duration}</label>
             <select
               id="block-duration"
               value={duration_minutes}
@@ -210,7 +213,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
         </div>
 
         <div>
-          <label htmlFor="block-start" className={labelClass}>Ora di inizio</label>
+          <label htmlFor="block-start" className={labelClass}>{t.common.startTime}</label>
           <select
             id="block-start"
             value={`${start_hour}:${start_minute.toString().padStart(2, '0')}`}
@@ -230,7 +233,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
         </div>
 
         <div>
-          <label htmlFor="block-notes" className={labelClass}>Note (opzionale)</label>
+          <label htmlFor="block-notes" className={labelClass}>{t.blockModal.notes}</label>
           <textarea
             id="block-notes"
             value={notes}
@@ -241,10 +244,10 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
         </div>
 
         <div role="group" aria-labelledby="block-repeat-label">
-          <span id="block-repeat-label" className={labelClass}>Ripetizione</span>
+          <span id="block-repeat-label" className={labelClass}>{t.blockModal.repeat}</span>
           <div className="grid grid-cols-3 gap-2">
             <button type="button" aria-pressed={!is_recurring} onClick={() => setIsRecurring(false)} className={segment(!is_recurring)}>
-              Nessuna
+              {t.blockModal.repeatNone}
             </button>
             <button
               type="button"
@@ -252,7 +255,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               onClick={() => { setIsRecurring(true); setRecurrenceType('weekly'); }}
               className={segment(is_recurring && recurrence_type === 'weekly')}
             >
-              Settimanale
+              {t.blockModal.weekly}
             </button>
             <button
               type="button"
@@ -260,17 +263,17 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               onClick={() => { setIsRecurring(true); setRecurrenceType('monthly'); }}
               className={segment(is_recurring && recurrence_type === 'monthly')}
             >
-              Mensile
+              {t.blockModal.monthly}
             </button>
           </div>
         </div>
 
         {is_recurring && (
           <div role="group" aria-labelledby="block-repeat-end-label">
-            <span id="block-repeat-end-label" className={labelClass}>Fine ripetizione</span>
+            <span id="block-repeat-end-label" className={labelClass}>{t.blockModal.repeatEnd}</span>
             <div className="grid grid-cols-2 gap-2">
               <button type="button" aria-pressed={!recurrence_end_date} onClick={() => setRecurrenceEndDate('')} className={segment(!recurrence_end_date)}>
-                Mai
+                {t.blockModal.never}
               </button>
               <button
                 type="button"
@@ -278,13 +281,13 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 onClick={() => setRecurrenceEndDate(recurrence_end_date || new Date().toISOString().split('T')[0])}
                 className={segment(!!recurrence_end_date)}
               >
-                Fino al
+                {t.blockModal.until}
               </button>
             </div>
             {recurrence_end_date && (
               <input
                 type="date"
-                aria-label="Data di fine ripetizione"
+                aria-label={t.blockModal.repeatEndDate}
                 value={recurrence_end_date}
                 onChange={(e) => setRecurrenceEndDate(e.target.value)}
                 className={`${fieldClass} mt-2`}
@@ -295,11 +298,11 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
 
         {isSeries && showDeleteRecurringMenu && (
           <div className="space-y-1 p-3 bg-surface-hover rounded-xl">
-            <p className="px-3 pb-1 text-sm text-text-secondary">Cosa vuoi eliminare?</p>
+            <p className="px-3 pb-1 text-sm text-text-secondary">{t.blockModal.deleteWhat}</p>
             {([
-              ['current', 'Solo questo evento'],
-              ['this-and-following', 'Questo e i seguenti'],
-              ['all', 'Tutti gli eventi della serie'],
+              ['current', t.blockModal.deleteCurrent],
+              ['this-and-following', t.blockModal.deleteFollowing],
+              ['all', t.blockModal.deleteAll],
             ] as const).map(([type, text]) => (
               <button
                 key={type}
@@ -316,14 +319,14 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
 
         {confirmingDelete ? (
           <div className="pt-2">
-            <p className="text-sm text-text-secondary mb-3">Eliminare questo evento? Non si può annullare.</p>
+            <p className="text-sm text-text-secondary mb-3">{t.blockModal.confirmDelete}</p>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(false)}
                 className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
               >
-                Annulla
+                {t.common.cancel}
               </button>
               <button
                 type="button"
@@ -331,7 +334,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 onClick={handleDelete}
                 className="flex-1 px-4 py-3 text-danger bg-danger/10 hover:bg-danger/20 rounded-xl font-medium transition-colors disabled:opacity-50"
               >
-                {loading ? 'Eliminazione...' : 'Elimina evento'}
+                {loading ? t.common.deleting : t.blockModal.deleteEvent}
               </button>
             </div>
           </div>
@@ -344,7 +347,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 onClick={() => setShowDeleteRecurringMenu(!showDeleteRecurringMenu)}
                 className="px-4 py-3 text-danger hover:bg-danger/10 rounded-xl transition-colors"
               >
-                Elimina
+                {t.common.delete}
               </button>
             ) : block ? (
               <button
@@ -352,7 +355,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
                 onClick={() => setConfirmingDelete(true)}
                 className="px-4 py-3 text-danger hover:bg-danger/10 rounded-xl transition-colors"
               >
-                Elimina
+                {t.common.delete}
               </button>
             ) : null}
             <button
@@ -360,14 +363,14 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               onClick={onClose}
               className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
             >
-              Annulla
+              {t.common.cancel}
             </button>
             <button
               type="submit"
               disabled={loading || !title.trim()}
               className="flex-1 px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
             >
-              {loading ? 'Salvataggio...' : 'Salva'}
+              {loading ? t.common.saving : t.common.save}
             </button>
           </div>
         )}

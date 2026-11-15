@@ -12,6 +12,7 @@ import { ShiftsView } from '@/components/ShiftsView';
 import { BottomNav, AppTab } from '@/components/BottomNav';
 import { useBlocks } from '@/hooks/useBlocks';
 import { useShiftAssignments } from '@/hooks/useShifts';
+import { useI18n } from '@/components/LanguageProvider';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -19,6 +20,7 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<AppTab>('calendar');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const supabase = createClient();
+  const { t } = useI18n();
   const { blocks, refetch: refetchBlocks } = useBlocks(0);
   // The summary counts this week's shifts too, not only events.
   const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 1 }), []);
@@ -67,7 +69,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg">
-        <div className="text-text-secondary">Caricamento...</div>
+        <div className="text-text-secondary">{t.common.loading}</div>
       </div>
     );
   }
@@ -103,13 +105,13 @@ export default function DashboardPage() {
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full invisible'}
         `}
         role="dialog"
-        aria-label="Riepilogo della settimana"
+        aria-label={t.summary.title}
       >
         <div className="flex items-center justify-end p-4">
           <button
             onClick={handleCloseSidebar}
             className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors"
-            aria-label="Chiudi riepilogo"
+            aria-label={t.summary.close}
           >
             <X className="w-6 h-6 text-text-secondary" />
           </button>

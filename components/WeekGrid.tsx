@@ -2,7 +2,6 @@
 
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { format, isSameDay, addDays, addMonths, subMonths } from 'date-fns';
-import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, ChartNoAxesColumn } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
@@ -19,6 +18,8 @@ import { ShiftCard } from './ShiftCard';
 import { ShiftModal } from './ShiftModal';
 import { CreateChoiceSheet } from './CreateChoiceSheet';
 import { MonthGrid } from './MonthGrid';
+import { capitalize, fill, formatDate } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 
 interface WeekGridProps {
   user?: {
@@ -35,6 +36,7 @@ const DAY_HOUR_HEIGHT = 56; // px, matches h-14
 const STRIP_OFFSETS = [-2, -1, 0, 1, 2];
 
 export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
+  const { locale, t } = useI18n();
   const {
     weekOffset,
     weekDays,
@@ -362,14 +364,9 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
     [goToDayOffset]
   );
 
-  const selectedDayName = selectedDay
-    ? `${format(selectedDay, 'EEEE', { locale: it })} ${format(selectedDay, 'd MMM', { locale: it })}`
-    : '';
+  const selectedDayName = selectedDay ? formatDate(locale, selectedDay, 'dayShortMonth') : '';
 
-  const monthTitle = useMemo(() => {
-    const label = format(monthCursor, 'MMMM yyyy', { locale: it });
-    return label.charAt(0).toUpperCase() + label.slice(1);
-  }, [monthCursor]);
+  const monthTitle = useMemo(() => capitalize(formatDate(locale, monthCursor, 'monthYear')), [monthCursor, locale]);
 
   const handleSelectDayFromMonth = (date: Date) => {
     goToWeek(weekOffsetForDate(date));
@@ -426,7 +423,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
           <button
             onClick={handlePrev}
             className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
-            aria-label="Precedente"
+            aria-label={t.calendar.previous}
           >
             <ChevronLeft className="w-5 h-5 text-text-secondary" />
           </button>
@@ -434,7 +431,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
           <button
             onClick={handleNext}
             className="flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors flex-shrink-0"
-            aria-label="Successivo"
+            aria-label={t.calendar.next}
           >
             <ChevronRight className="w-5 h-5 text-text-secondary" />
           </button>
@@ -442,7 +439,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
 
         <div
           role="group"
-          aria-label="Vista"
+          aria-label={t.calendar.view}
           className="order-last sm:order-none w-full sm:w-auto flex items-center bg-surface rounded-xl p-0.5"
         >
           {(['day', 'week', 'month'] as const).map((v) => (
@@ -454,7 +451,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                 view === v ? 'bg-accent text-accent-contrast font-medium' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              {v === 'day' ? 'Giorno' : v === 'week' ? 'Settimana' : 'Mese'}
+              {t.views[v]}
             </button>
           ))}
         </div>
@@ -464,12 +461,12 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
             onClick={handleToday}
             className="px-3 h-11 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
           >
-            Oggi
+            {t.calendar.today}
           </button>
           <button
             onClick={onOpenSidebar}
             className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors"
-            aria-label="Riepilogo della settimana"
+            aria-label={t.summary.title}
           >
             <ChartNoAxesColumn className="w-5 h-5 text-text-secondary" />
           </button>
@@ -494,11 +491,11 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                   key={n}
                   onClick={() => goToDayOffset(n)}
                   aria-current={isSelected ? 'date' : undefined}
-                  aria-label={format(date, 'EEEE d MMMM', { locale: it })}
+                  aria-label={formatDate(locale, date, 'fullDay')}
                   className="flex flex-col items-center gap-1 min-w-11 px-1.5 py-1 rounded-xl transition-colors"
                 >
                   <span className="text-[10px] uppercase tracking-wide text-text-secondary">
-                    {format(date, 'EEE', { locale: it })}
+                    {formatDate(locale, date, 'weekdayShort')}
                   </span>
                   <span
                     className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors ${
@@ -540,7 +537,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                 <button
                   key={hour}
                   type="button"
-                  aria-label={`Aggiungi alle ${hour.toString().padStart(2, '0')}:00`}
+                  aria-label={fill(t.calendar.addAt, { time: `${hour.toString().padStart(2, '0')}:00` })}
                   className="absolute block w-full h-14 border-b border-border cursor-pointer hover:bg-surface-hover/50 transition-colors focus-visible:-outline-offset-2"
                   style={{ top: `${hour * DAY_HOUR_HEIGHT}px` }}
                   onClick={() => handleCellClick(selectedDayIndex, hour)}
@@ -623,7 +620,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                     <button
                       type="button"
                       onClick={() => handleSelectDayFromMonth(day)}
-                      aria-label={`Apri ${format(day, 'EEEE d MMMM', { locale: it })}`}
+                      aria-label={fill(t.calendar.openDate, { date: formatDate(locale, day, 'fullDay') })}
                       className="sticky top-0 z-20 block w-full bg-bg border-b border-border hover:bg-surface-hover transition-colors focus-visible:-outline-offset-2"
                     >
                       <DayHeader date={day} isToday={isToday} />
@@ -693,7 +690,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
       <CreateChoiceSheet
         isOpen={createContext !== null}
         initialStep={createStep}
-        dateLabel={createContext ? format(createContext.date, 'EEEE d MMMM', { locale: it }) : ''}
+        dateLabel={createContext ? formatDate(locale, createContext.date, 'fullDay') : ''}
         shifts={shifts}
         onClose={() => setCreateContext(null)}
         onChooseEvent={() => createContext && openEventCreate(createContext.date, createContext.hour)}
@@ -709,7 +706,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
         onRemoveFromDay={editingAssignment ? handleRemoveShiftFromDay : undefined}
         dayLabel={
           editingAssignment
-            ? format(new Date(`${editingAssignment.shift_date}T00:00:00`), 'EEEE d MMMM', { locale: it })
+            ? formatDate(locale, new Date(`${editingAssignment.shift_date}T00:00:00`), 'fullDay')
             : undefined
         }
         shift={editingShift}

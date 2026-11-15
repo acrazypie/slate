@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Shift, ShiftFormData, COLOR_PALETTE, COLOR_NAMES, SHIFT_DEFAULT_COLOR, formatTime } from '@/lib/types';
+import { Shift, ShiftFormData, COLOR_PALETTE, colorKey, SHIFT_DEFAULT_COLOR, formatTime } from '@/lib/types';
+import { fill } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 import { Dialog, DialogClose, ColorSwatch } from './Dialog';
 
 interface ShiftModalProps {
@@ -20,6 +22,7 @@ const inputClass =
   'w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none';
 
 export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay, dayLabel, shift }: ShiftModalProps) {
+  const { t } = useI18n();
   const [title, setTitle] = useState('');
   const [start, setStart] = useState('09:00');
   const [end, setEnd] = useState('17:00');
@@ -54,7 +57,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
     e.preventDefault();
     if (!title.trim() || !start || !end) return;
     if (start === end) {
-      setFormError("L'ora di fine deve essere diversa da quella di inizio.");
+      setFormError(t.shiftModal.sameTimeError);
       return;
     }
     const [sh, sm] = start.split(':').map(Number);
@@ -71,7 +74,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
     setLoading(false);
   };
 
-  const heading = shift ? 'Modifica turno' : 'Nuovo turno';
+  const heading = shift ? t.shiftModal.editTitle : t.shiftModal.newTitle;
   const labelClass = 'block text-sm text-text-secondary mb-2';
 
   return (
@@ -83,11 +86,11 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="shift-title" className={labelClass}>Nome del turno</label>
+          <label htmlFor="shift-title" className={labelClass}>{t.shiftModal.name}</label>
           <input
             id="shift-title"
             type="text"
-            placeholder="es. Mattina"
+            placeholder={t.shiftModal.namePlaceholder}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={`${inputClass} placeholder-text-tertiary`}
@@ -97,28 +100,28 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="shift-start" className={labelClass}>Ora di inizio</label>
+            <label htmlFor="shift-start" className={labelClass}>{t.common.startTime}</label>
             <input id="shift-start" type="time" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label htmlFor="shift-end" className={labelClass}>Ora di fine</label>
+            <label htmlFor="shift-end" className={labelClass}>{t.common.endTime}</label>
             <input id="shift-end" type="time" value={end} onChange={(e) => setEnd(e.target.value)} className={inputClass} />
           </div>
         </div>
-        {overnight && <p className="text-xs text-text-tertiary">Il turno termina il giorno successivo.</p>}
+        {overnight && <p className="text-xs text-text-tertiary">{t.shiftModal.overnight}</p>}
 
         <div role="group" aria-labelledby="shift-color-label">
-          <span id="shift-color-label" className={labelClass}>Colore</span>
+          <span id="shift-color-label" className={labelClass}>{t.common.color}</span>
           <div className="flex flex-wrap -mx-1.5">
             {COLOR_PALETTE.map((c) => (
-              <ColorSwatch key={c} color={c} name={COLOR_NAMES[c] ?? c} selected={color === c} onSelect={() => setColor(c)} />
+              <ColorSwatch key={c} color={c} name={colorKey(c) ? t.colors[colorKey(c)!] : c} selected={color === c} onSelect={() => setColor(c)} />
             ))}
           </div>
         </div>
 
         {shift && (
           <p className="text-xs text-text-tertiary">
-            Le modifiche valgono per tutti i giorni in cui questo turno è inserito.
+            {t.shiftModal.appliesEverywhere}
           </p>
         )}
         {formError && <p role="alert" className="text-sm text-danger">{formError}</p>}
@@ -130,15 +133,14 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
             onClick={() => run(onRemoveFromDay)}
             className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl text-sm hover:bg-border transition-colors disabled:opacity-50"
           >
-            Rimuovi da {dayLabel || 'questo giorno'}
+            {fill(t.shiftModal.removeFrom, { day: dayLabel || t.shiftModal.thisDay })}
           </button>
         )}
 
         {confirmingDelete && shift && onDelete ? (
           <div className="pt-2">
             <p className="text-sm text-text-secondary mb-3">
-              Eliminare il turno &ldquo;{shift.title}&rdquo;? Verrà tolto da tutti i giorni in cui è inserito e non si può
-              annullare.
+              {fill(t.shiftModal.confirmDelete, { title: shift.title })}
             </p>
             <div className="flex gap-3">
               <button
@@ -146,7 +148,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
                 onClick={() => setConfirmingDelete(false)}
                 className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
               >
-                Annulla
+                {t.common.cancel}
               </button>
               <button
                 type="button"
@@ -154,7 +156,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
                 onClick={() => run(onDelete)}
                 className="flex-1 px-4 py-3 text-danger bg-danger/10 hover:bg-danger/20 rounded-xl font-medium transition-colors disabled:opacity-50"
               >
-                {loading ? 'Eliminazione...' : 'Elimina turno'}
+                {loading ? t.common.deleting : t.shiftModal.deleteShift}
               </button>
             </div>
           </div>
@@ -167,7 +169,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
                 onClick={() => setConfirmingDelete(true)}
                 className="px-4 py-3 text-danger hover:bg-danger/10 rounded-xl transition-colors disabled:opacity-50"
               >
-                Elimina turno
+                {t.shiftModal.deleteShift}
               </button>
             )}
             <button
@@ -175,14 +177,14 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
               onClick={onClose}
               className="flex-1 px-4 py-3 bg-surface-hover text-text-primary rounded-xl transition-colors hover:bg-border"
             >
-              Annulla
+              {t.common.cancel}
             </button>
             <button
               type="submit"
               disabled={loading || !title.trim()}
               className="flex-1 px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
             >
-              {loading ? 'Salvataggio...' : 'Salva'}
+              {loading ? t.common.saving : t.common.save}
             </button>
           </div>
         )}

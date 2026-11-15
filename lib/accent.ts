@@ -2,17 +2,20 @@
 // view, and applied by overriding the two accent CSS variables on <html>.
 
 export const ACCENT_STORAGE_KEY = 'slate-accent';
+import type { ColorKey } from './types';
+
 export const DEFAULT_ACCENT = '#E49C69';
 
-export const ACCENT_OPTIONS = [
-  { value: '#E49C69', label: 'Albicocca' },
-  { value: '#E0B84C', label: 'Ambra' },
-  { value: '#8BC48A', label: 'Salvia' },
-  { value: '#6BB6A3', label: 'Verde acqua' },
-  { value: '#7AA7D9', label: 'Azzurro' },
-  { value: '#BB86FC', label: 'Viola' },
-  { value: '#E58FB4', label: 'Rosa' },
-  { value: '#CF6679', label: 'Lampone' },
+/** `name` is a key into `t.colors`. */
+export const ACCENT_OPTIONS: { value: string; name: ColorKey }[] = [
+  { value: '#E49C69', name: 'apricot' },
+  { value: '#E0B84C', name: 'amber' },
+  { value: '#8BC48A', name: 'sage' },
+  { value: '#6BB6A3', name: 'teal' },
+  { value: '#7AA7D9', name: 'skyBlue' },
+  { value: '#BB86FC', name: 'violet' },
+  { value: '#E58FB4', name: 'pink' },
+  { value: '#CF6679', name: 'raspberry' },
 ];
 
 const HEX = /^#[0-9a-fA-F]{6}$/;

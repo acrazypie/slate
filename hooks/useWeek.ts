@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { startOfWeek, addWeeks, addDays, format, eachDayOfInterval, isSameDay } from 'date-fns';
+import { startOfWeek, addWeeks, addDays, eachDayOfInterval } from 'date-fns';
+import { useI18n } from '@/components/LanguageProvider';
+import { formatDayRange } from '@/lib/i18n/format';
 
 export type ViewMode = 'day' | 'week' | 'month';
 
 export function useWeek() {
+  const { locale } = useI18n();
   const [weekOffset, setWeekOffset] = useState(0);
   const [view, setView] = useState<ViewMode>(
     () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'week'
@@ -46,16 +49,8 @@ export function useWeek() {
   }, []);
 
   const formatWeekRange = useMemo(() => {
-    const start = currentWeekStart;
-    const end = addDays(currentWeekStart, 6);
-    if (isSameDay(start, end)) {
-      return format(start, 'd MMM');
-    }
-    if (start.getMonth() === end.getMonth()) {
-      return `${format(start, 'd')} – ${format(end, 'd MMM')}`;
-    }
-    return `${format(start, 'd MMM')} – ${format(end, 'd MMM')}`;
-  }, [currentWeekStart]);
+    return formatDayRange(locale, currentWeekStart, addDays(currentWeekStart, 6));
+  }, [currentWeekStart, locale]);
 
   const isCurrentWeek = weekOffset === 0;
 

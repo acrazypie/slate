@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, Briefcase, Plus, ChevronLeft } from 'lucide-react';
 import { Shift, formatTime } from '@/lib/types';
 import { Dialog, DialogClose } from './Dialog';
+import { useI18n } from './LanguageProvider';
 
 interface CreateChoiceSheetProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function CreateChoiceSheet({
   onPickShift,
   onCreateShift,
 }: CreateChoiceSheetProps) {
+  const { t } = useI18n();
   const [step, setStep] = useState<'choice' | 'shift'>(initialStep);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function CreateChoiceSheet({
   const rowClass =
     'w-full flex items-center gap-3 px-4 py-3 bg-surface-hover rounded-xl hover:bg-border transition-colors text-left';
 
-  const heading = step === 'choice' ? 'Cosa vuoi aggiungere?' : 'Aggiungi un turno';
+  const heading = step === 'choice' ? t.create.whatToAdd : t.create.addShift;
 
   return (
     <Dialog label={heading} onClose={onClose} size="sheet" zClass="z-[55]">
@@ -48,7 +50,7 @@ export function CreateChoiceSheet({
               <button
                 onClick={() => setStep('choice')}
                 className="flex items-center justify-center w-11 h-11 -my-2 -ml-2 flex-shrink-0 rounded-xl hover:bg-surface-hover transition-colors"
-                aria-label="Indietro"
+                aria-label={t.common.back}
               >
                 <ChevronLeft className="w-5 h-5 text-text-secondary" />
               </button>
@@ -66,15 +68,15 @@ export function CreateChoiceSheet({
             <button onClick={onChooseEvent} className={rowClass}>
               <CalendarDays className="w-5 h-5 text-accent-text flex-shrink-0" />
               <div>
-                <div className="text-sm font-medium text-text-primary">Evento</div>
-                <div className="text-xs text-text-secondary">Studio, lavoro, lezione o altro</div>
+                <div className="text-sm font-medium text-text-primary">{t.common.event}</div>
+                <div className="text-xs text-text-secondary">{t.create.eventHint}</div>
               </div>
             </button>
             <button onClick={() => setStep('shift')} className={rowClass}>
               <Briefcase className="w-5 h-5 text-accent-text flex-shrink-0" />
               <div>
-                <div className="text-sm font-medium text-text-primary">Turno</div>
-                <div className="text-xs text-text-secondary">Inserisci uno dei tuoi turni in questo giorno</div>
+                <div className="text-sm font-medium text-text-primary">{t.common.shift}</div>
+                <div className="text-xs text-text-secondary">{t.create.shiftHint}</div>
               </div>
             </button>
           </div>
@@ -82,7 +84,7 @@ export function CreateChoiceSheet({
           <div className="flex flex-col gap-2">
             {shifts.length === 0 && (
               <p className="text-sm text-text-secondary py-2">
-                Non hai ancora creato nessun turno. Creane uno per inserirlo in questo giorno.
+                {t.create.noShifts}
               </p>
             )}
             {shifts.map((shift) => (
@@ -99,7 +101,7 @@ export function CreateChoiceSheet({
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border-strong text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Nuovo turno
+              {t.create.newShift}
             </button>
           </div>
         )}

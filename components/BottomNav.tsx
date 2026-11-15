@@ -1,24 +1,28 @@
 'use client';
 
 import { CalendarDays, Briefcase, Settings } from 'lucide-react';
+import { useI18n } from './LanguageProvider';
 
 export type AppTab = 'calendar' | 'shifts' | 'settings';
 
-export const TABS: { id: AppTab; label: string; Icon: typeof CalendarDays }[] = [
-  { id: 'calendar', label: 'Calendario', Icon: CalendarDays },
-  { id: 'shifts', label: 'Turni', Icon: Briefcase },
-  { id: 'settings', label: 'Impostazioni', Icon: Settings },
+/** Tab ids double as keys into `t.nav` for the labels. */
+export const TABS: { id: AppTab; Icon: typeof CalendarDays }[] = [
+  { id: 'calendar', Icon: CalendarDays },
+  { id: 'shifts', Icon: Briefcase },
+  { id: 'settings', Icon: Settings },
 ];
 
 /** Phone and tablet navigation. From `md` up the same tabs live in the sidebar. */
 export function BottomNav({ active, onChange }: { active: AppTab; onChange: (tab: AppTab) => void }) {
+  const { t } = useI18n();
+
   return (
     <nav
       className="md:hidden flex-shrink-0 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]"
-      aria-label="Navigazione principale"
+      aria-label={t.nav.main}
     >
       <div className="flex justify-center gap-1 px-2 py-1.5 max-w-md mx-auto">
-        {TABS.map(({ id, label, Icon }) => {
+        {TABS.map(({ id, Icon }) => {
           const isActive = active === id;
           return (
             <button
@@ -30,7 +34,7 @@ export function BottomNav({ active, onChange }: { active: AppTab; onChange: (tab
               }`}
             >
               <Icon className="w-5 h-5" />
-              {label}
+              {t.nav[id]}
             </button>
           );
         })}

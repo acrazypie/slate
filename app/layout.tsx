@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { Providers } from "@/components/Providers";
+import { getI18n, getLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 const dmSans = DM_Sans({ 
@@ -14,20 +15,22 @@ const dmSerif = DM_Serif_Display({
   variable: "--font-dm-serif",
 });
 
-export const metadata: Metadata = {
-  title: "Slate - La tua settimana, a blocchi",
-  description: "Pianificatore a blocchi orari per studenti, universitari e giovani lavoratori",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t.meta.title, description: t.meta.description };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="it" suppressHydrationWarning className={`${dmSans.variable} ${dmSerif.variable} h-full antialiased`}>
+    <html lang={locale} suppressHydrationWarning className={`${dmSans.variable} ${dmSerif.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
-        <Providers>{children}</Providers>
+        <Providers locale={locale}>{children}</Providers>
       </body>
     </html>
   );

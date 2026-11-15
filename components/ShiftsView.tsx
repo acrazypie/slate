@@ -5,6 +5,8 @@ import { Plus, Briefcase, ChevronRight } from 'lucide-react';
 import { useShifts } from '@/hooks/useShifts';
 import { Shift, ShiftFormData, formatTime, isOvernightShift, shiftDurationMinutes } from '@/lib/types';
 import { ShiftModal } from './ShiftModal';
+import { fill } from '@/lib/i18n/format';
+import { useI18n } from './LanguageProvider';
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -15,6 +17,7 @@ function formatDuration(minutes: number): string {
 /** `onDataChange` fires after a shift is saved or deleted, so the weekly summary can reload. */
 export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
   const { shifts, loading, error, createShift, updateShift, deleteShift } = useShifts();
+  const { t } = useI18n();
   const [editing, setEditing] = useState<Shift | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -47,29 +50,29 @@ export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
     <div className="flex-1 overflow-y-auto bg-bg">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between gap-3 mb-2">
-          <h1 className="font-serif text-2xl sm:text-3xl text-text-primary">Turni</h1>
+          <h1 className="font-serif text-2xl sm:text-3xl text-text-primary">{t.common.shifts}</h1>
           <button
             onClick={openCreate}
             className="flex items-center gap-2 px-4 py-2.5 bg-accent text-accent-contrast rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
-            Nuovo turno
+            {t.create.newShift}
           </button>
         </div>
         <p className="text-sm text-text-secondary mb-6">
-          Crea qui i tuoi turni, poi inseriscili nei giorni dal calendario.
+          {t.shiftsView.intro}
         </p>
 
-        {error && <p className="text-sm text-danger mb-4">Non è stato possibile caricare o salvare i turni: {error}</p>}
+        {error && <p className="text-sm text-danger mb-4">{fill(t.shiftsView.loadError, { error })}</p>}
 
         {loading ? (
-          <p className="text-sm text-text-secondary">Caricamento...</p>
+          <p className="text-sm text-text-secondary">{t.common.loading}</p>
         ) : shifts.length === 0 ? (
           <div className="flex flex-col items-center text-center gap-3 px-6 py-12 border border-dashed border-border-strong rounded-2xl">
             <Briefcase className="w-8 h-8 text-text-tertiary" />
-            <p className="text-sm text-text-secondary">Non hai ancora nessun turno.</p>
+            <p className="text-sm text-text-secondary">{t.shiftsView.empty}</p>
             <button onClick={openCreate} className="text-sm text-accent-text hover:underline">
-              Crea il primo turno
+              {t.shiftsView.createFirst}
             </button>
           </div>
         ) : (
@@ -85,7 +88,7 @@ export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
                     <span className="block text-sm font-medium text-text-primary truncate">{shift.title}</span>
                     <span className="block text-xs text-text-secondary">
                       {formatTime(shift.start_hour, shift.start_minute)} – {formatTime(shift.end_hour, shift.end_minute)}
-                      {isOvernightShift(shift) && ' (giorno dopo)'}
+                      {isOvernightShift(shift) && ` ${t.shiftsView.nextDay}`}
                     </span>
                   </span>
                   <span className="text-xs text-text-tertiary flex-shrink-0">
