@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Block } from '@/lib/types';
-import { dateForWeekOffset, isWeekOffsetInSeries, SeriesLike } from '@/lib/recurrence';
+import { dateForWeekOffset, isWeekOffsetInSeries, keyFromDate, SeriesLike } from '@/lib/recurrence';
 
 export { weekOffsetForDate } from '@/lib/recurrence';
 
@@ -32,7 +32,7 @@ export function useMonthBlocks(weekOffsets: number[]) {
 
     const minOffset = Math.min(...offsets);
     const maxOffset = Math.max(...offsets);
-    const minDate = dateForWeekOffset(minOffset, 0).toISOString().slice(0, 10);
+    const minDate = keyFromDate(dateForWeekOffset(minOffset, 0));
 
     const plainPromise = supabase
       .from('blocks')

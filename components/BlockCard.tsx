@@ -1,6 +1,6 @@
 'use client';
 
-import { Block, BlockCategory } from '@/lib/types';
+import { Block, BlockCategory, OverlapSlot, overlapPosition } from '@/lib/types';
 import { useI18n } from './LanguageProvider';
 import { CategoryIcon } from './CategoryIcon';
 import { Repeat } from 'lucide-react';
@@ -10,9 +10,11 @@ interface BlockCardProps {
   onClick: (e: React.MouseEvent) => void;
   /** Take only the right half of the column, leaving the left half for a shift. */
   half?: boolean;
+  /** Set when other events share this one's time: which column of how many it takes. */
+  slot?: OverlapSlot;
 }
 
-export function BlockCard({ block, onClick, half }: BlockCardProps) {
+export function BlockCard({ block, onClick, half, slot }: BlockCardProps) {
   const { t } = useI18n();
   const startTime = `${block.start_hour.toString().padStart(2, '0')}:${block.start_minute.toString().padStart(2, '0')}`;
   const endHour = block.start_hour + Math.floor((block.start_minute + block.duration_minutes) / 60);
@@ -39,6 +41,7 @@ export function BlockCard({ block, onClick, half }: BlockCardProps) {
         minHeight: '22px',
         backgroundColor: `color-mix(in srgb, ${block.color} 22%, var(--color-surface))`,
         borderLeft: `3px solid ${block.color}`,
+        ...overlapPosition(slot, half),
       }}
       onClick={onClick}
     >

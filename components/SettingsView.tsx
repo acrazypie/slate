@@ -38,7 +38,7 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [accent, setAccentState] = useState<string>(() => getStoredAccent());
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
-  const { connected, connect, disconnect } = useGoogleCalendarConnection();
+  const { connected, calendars, needsReconnect, connect, disconnect, setCalendarVisible } = useGoogleCalendarConnection();
   const [calendarActionLoading, setCalendarActionLoading] = useState(false);
 
   const handleViewChange = (view: ViewMode) => {
@@ -212,19 +212,67 @@ export function SettingsView({ user }: SettingsViewProps) {
               {t.settings.gcalChecking}
             </div>
           ) : connected ? (
-            <div className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-surface-hover">
-              <div className="flex items-center gap-2 text-sm text-text-primary">
-                <CalendarCheck className="w-4 h-4 text-accent-text" />
-                {t.settings.gcalConnected}
+            <>
+              <div className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-surface-hover">
+                <div className="flex items-center gap-2 text-sm text-text-primary">
+                  <CalendarCheck className="w-4 h-4 text-accent-text" />
+                  {t.settings.gcalConnected}
+                </div>
+                <button
+                  onClick={handleDisconnectCalendar}
+                  disabled={calendarActionLoading}
+                  className="px-3 min-h-11 -my-2 -mr-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors disabled:opacity-50"
+                >
+                  {t.settings.gcalDisconnect}
+                </button>
               </div>
-              <button
-                onClick={handleDisconnectCalendar}
-                disabled={calendarActionLoading}
-                className="px-3 min-h-11 -my-2 -mr-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors disabled:opacity-50"
-              >
-                {t.settings.gcalDisconnect}
-              </button>
-            </div>
+
+              {calendars.length > 0 && (
+                <div role="group" aria-labelledby="gcal-calendars-label" className="mt-4">
+                  <p id="gcal-calendars-label" className="text-sm text-text-secondary mb-1">
+                    {t.settings.gcalCalendars}
+                  </p>
+                  <ul>
+                    {calendars.map((calendar) => (
+                      <li key={calendar.id}>
+                        <label className="flex items-center gap-3 px-3 min-h-11 -mx-3 sm:mx-0 rounded-xl hover:bg-surface-hover transition-colors cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={calendar.visible}
+                            onChange={(e) => setCalendarVisible(calendar.id, e.target.checked)}
+                            className="w-4 h-4 flex-shrink-0 accent-[var(--color-accent)]"
+                          />
+                          <span
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: calendar.color }}
+                            aria-hidden="true"
+                          />
+                          <span className="flex-1 min-w-0 truncate text-sm text-text-primary">{calendar.name}</span>
+                          {!calendar.canEdit && (
+                            <span className="text-[10px] uppercase tracking-wide text-text-tertiary flex-shrink-0">
+                              {t.settings.gcalReadOnly}
+                            </span>
+                          )}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {needsReconnect && (
+                <div className="flex items-center justify-between gap-3 mt-2 px-3 py-2 rounded-xl border border-border">
+                  <p className="text-sm text-text-secondary">{t.settings.gcalReconnectHint}</p>
+                  <button
+                    onClick={handleConnectCalendar}
+                    disabled={calendarActionLoading}
+                    className="px-3 min-h-11 rounded-xl text-sm text-accent-text hover:bg-surface-hover transition-colors disabled:opacity-50 flex-shrink-0"
+                  >
+                    {t.settings.gcalReconnect}
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <button
               onClick={handleConnectCalendar}

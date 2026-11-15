@@ -5,8 +5,8 @@ import { dateForWeekOffset } from '@/lib/recurrence';
 import { Block } from '@/lib/types';
 
 /**
- * Pushes Slate blocks to the user's connected Google Calendar. One-way
- * (Slate -> Google) only. Silently no-ops if the user hasn't connected
+ * Pushes Slate blocks to the user's connected Google Calendar. The way back
+ * (changes made in Google) is /api/google-calendar/events. Silently no-ops if the user hasn't connected
  * Google Calendar — this endpoint is fired on every block mutation
  * regardless, so callers don't need to check connection status themselves.
  */
@@ -64,11 +64,20 @@ export async function POST(request: Request) {
         );
       }
 
-      const eventId = await upsertGoogleEvent(auth.accessToken, auth.calendarId, block, exceptionDates);
-      if (eventId && eventId !== block.google_event_id) {
-        await supabase.from('blocks').update({ google_event_id: eventId }).eq('id', block.id);
+      const event = await upsertGoogleEvent(auth.accessToken, auth.calendarId, block, exceptionDates);
+      if (!event) continue;
+      synced++;
+
+      // Remember which version of the Google event this is, so the pull in
+      // the other direction can tell its own echo from an edit made in Google.
+      const { error: stampError } = await supabase
+        .from('blocks')
+        .update({ google_event_id: event.id, google_updated_at: event.updated })
+        .eq('id', block.id);
+      if (stampError && event.id !== block.google_event_id) {
+        // `google_updated_at` is missing until the two-way sync migration has run.
+        await supabase.from('blocks').update({ google_event_id: event.id }).eq('id', block.id);
       }
-      if (eventId) synced++;
     }
 
     return NextResponse.json({ ok: true, synced });

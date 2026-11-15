@@ -19,7 +19,138 @@ export interface Block {
   recurrence_end_date?: string;
   recurrence_group_id?: string;
   google_event_id?: string | null;
+  /** Google's `updated` stamp of the mirrored event when Slate last pushed or pulled it. */
+  google_updated_at?: string | null;
   created_at: string;
+}
+
+/** One of the user's Google calendars, as listed in Settings. */
+export interface GoogleCalendar {
+  id: string;
+  name: string;
+  color: string;
+  primary: boolean;
+  /** False for calendars the user can only read (holidays, shared read-only). */
+  canEdit: boolean;
+  /** Whether its events are shown in Slate. */
+  visible: boolean;
+}
+
+/**
+ * An event that lives only in Google Calendar, shown next to Slate's own
+ * events. Dates and times are wall-clock values in Slate's time zone. A
+ * recurring event arrives already expanded: one entry per occurrence.
+ */
+export interface GoogleEvent {
+  id: string;
+  calendarId: string;
+  calendarName: string;
+  title: string;
+  notes: string;
+  location: string | null;
+  color: string;
+  allDay: boolean;
+  /** First day, 'yyyy-MM-dd'. */
+  startDate: string;
+  /** Last day, inclusive. Differs from `startDate` for multi-day events. */
+  endDate: string;
+  /** Start and end times. Both 0 for an all-day event. */
+  start_hour: number;
+  start_minute: number;
+  end_hour: number;
+  end_minute: number;
+  /** Set on an occurrence of a recurring event: the id of the series. */
+  recurringEventId: string | null;
+  canEdit: boolean;
+  htmlLink: string | null;
+}
+
+/** What the edit form sends back for a Google event. */
+export interface GoogleEventChanges {
+  title: string;
+  notes: string;
+  allDay: boolean;
+  startDate: string;
+  endDate: string;
+  start_hour: number;
+  start_minute: number;
+  end_hour: number;
+  end_minute: number;
+}
+
+/** For a recurring Google event: change just this occurrence, or the whole series. */
+export type GoogleEventScope = 'this' | 'all';
+
+/** The part of a Google event that falls on one day, in minutes from midnight. */
+export interface GoogleEventSegment {
+  event: GoogleEvent;
+  start: number;
+  end: number;
+}
+
+/**
+ * Splits events into what each day shows: all-day events as a list, timed
+ * events as the slice of them that falls on that day (an event running past
+ * midnight gives one slice per day).
+ */
+export function googleEventsForDay(
+  events: GoogleEvent[],
+  dateKey: string
+): { allDay: GoogleEvent[]; timed: GoogleEventSegment[] } {
+  const allDay: GoogleEvent[] = [];
+  const timed: GoogleEventSegment[] = [];
+  for (const event of events) {
+    if (dateKey < event.startDate || dateKey > event.endDate) continue;
+    if (event.allDay) {
+      allDay.push(event);
+      continue;
+    }
+    const start = dateKey === event.startDate ? event.start_hour * 60 + event.start_minute : 0;
+    const end = dateKey === event.endDate ? event.end_hour * 60 + event.end_minute : 24 * 60;
+    // An event ending at midnight exactly has nothing on its last day.
+    if (end > start) timed.push({ event, start, end });
+  }
+  timed.sort((a, b) => a.start - b.start || a.end - b.end);
+  return { allDay, timed };
+}
+
+/** Where a card sits when several overlap: column `col` of `cols` side by side. */
+export interface OverlapSlot {
+  col: number;
+  cols: number;
+}
+
+/**
+ * Lays overlapping items out side by side. Items that overlap, directly or
+ * through a chain of others, share a cluster and split the width evenly.
+ */
+export function layoutOverlaps<K>(items: { key: K; start: number; end: number }[]): Map<K, OverlapSlot> {
+  const result = new Map<K, OverlapSlot>();
+  const sorted = [...items].sort((a, b) => a.start - b.start || b.end - a.end);
+  let cluster: { key: K; col: number }[] = [];
+  let columnEnds: number[] = [];
+  let clusterEnd = -1;
+
+  const flush = () => {
+    for (const entry of cluster) result.set(entry.key, { col: entry.col, cols: columnEnds.length });
+    cluster = [];
+    columnEnds = [];
+  };
+
+  for (const item of sorted) {
+    if (cluster.length > 0 && item.start >= clusterEnd) flush();
+    let col = columnEnds.findIndex((end) => end <= item.start);
+    if (col === -1) {
+      col = columnEnds.length;
+      columnEnds.push(item.end);
+    } else {
+      columnEnds[col] = item.end;
+    }
+    cluster.push({ key: item.key, col });
+    clusterEnd = Math.max(clusterEnd, item.end);
+  }
+  flush();
+  return result;
 }
 
 /** A reusable shift definition (e.g. "Mattina 09:00-13:00"). Never recurring. */
@@ -158,3 +289,16 @@ export const DURATION_OPTIONS = [
   { value: 240, label: '4h' },
   { value: 480, label: '8h' },
 ];
+/**
+ * Inline `left`/`right` for a card that shares its hour with others. Events sit
+ * in the right half of the column when the day also has shifts (`half`).
+ * Undefined when the card is alone, so it keeps its normal full width.
+ */
+export function overlapPosition(slot: OverlapSlot | undefined, half?: boolean): { left: string; right: string } | undefined {
+  if (!slot || slot.cols <= 1) return undefined;
+  const areaStart = half ? 50 : 0;
+  const areaWidth = half ? 50 : 100;
+  const left = areaStart + (slot.col / slot.cols) * areaWidth;
+  const right = 100 - (areaStart + ((slot.col + 1) / slot.cols) * areaWidth);
+  return { left: `calc(${left}% + 2px)`, right: `calc(${right}% + 2px)` };
+}

@@ -5,9 +5,14 @@ import { createClient } from '@/lib/supabase/client';
 import { Block, BlockFormData } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { syncToGoogleCalendar } from '@/lib/googleCalendarClient';
-import { dateForWeekOffset, isWeekOffsetInSeries, SeriesLike } from '@/lib/recurrence';
+import { dateForWeekOffset, isWeekOffsetInSeries, keyFromDate, SeriesLike } from '@/lib/recurrence';
 
-export function useBlocks(weekOffset: number = 0) {
+/**
+ * `weekOffset` is a stored week offset (weeks since the epoch week in
+ * lib/recurrence.ts), not the 0-is-this-week offset `useWeek` navigates by:
+ * pass `useWeek().storedWeekOffset` or `currentWeekOffset()`.
+ */
+export function useBlocks(weekOffset: number) {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +33,7 @@ export function useBlocks(weekOffset: number = 0) {
     // on/before it, and not already ended before it). Exact membership for
     // monthly series still needs the real recurrence math below - this is
     // just a cheap DB-side prefilter.
-    const weekDate = dateForWeekOffset(weekOffset, 0).toISOString().slice(0, 10);
+    const weekDate = keyFromDate(dateForWeekOffset(weekOffset, 0));
     const seriesPromise = supabase
       .from('blocks')
       .select('*')

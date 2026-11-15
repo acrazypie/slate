@@ -1,7 +1,7 @@
 'use client';
 
-import { Plus, Briefcase, ArrowUpRight } from 'lucide-react';
-import { Block, ShiftAssignment, BlockCategory, formatTime, blockEndTime } from '@/lib/types';
+import { Plus, Briefcase, ArrowUpRight, CalendarDays } from 'lucide-react';
+import { Block, GoogleEvent, ShiftAssignment, BlockCategory, formatTime, blockEndTime } from '@/lib/types';
 import { Dialog, DialogClose } from './Dialog';
 import { CategoryIcon } from './CategoryIcon';
 import { formatDate } from '@/lib/i18n/format';
@@ -11,6 +11,9 @@ interface DaySheetProps {
   date: Date | null;
   blocks: Block[];
   assignments: ShiftAssignment[];
+  /** Events from Google Calendar on this day, all-day ones first. */
+  googleEvents: GoogleEvent[];
+  onEditGoogleEvent: (event: GoogleEvent) => void;
   onClose: () => void;
   onAddEvent: () => void;
   onAddShift: () => void;
@@ -24,6 +27,8 @@ export function DaySheet({
   date,
   blocks,
   assignments,
+  googleEvents,
+  onEditGoogleEvent,
   onClose,
   onAddEvent,
   onAddShift,
@@ -35,7 +40,7 @@ export function DaySheet({
   if (!date) return null;
 
   const dayLabel = formatDate(locale, date, 'fullDay');
-  const isEmpty = blocks.length === 0 && assignments.length === 0;
+  const isEmpty = blocks.length === 0 && assignments.length === 0 && googleEvents.length === 0;
   const rowClass =
     'w-full flex items-center gap-3 px-3 py-2.5 bg-surface-hover rounded-xl hover:bg-border transition-colors text-left';
 
@@ -73,6 +78,29 @@ export function DaySheet({
                 </span>
               </span>
               <span className="text-[10px] uppercase tracking-wide text-text-tertiary">{t.common.shift}</span>
+            </button>
+          ))}
+
+          {googleEvents.map((event) => (
+            <button key={event.id} onClick={() => onEditGoogleEvent(event)} className={rowClass}>
+              <span
+                className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 text-text-primary"
+                style={{ backgroundColor: `color-mix(in srgb, ${event.color} 25%, var(--color-surface))` }}
+              >
+                <CalendarDays className="w-4 h-4" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-medium text-text-primary truncate">
+                  {event.title || t.googleEvent.untitled}
+                </span>
+                <span className="block text-xs text-text-secondary truncate">
+                  {event.allDay
+                    ? t.calendar.allDay
+                    : `${formatTime(event.start_hour, event.start_minute)} – ${formatTime(event.end_hour, event.end_minute)}`}
+                  {` · ${event.calendarName}`}
+                </span>
+              </span>
+              <span className="text-[10px] uppercase tracking-wide text-text-tertiary">Google</span>
             </button>
           ))}
 

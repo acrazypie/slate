@@ -13,7 +13,7 @@ sync route.
 |---|---|
 | `is_recurring` | `true` marks the row as a series |
 | `recurrence_type` | `weekly` or `monthly` |
-| `week_offset` + `day_of_week` | Date of the first occurrence |
+| `week_offset` + `day_of_week` | Date of the first occurrence. `week_offset` counts weeks from Monday 2024-01-01, see below |
 | `recurrence_end_date` | Last day an occurrence may fall on; null for no end |
 
 **Weekly** repeats every 7 days from the first occurrence.
@@ -28,9 +28,28 @@ A series is expanded to at most **104 occurrences** (`MAX_OCCURRENCES`), about
 two years of weekly events. A series with no end date stops appearing after
 that.
 
+## Week numbers
+
+Every week has a fixed number: whole weeks since Monday 2024-01-01
+(`EPOCH_WEEK_START`). That number is what `blocks.week_offset` and
+`block_exceptions.occurrence_week_offset` hold, and what every function in
+`lib/recurrence.ts` takes and returns, so a stored event names the same real
+date whenever it is read. `weekOffsetForDate(date)` and
+`dateForWeekOffset(week, day)` convert between the two; neither looks at the
+clock, and both give the same answer in any time zone (the server runs in
+UTC, the user is in `Europe/Rome`).
+
+The calendar's navigation is the one thing that is relative to today:
+`useWeek().weekOffset` is 0 for the current week. `useWeek` also returns
+`storedWeekOffset`, the fixed number of the week on screen, which is what gets
+passed to `useBlocks`; `goToDate(date)` goes the other way. Outside the hook,
+`storedOffsetFromView` and `viewOffsetFromStored` do the same conversion, and
+`currentWeekOffset(timeZone?)` gives the current week's number (pass a time
+zone on the server).
+
 ## Loading a week
 
-`useBlocks(weekOffset)` runs two queries in parallel:
+`useBlocks(storedWeekOffset)` runs two queries in parallel:
 
 1. Plain events with `week_offset` equal to the requested week.
 2. Candidate series: `is_recurring`, started on or before this week, and not
@@ -72,5 +91,8 @@ there), so the mirrored event's `RRULE` and `EXDATE` lines stay in step. See
 npx tsx scripts/test-recurrence.ts
 ```
 
-Prints the first occurrences of a weekly and a monthly series, an ended
-series, and a membership check, each next to the expected result.
+Checks weekly and monthly series, end dates and skipped weeks, and then
+moves a fake system clock forward (past the next Monday, and by months) to
+show that stored events, series and exceptions stay on the same dates. Run it
+under another zone (`TZ=America/Los_Angeles npx tsx ...`) to see that the
+results don't depend on it. Exits non-zero if a check fails.

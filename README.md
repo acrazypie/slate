@@ -20,8 +20,10 @@ The interface is in Italian. Live at [slate.egenesio.com](https://slate.egenesio
   can be deleted.
 - **Shifts**: define a shift once ("Mattina 09:00–13:00") and drop it on any
   day. Overnight shifts are supported.
-- **Weekly summary** of hours per category, shifts included.
-- **Google Calendar sync**, one way (Slate → Google), for events.
+- **Weekly and monthly summaries** of hours per category, shifts included.
+- **Google Calendar sync**, two way: your events are copied to Google and
+  changes made there come back, and your Google calendars show up in Slate,
+  where their events can be edited.
 - **Accounts** with email and password or Google sign-in, plus password reset.
 - **Light, dark and system themes**, a configurable accent colour and a
   default view, stored per device.
@@ -77,7 +79,7 @@ and redirect URLs, is in [docs/setup.md](docs/setup.md).
 | [Architecture](docs/architecture.md) | Project layout, routes, data flow, auth, theming, known limitations |
 | [Database](docs/database.md) | Tables, row-level security, the full schema SQL |
 | [Recurrence](docs/recurrence.md) | How recurring events are stored, expanded and deleted |
-| [Google Calendar sync](docs/google-calendar.md) | Google Cloud setup, the connect flow, how events are pushed |
+| [Google Calendar sync](docs/google-calendar.md) | Google Cloud setup, the connect flow, how events move in both directions |
 | [Deployment](docs/deployment.md) | Deploying to Vercel and the production checklist |
 
 ## Scripts

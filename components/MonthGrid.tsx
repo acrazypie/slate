@@ -13,7 +13,8 @@ import {
 } from 'date-fns';
 import { useMonthBlocks, weekOffsetForDate } from '@/hooks/useMonthBlocks';
 import { useShiftAssignments } from '@/hooks/useShifts';
-import { Block, ShiftAssignment, blockEndTime, formatCompactRange } from '@/lib/types';
+import { useGoogleEvents } from '@/hooks/useGoogleEvents';
+import { Block, GoogleEvent, ShiftAssignment, blockEndTime, formatCompactRange, googleEventsForDay } from '@/lib/types';
 import { DaySheet } from './DaySheet';
 import { fill, weekdayNames } from '@/lib/i18n/format';
 import { useI18n } from './LanguageProvider';
@@ -23,6 +24,11 @@ interface MonthGridProps {
   today: Date;
   /** Bumped by the parent after any create/edit/delete so the grid reloads. */
   refreshKey: number;
+  /** Bumped after a Google event is edited, so those reload too. */
+  googleRefreshKey: number;
+  /** Loading found events changed in Google Calendar: the parent's copies are stale. */
+  onBlocksPulled: () => void;
+  onEditGoogleEvent: (event: GoogleEvent) => void;
   onAddEvent: (date: Date) => void;
   onAddShift: (date: Date) => void;
   onEditBlock: (block: Block) => void;
@@ -46,6 +52,9 @@ export function MonthGrid({
   monthDate,
   today,
   refreshKey,
+  googleRefreshKey,
+  onBlocksPulled,
+  onEditGoogleEvent,
   onAddEvent,
   onAddShift,
   onEditBlock,
@@ -64,6 +73,19 @@ export function MonthGrid({
 
   const { blocks, refetch: refetchBlocks } = useMonthBlocks(weekOffsets);
   const { assignments, refetch: refetchAssignments } = useShiftAssignments(gridStart, gridEnd);
+
+  const { events: googleEvents, refetch: refetchGoogleEvents } = useGoogleEvents(gridStart, gridEnd, {
+    onBlocksChanged: () => {
+      refetchBlocks();
+      onBlocksPulled();
+    },
+  });
+
+  useEffect(() => {
+    if (googleRefreshKey === 0) return;
+    refetchGoogleEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [googleRefreshKey]);
 
   useEffect(() => {
     if (refreshKey === 0) return;
@@ -94,6 +116,7 @@ export function MonthGrid({
 
   const blocksFor = (day: Date) => blocksByKey.get(`${weekOffsetForDate(day)}:${(day.getDay() + 6) % 7}`) || [];
   const assignmentsFor = (day: Date) => assignmentsByDate.get(format(day, 'yyyy-MM-dd')) || [];
+  const googleFor = (day: Date) => googleEventsForDay(googleEvents, format(day, 'yyyy-MM-dd'));
 
   const weeks = useMemo(() => {
     const result: Date[][] = [];
@@ -123,7 +146,25 @@ export function MonthGrid({
               const inMonth = isSameMonth(day, monthDate);
               const isToday = isSameDay(day, today);
 
+              const google = googleFor(day);
               const chips: Chip[] = [
+                ...google.allDay.map((g) => ({
+                  key: `ga-${g.id}`,
+                  title: g.title || t.googleEvent.untitled,
+                  time: t.calendar.allDay,
+                  color: g.color,
+                  isShift: false,
+                  // Ahead of anything with a time.
+                  startMinutes: -1,
+                })),
+                ...google.timed.map(({ event: g, start, end }) => ({
+                  key: `g-${g.id}`,
+                  title: g.title || t.googleEvent.untitled,
+                  time: formatCompactRange(Math.floor(start / 60), start % 60, Math.floor(end / 60) % 24, end % 60),
+                  color: g.color,
+                  isShift: false,
+                  startMinutes: start,
+                })),
                 ...assignmentsFor(day).map((a) => ({
                   key: `s-${a.id}`,
                   title: a.shift.title,
@@ -202,6 +243,12 @@ export function MonthGrid({
         date={selectedDate}
         blocks={selectedDate ? blocksFor(selectedDate) : []}
         assignments={selectedDate ? assignmentsFor(selectedDate) : []}
+        googleEvents={
+          selectedDate
+            ? [...googleFor(selectedDate).allDay, ...googleFor(selectedDate).timed.map((segment) => segment.event)]
+            : []
+        }
+        onEditGoogleEvent={onEditGoogleEvent}
         onClose={() => setSelectedDate(null)}
         onAddEvent={() => selectedDate && onAddEvent(selectedDate)}
         onAddShift={() => selectedDate && onAddShift(selectedDate)}

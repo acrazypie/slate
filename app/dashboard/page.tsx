@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { startOfWeek, addDays } from 'date-fns';
+import { startOfWeek, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, isSameMonth } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { X } from 'lucide-react';
@@ -11,6 +11,8 @@ import { SettingsView } from '@/components/SettingsView';
 import { ShiftsView } from '@/components/ShiftsView';
 import { BottomNav, AppTab } from '@/components/BottomNav';
 import { useBlocks } from '@/hooks/useBlocks';
+import { useMonthBlocks } from '@/hooks/useMonthBlocks';
+import { dateForWeekOffset, weekOffsetForDate } from '@/lib/recurrence';
 import { useShiftAssignments } from '@/hooks/useShifts';
 import { useI18n } from '@/components/LanguageProvider';
 
@@ -21,17 +23,34 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const supabase = createClient();
   const { t } = useI18n();
-  const { blocks, refetch: refetchBlocks } = useBlocks(0);
   // The summary counts this week's shifts too, not only events.
   const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 1 }), []);
+  const { blocks, refetch: refetchBlocks } = useBlocks(useMemo(() => weekOffsetForDate(weekStart), [weekStart]));
   const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
   const { assignments, refetch: refetchAssignments } = useShiftAssignments(weekStart, weekEnd);
+  // The same again for the current calendar month. Events are loaded by week,
+  // so the weeks at either end bring in a few days of the neighbouring months:
+  // those are dropped below.
+  const monthStart = useMemo(() => startOfMonth(new Date()), []);
+  const monthEnd = useMemo(() => endOfMonth(monthStart), [monthStart]);
+  const monthWeekOffsets = useMemo(
+    () => eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 }).map(weekOffsetForDate),
+    [monthStart, monthEnd]
+  );
+  const { blocks: monthWeeksBlocks, refetch: refetchMonthBlocks } = useMonthBlocks(monthWeekOffsets);
+  const monthBlocks = useMemo(
+    () => monthWeeksBlocks.filter((b) => isSameMonth(dateForWeekOffset(b.week_offset, b.day_of_week), monthStart)),
+    [monthWeeksBlocks, monthStart]
+  );
+  const { assignments: monthAssignments, refetch: refetchMonthAssignments } = useShiftAssignments(monthStart, monthEnd);
   // The calendar and the shifts tab keep their own copies of the data, so they
   // say when something changed and the summary reloads.
   const refreshSummary = useCallback(() => {
     refetchBlocks();
     refetchAssignments();
-  }, [refetchBlocks, refetchAssignments]);
+    refetchMonthBlocks();
+    refetchMonthAssignments();
+  }, [refetchBlocks, refetchAssignments, refetchMonthBlocks, refetchMonthAssignments]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -82,6 +101,8 @@ export default function DashboardPage() {
           user={currentUser}
           blocks={blocks}
           assignments={assignments}
+          monthBlocks={monthBlocks}
+          monthAssignments={monthAssignments}
           nav={{ active: tab, onChange: setTab }}
         />
       </aside>
@@ -116,8 +137,14 @@ export default function DashboardPage() {
             <X className="w-6 h-6 text-text-secondary" />
           </button>
         </div>
-        <div className="flex-1 -mt-4">
-          <Sidebar user={currentUser} blocks={blocks} assignments={assignments} />
+        <div className="flex-1 min-h-0 -mt-4">
+          <Sidebar
+            user={currentUser}
+            blocks={blocks}
+            assignments={assignments}
+            monthBlocks={monthBlocks}
+            monthAssignments={monthAssignments}
+          />
         </div>
       </div>
 

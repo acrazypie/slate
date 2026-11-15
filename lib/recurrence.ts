@@ -1,13 +1,4 @@
-import {
-  startOfWeek,
-  addWeeks,
-  addDays,
-  addMonths,
-  startOfMonth,
-  endOfMonth,
-  differenceInCalendarWeeks,
-  isAfter,
-} from 'date-fns';
+import { addWeeks, addDays, addMonths, startOfMonth, endOfMonth, isAfter } from 'date-fns';
 
 /**
  * Slate stores a recurring block as ONE row (a "series root") carrying a
@@ -18,7 +9,7 @@ import {
  */
 
 export interface SeriesLike {
-  week_offset: number;
+  week_offset: number; // weeks since EPOCH_WEEK_START, not relative to today
   day_of_week: number; // 0 = Monday ... 6 = Sunday, matching the rest of the app
   is_recurring?: boolean;
   recurrence_type?: 'weekly' | 'monthly' | null;
@@ -29,17 +20,82 @@ export interface SeriesLike {
 // years of weekly occurrences, more than enough for any practical use here.
 const MAX_OCCURRENCES = 104;
 
-/** week_offset 0 always means "whichever real week contains today", recomputed fresh. */
-export function weekOffsetForDate(date: Date): number {
-  const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const targetWeekStart = startOfWeek(date, { weekStartsOn: 1 });
-  return differenceInCalendarWeeks(targetWeekStart, thisWeekStart, { weekStartsOn: 1 });
+/**
+ * Stored week offsets (`blocks.week_offset`, `block_exceptions.occurrence_week_offset`)
+ * count whole weeks from this fixed Monday, so a stored value names the same
+ * real week for ever. They used to be relative to "the current week", which
+ * made every stored event slide forward a week each Monday.
+ *
+ * Changing this constant moves every stored event: don't.
+ */
+export const EPOCH_WEEK_START = '2024-01-01'; // a Monday
+
+const MS_PER_DAY = 86_400_000;
+const EPOCH_DAY = Date.UTC(2024, 0, 1) / MS_PER_DAY;
+
+/**
+ * Dates in this file are "calendar days": a Date at local midnight, read back
+ * only through its local year/month/day. Counting days through UTC keeps the
+ * arithmetic exact across daylight-saving changes and gives the same answer
+ * whatever time zone the code runs in.
+ */
+function dayNumber(date: Date): number {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / MS_PER_DAY;
 }
 
-/** The real calendar date a (week_offset, day_of_week) pair refers to right now. */
+function dateFromDayNumber(day: number): Date {
+  const utc = new Date(day * MS_PER_DAY);
+  return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate());
+}
+
+/** A calendar day from 'yyyy-MM-dd' (`new Date('yyyy-MM-dd')` would be UTC midnight instead). */
+export function dateFromKey(key: string): Date {
+  const [y, m, d] = key.slice(0, 10).split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** 'yyyy-MM-dd' of a calendar day (`toISOString()` would shift it by the zone offset). */
+export function keyFromDate(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** The stored week offset of the (Monday-first) week containing this calendar day. */
+export function weekOffsetForDate(date: Date): number {
+  return Math.floor((dayNumber(date) - EPOCH_DAY) / 7);
+}
+
+/** The calendar day a stored (week_offset, day_of_week) pair names. Does not depend on today's date. */
 export function dateForWeekOffset(weekOffset: number, dayOfWeek: number): Date {
-  const weekStart = startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
-  return addDays(weekStart, dayOfWeek);
+  return dateFromDayNumber(EPOCH_DAY + weekOffset * 7 + dayOfWeek);
+}
+
+/**
+ * Today as a calendar day. Pass a time zone on the server, whose own clock
+ * zone (UTC on Vercel) is not the user's: around midnight the two disagree
+ * about which day, and on a Sunday night about which week, it is.
+ */
+export function today(timeZone?: string, now: Date = new Date()): Date {
+  if (!timeZone) return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    .formatToParts(now)
+    .reduce<Record<string, string>>((acc, part) => ({ ...acc, [part.type]: part.value }), {});
+  return new Date(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
+}
+
+/** The stored week offset of the week containing today. */
+export function currentWeekOffset(timeZone?: string, now: Date = new Date()): number {
+  return weekOffsetForDate(today(timeZone, now));
+}
+
+/** From the navigation offset of `useWeek` (0 = the week containing today) to a stored offset. */
+export function storedOffsetFromView(viewOffset: number, now: Date = new Date()): number {
+  return currentWeekOffset(undefined, now) + viewOffset;
+}
+
+/** From a stored offset to the navigation offset of `useWeek` (0 = the week containing today). */
+export function viewOffsetFromStored(storedOffset: number, now: Date = new Date()): number {
+  return storedOffset - currentWeekOffset(undefined, now);
 }
 
 /** 1-5: which occurrence of its weekday this date is within its month (e.g. 2nd Tuesday = 2). */
@@ -81,7 +137,7 @@ export function getSeriesOccurrenceDates(series: SeriesLike): Date[] {
   const startDate = dateForWeekOffset(series.week_offset, series.day_of_week);
   if (!series.is_recurring) return [startDate];
 
-  const endDate = series.recurrence_end_date ? new Date(series.recurrence_end_date) : null;
+  const endDate = series.recurrence_end_date ? dateFromKey(series.recurrence_end_date) : null;
   const dates: Date[] = [];
 
   if (series.recurrence_type === 'monthly') {
