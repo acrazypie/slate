@@ -4,11 +4,12 @@
 export const ACCENT_STORAGE_KEY = 'slate-accent';
 import type { ColorKey } from './types';
 
-export const DEFAULT_ACCENT = '#D4EE5E';
+export const DEFAULT_ACCENT = '#6BB6A3';
 
 /** `name` is a key into `t.colors`. */
 export const ACCENT_OPTIONS: { value: string; name: ColorKey }[] = [
   // Presets that equal a block colour are left out, so the accent never reads as a block.
+  { value: '#6BB6A3', name: 'teal' },
   { value: '#D4EE5E', name: 'gesso' },
   { value: '#E0B84C', name: 'amber' },
   { value: '#8BC48A', name: 'sage' },
