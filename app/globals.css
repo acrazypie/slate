@@ -1,55 +1,64 @@
 @import "tailwindcss";
 
+/* Slate design system (slate-app DESIGN.md): near-black, hairlines, one accent
+   (Gesso), Syne for titles and DM Mono for everything else. Semantic names are
+   kept so components follow the palette. */
 @theme {
-  --font-sans: var(--font-dm-sans);
-  --font-serif: var(--font-dm-serif);
-  --color-bg: var(--color-bg, #121212);
-  --color-surface: var(--color-surface, #1e1e1e);
-  --color-surface-hover: var(--color-surface-hover, #272727);
-  --color-border: var(--color-border, #2e2e2e);
-  --color-border-strong: var(--color-border-strong, #383838);
-  --color-text-primary: var(--color-text-primary, #e0e0e0);
-  --color-text-secondary: var(--color-text-secondary, #a0a0a0);
-  --color-text-tertiary: var(--color-text-tertiary, #6c6c6c);
-  --color-accent: var(--color-accent, #e49c69);
-  --color-accent-contrast: var(--color-accent-contrast, #201a17);
-  --color-accent-text: var(--color-accent-text, #e49c69);
-  --color-danger: var(--color-danger, #f87171);
+  --font-sans: var(--font-mono);
+  --font-serif: var(--font-syne);
+  --color-bg: var(--color-bg, #0a0a0a);
+  --color-surface: var(--color-surface, #121214);
+  --color-surface-hover: var(--color-surface-hover, #1a1a1e);
+  --color-border: var(--color-border, rgba(255, 255, 255, 0.08));
+  --color-border-strong: var(--color-border-strong, rgba(255, 255, 255, 0.16));
+  --color-text-primary: var(--color-text-primary, #efefef);
+  --color-text-secondary: var(--color-text-secondary, #8d8d96);
+  --color-text-tertiary: var(--color-text-tertiary, #8d8d96);
+  --color-accent: var(--color-accent, #d4ee5e);
+  --color-accent-contrast: var(--color-accent-contrast, #0a0a0a);
+  --color-accent-text: var(--color-accent-text, #d4ee5e);
+  --color-danger: var(--color-danger, #ff5c8a);
 }
 
 :root {
-  --color-bg: #121212;
-  --color-surface: #1e1e1e;
-  --color-surface-hover: #272727;
-  --color-border: #2e2e2e;
-  --color-border-strong: #383838;
-  --color-text-primary: #e0e0e0;
-  --color-text-secondary: #a0a0a0;
-  /* Tertiary text is used at 10-12px, so it still has to clear 4.5:1 on every surface. */
-  --color-text-tertiary: #909090;
-  --color-accent: #e49c69;
-  --color-accent-contrast: #201a17;
-  /* The accent when it is used as text or as an icon. On dark it is the accent itself. */
-  --color-accent-text: var(--color-accent);
-  --color-danger: #f87171;
+  --color-bg: #0a0a0a;
+  --color-surface: #121214;
+  --color-surface-hover: #1a1a1e;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-text-primary: #efefef;
+  --color-text-secondary: #8d8d96;
+  /* Used for small text too, so it clears 4.5:1 on every surface. */
+  --color-text-tertiary: #8d8d96;
+  --color-accent: #d4ee5e;
+  --color-accent-contrast: #0a0a0a;
+  --color-accent-text: #d4ee5e;
+  --color-danger: #ff5c8a;
+  color-scheme: dark;
 }
 
+/* Light theme: a deeper accent, so it keeps its contrast on white. */
 .light {
-  --color-bg: #fff6ea;
-  --color-surface: #ffffff;
-  --color-surface-hover: #fdefdb;
-  /* Neutral sand, so borders don't read as the accent's focus state. */
-  --color-border: #ecdcc8;
-  --color-border-strong: #d9bfa3;
-  --color-text-primary: #201a17;
-  --color-text-secondary: #5c3b2e;
-  --color-text-tertiary: #7a6257;
-  --color-accent: #e49c69;
-  --color-accent-contrast: #201a17;
-  /* The raw accent is about 2:1 on white. Darkened halfway to the text colour
-     it clears 4.5:1, and it still follows a custom accent picked in Settings. */
-  --color-accent-text: color-mix(in srgb, var(--color-accent) 50%, #201a17);
-  --color-danger: #b91c1c;
+  --color-bg: #fafafa;
+  --color-surface: #f1f1f4;
+  --color-surface-hover: #e8e8ed;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+  --color-text-primary: #17171a;
+  --color-text-secondary: #55555f;
+  --color-text-tertiary: #55555f;
+  --color-accent: #5a7000;
+  --color-accent-contrast: #ffffff;
+  --color-accent-text: #5a7000;
+  --color-danger: #e0336a;
+  color-scheme: light;
+}
+
+h1,
+h2,
+.font-serif {
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 html {

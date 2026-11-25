@@ -10,6 +10,15 @@ export const en: LegalDocs = {
     ],
     sections: [
       {
+        title: "Calendar data in the Slate app",
+        blocks: [
+          "The Slate website does not read or write your Google Calendar or your phone calendar.",
+          "The Slate app for Android can show and change events in the calendars on your phone, and show events from your Google account, only after you give it permission. This data stays on the device. It is not sent to us or to any server run by us.",
+          "If you turn on Google sync in the app, blocks and shifts you create in Slate are copied to a calendar named Slate in your Google account, using your own sign-in. Slate does not keep your Google access token on any server. You can revoke access in your Google account at any time.",
+          "If you run your own Slate server, it receives only the blocks, shifts and settings you choose to sync with it. Events from your phone calendars or from Google are never sent to it.",
+        ],
+      },
+      {
         title: '1. Data controller',
         blocks: [
           'The data controller is **Matteo Genesio**, who can be reached by email at **egenesio@proton.me**.',

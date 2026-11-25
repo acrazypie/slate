@@ -30,11 +30,9 @@ export async function updateSession(request: NextRequest) {
 
   const isAuthenticated = !!user;
   // The callbacks are left alone, because signed-in people have to reach them:
-  // /auth/callback to be sent on to /reset-password from a password-reset link,
-  // /auth/google-calendar/callback to store the tokens after Google's consent screen.
+  // /auth/callback to be sent on to /reset-password from a password-reset link.
   const { pathname } = request.nextUrl;
-  const isCallback =
-    pathname.startsWith('/auth/callback') || pathname.startsWith('/auth/google-calendar/callback');
+  const isCallback = pathname.startsWith('/auth/callback');
   const isAuthRoute = pathname.startsWith('/auth') && !isCallback;
   const isDashboard = pathname.startsWith('/dashboard');
 

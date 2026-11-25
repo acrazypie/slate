@@ -7,8 +7,8 @@ import { useTheme } from 'next-themes';
 import { Sun, Moon, Monitor, ChevronDown, ChevronUp, CalendarCheck, Loader2, LogOut, Check, Smartphone } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ViewMode } from '@/hooks/useWeek';
-import { useGoogleCalendarConnection } from '@/hooks/useGoogleCalendarConnection';
 import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
+import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
 import { useI18n } from './LanguageProvider';
 
@@ -28,6 +28,58 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+/** Hourly rate, currency and overtime rules. Kept on this device; see lib/pay.ts. */
+function PaySection() {
+  const { t } = useI18n();
+  const [rules, save] = usePayRules();
+  const set = (patch: Partial<PayRules>) => save({ ...rules, ...patch });
+  const field = 'w-full rounded-lg bg-surface-hover px-3 py-2 text-sm text-text-primary';
+  return (
+    <Section title={t.pay.title}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-sm text-text-secondary">
+          {t.pay.rate}
+          <input
+            type="number"
+            min={0}
+            step={0.5}
+            inputMode="decimal"
+            className={`${field} mt-1`}
+            value={rules.hourlyRate ?? ''}
+            onChange={(e) => set({ hourlyRate: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })}
+          />
+        </label>
+        <label className="text-sm text-text-secondary">
+          {t.pay.currency}
+          <input type="text" maxLength={4} className={`${field} mt-1`} value={rules.currency} onChange={(e) => set({ currency: e.target.value })} />
+        </label>
+        <label className="text-sm text-text-secondary">
+          {t.pay.overtimeAfter}
+          <select
+            className={`${field} mt-1`}
+            value={rules.overtimeAfterHours ?? ''}
+            onChange={(e) => set({ overtimeAfterHours: e.target.value === '' ? null : Number(e.target.value) })}
+          >
+            <option value="">{t.pay.overtimeOff}</option>
+            {[35, 38, 40, 42, 48].map((h) => (
+              <option key={h} value={h}>{h}</option>
+            ))}
+          </select>
+        </label>
+        <label className="text-sm text-text-secondary">
+          {t.pay.multiplier}
+          <select className={`${field} mt-1`} value={rules.overtimeMultiplier} onChange={(e) => set({ overtimeMultiplier: Number(e.target.value) })}>
+            {[1.25, 1.5, 2, 2.5].map((m) => (
+              <option key={m} value={m}>×{m}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p className="text-xs text-text-tertiary mt-3">{t.pay.hint}</p>
+    </Section>
+  );
+}
+
 export function SettingsView({ user }: SettingsViewProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -38,8 +90,6 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [accent, setAccentState] = useState<string>(() => getStoredAccent());
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
-  const { connected, calendars, needsReconnect, connect, disconnect, setCalendarVisible } = useGoogleCalendarConnection();
-  const [calendarActionLoading, setCalendarActionLoading] = useState(false);
 
   const handleViewChange = (view: ViewMode) => {
     setDefaultView(view);
@@ -49,18 +99,6 @@ export function SettingsView({ user }: SettingsViewProps) {
   const handleAccentChange = (value: string) => {
     setAccentState(value);
     setAccent(value);
-  };
-
-  const handleConnectCalendar = async () => {
-    setCalendarActionLoading(true);
-    await connect();
-    // connect() redirects the browser away, so loading state just covers the gap.
-  };
-
-  const handleDisconnectCalendar = async () => {
-    setCalendarActionLoading(true);
-    await disconnect();
-    setCalendarActionLoading(false);
   };
 
   const handleLogout = async () => {
@@ -139,6 +177,8 @@ export function SettingsView({ user }: SettingsViewProps) {
           </div>
         </Section>
 
+        <PaySection />
+
         <Section title={t.settings.accent}>
           <div className="flex flex-wrap items-center -mx-1.5">
             {ACCENT_OPTIONS.map((option) => {
@@ -205,88 +245,6 @@ export function SettingsView({ user }: SettingsViewProps) {
           </div>
         </Section>
 
-        <Section title="Google Calendar">
-          {connected === null ? (
-            <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-surface-hover text-sm text-text-secondary">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {t.settings.gcalChecking}
-            </div>
-          ) : connected ? (
-            <>
-              <div className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-surface-hover">
-                <div className="flex items-center gap-2 text-sm text-text-primary">
-                  <CalendarCheck className="w-4 h-4 text-accent-text" />
-                  {t.settings.gcalConnected}
-                </div>
-                <button
-                  onClick={handleDisconnectCalendar}
-                  disabled={calendarActionLoading}
-                  className="px-3 min-h-11 -my-2 -mr-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-border transition-colors disabled:opacity-50"
-                >
-                  {t.settings.gcalDisconnect}
-                </button>
-              </div>
-
-              {calendars.length > 0 && (
-                <div role="group" aria-labelledby="gcal-calendars-label" className="mt-4">
-                  <p id="gcal-calendars-label" className="text-sm text-text-secondary mb-1">
-                    {t.settings.gcalCalendars}
-                  </p>
-                  <ul>
-                    {calendars.map((calendar) => (
-                      <li key={calendar.id}>
-                        <label className="flex items-center gap-3 px-3 min-h-11 -mx-3 sm:mx-0 rounded-xl hover:bg-surface-hover transition-colors cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={calendar.visible}
-                            onChange={(e) => setCalendarVisible(calendar.id, e.target.checked)}
-                            className="w-4 h-4 flex-shrink-0 accent-[var(--color-accent)]"
-                          />
-                          <span
-                            className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: calendar.color }}
-                            aria-hidden="true"
-                          />
-                          <span className="flex-1 min-w-0 truncate text-sm text-text-primary">{calendar.name}</span>
-                          {!calendar.canEdit && (
-                            <span className="text-[10px] uppercase tracking-wide text-text-tertiary flex-shrink-0">
-                              {t.settings.gcalReadOnly}
-                            </span>
-                          )}
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {needsReconnect && (
-                <div className="flex items-center justify-between gap-3 mt-2 px-3 py-2 rounded-xl border border-border">
-                  <p className="text-sm text-text-secondary">{t.settings.gcalReconnectHint}</p>
-                  <button
-                    onClick={handleConnectCalendar}
-                    disabled={calendarActionLoading}
-                    className="px-3 min-h-11 rounded-xl text-sm text-accent-text hover:bg-surface-hover transition-colors disabled:opacity-50 flex-shrink-0"
-                  >
-                    {t.settings.gcalReconnect}
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <button
-              onClick={handleConnectCalendar}
-              disabled={calendarActionLoading}
-              className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-surface-hover text-text-primary hover:bg-border transition-colors text-sm disabled:opacity-50"
-            >
-              {calendarActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarCheck className="w-4 h-4" />}
-              {t.settings.gcalConnect}
-            </button>
-          )}
-          <p className="text-xs text-text-tertiary mt-2">
-            {t.settings.gcalHint}
-          </p>
-        </Section>
 
         <Section title={t.settings.installTitle}>
           <p className="text-sm text-text-secondary leading-relaxed mb-3">

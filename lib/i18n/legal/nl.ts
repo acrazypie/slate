@@ -10,6 +10,15 @@ export const nl: LegalDocs = {
     ],
     sections: [
       {
+        title: "Agendagegevens in de Slate-app",
+        blocks: [
+          "De Slate-website leest of schrijft je Google Agenda of de agenda van je telefoon niet.",
+          "De Slate-app voor Android kan afspraken in de agenda’s op je telefoon tonen en wijzigen, en afspraken van je Google-account tonen, pas nadat je daarvoor toestemming geeft. Deze gegevens blijven op het apparaat. Ze worden niet naar ons of naar een server die wij beheren gestuurd.",
+          "Als je Google-synchronisatie in de app aanzet, worden blokken en diensten die je in Slate maakt, gekopieerd naar een agenda met de naam Slate in je Google-account, met je eigen inlog. Slate bewaart je Google-toegangstoken op geen enkele server. Je kunt de toegang op elk moment intrekken in je Google-account.",
+          "Als je je eigen Slate-server draait, ontvangt die alleen de blokken, diensten en instellingen die je kiest om te synchroniseren. Afspraken uit je telefoonagenda’s of uit Google worden er nooit naartoe gestuurd.",
+        ],
+      },
+      {
         title: '1. Verwerkingsverantwoordelijke',
         blocks: [
           'De verwerkingsverantwoordelijke is **Matteo Genesio**, bereikbaar via het e-mailadres **egenesio@proton.me**.',

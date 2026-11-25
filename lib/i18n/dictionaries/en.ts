@@ -33,6 +33,7 @@ export const en: Dictionary = {
     altro: 'Other',
   },
   colors: {
+    gesso: "Gesso",
     apricot: 'Apricot',
     sand: 'Sand',
     dune: 'Dune',
@@ -49,6 +50,32 @@ export const en: Dictionary = {
     day: 'Day',
     week: 'Week',
     month: 'Month',
+  },
+  site: {
+    downloadTitle: "Get the app",
+    downloadLede: "Slate runs on your phone. Your data stays on the device, and nothing leaves it unless you connect a server you run yourself.",
+    downloadApk: "Download for Android",
+    downloadSoon: "Download coming soon",
+    downloadNote: "Android APK. iOS is not available yet.",
+    selfTitle: "Run your own server",
+    selfLede: "A Slate server you host with Docker, for several users, under your control. In development.",
+    selfCta: "How to set it up",
+    repoSoon: "Repository coming soon",
+    cloudTitle: "Cloud version",
+    cloudLede: "The first version of Slate, hosted by us, for accounts that already exist.",
+    cloudCta: "Open the cloud app",
+    selfPageTitle: "Your own Slate server",
+    selfPageLede: "Status: in development. This is the setup it will have, so you can plan for it.",
+    selfSteps: [
+      "Get the server code from its repository and read docs/server-plan.md.",
+      "Copy .env.example to .env and set your domain and a database password.",
+      "Start it with docker compose up -d. The proxy gets the TLS certificate for your domain.",
+      "Create the first admin with the command in the repository README.",
+      "In the app, open Settings › Account, choose Your own Slate server, and enter your domain."
+    ],
+    selfStatus: "Not usable yet: the server is being built.",
+    back: "Back to the start",
+    repoLink: "Server repository"
   },
   landing: {
     tagline: 'Your week, in blocks.',
@@ -105,6 +132,17 @@ export const en: Dictionary = {
     calendar: 'Calendar',
     shifts: 'Shifts',
     settings: 'Settings',
+  },
+  pay: {
+    title: "Pay",
+    rate: "Hourly rate",
+    currency: "Currency",
+    overtimeAfter: "Overtime after (hours a week)",
+    overtimeOff: "No overtime",
+    multiplier: "Overtime multiplier",
+    earnings: "Earnings",
+    overtime: "Overtime",
+    hint: "Earnings count shifts only. Stored on this device."
   },
   summary: {
     title: 'Week summary',

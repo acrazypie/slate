@@ -33,6 +33,7 @@ export const es: Dictionary = {
     altro: 'Otro',
   },
   colors: {
+    gesso: "Gesso",
     apricot: 'Albaricoque',
     sand: 'Arena',
     dune: 'Duna',
@@ -49,6 +50,32 @@ export const es: Dictionary = {
     day: 'Día',
     week: 'Semana',
     month: 'Mes',
+  },
+  site: {
+    downloadTitle: "Descarga la app",
+    downloadLede: "Slate funciona en tu teléfono. Tus datos se quedan en el dispositivo y no salen a ningún sitio salvo que conectes un servidor que gestiones tú.",
+    downloadApk: "Descargar para Android",
+    downloadSoon: "Descarga próximamente",
+    downloadNote: "APK para Android. iOS aún no está disponible.",
+    selfTitle: "Gestiona tu propio servidor",
+    selfLede: "Un servidor de Slate que alojas con Docker, para varios usuarios, bajo tu control. En desarrollo.",
+    selfCta: "Cómo configurarlo",
+    repoSoon: "Repositorio próximamente",
+    cloudTitle: "Versión en la nube",
+    cloudLede: "La primera versión de Slate, alojada por nosotros, para cuentas que ya existen.",
+    cloudCta: "Abrir la app en la nube",
+    selfPageTitle: "Tu propio servidor de Slate",
+    selfPageLede: "Estado: en desarrollo. Esta es la configuración prevista, para que puedas planificarla.",
+    selfSteps: [
+      "Descarga el código del servidor desde su repositorio y lee docs/server-plan.md.",
+      "Copia .env.example a .env y pon tu dominio y una contraseña de base de datos.",
+      "Arráncalo con docker compose up -d. El proxy obtiene el certificado TLS para tu dominio.",
+      "Crea el primer administrador con el comando del README del repositorio.",
+      "En la app, abre Ajustes › Cuenta, elige Tu propio servidor de Slate e introduce tu dominio."
+    ],
+    selfStatus: "Todavía no es utilizable: el servidor está en construcción.",
+    back: "Volver al inicio",
+    repoLink: "Repositorio del servidor"
   },
   landing: {
     tagline: 'Tu semana, en bloques.',
@@ -105,6 +132,17 @@ export const es: Dictionary = {
     calendar: 'Calendario',
     shifts: 'Turnos',
     settings: 'Ajustes',
+  },
+  pay: {
+    title: "Pago",
+    rate: "Tarifa por hora",
+    currency: "Moneda",
+    overtimeAfter: "Horas extra a partir de (horas por semana)",
+    overtimeOff: "Sin horas extra",
+    multiplier: "Multiplicador de horas extra",
+    earnings: "Ganancias",
+    overtime: "Horas extra",
+    hint: "Las ganancias cuentan solo los turnos. Se guarda en este dispositivo."
   },
   summary: {
     title: 'Resumen de la semana',

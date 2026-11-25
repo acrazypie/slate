@@ -17,7 +17,6 @@ this page in the same change.
 | `block_exceptions` | One skipped occurrence of a recurring series | via `blocks.user_id` |
 | `shifts` | A reusable shift definition | `user_id` |
 | `shift_assignments` | A shift placed on one calendar day | `user_id` |
-| `google_calendar_tokens` | A user's Google Calendar connection | `user_id` (primary key) |
 
 Deleting a user cascades to all of their rows. Deleting a block cascades to
 its exceptions; deleting a shift cascades to its assignments.
@@ -99,21 +98,8 @@ one day. The app treats that unique violation (`23505`) as a no-op. The insert
 policy also checks that the shift belongs to the user. Assignments cannot be
 updated, only inserted and deleted.
 
-## `google_calendar_tokens`
-
-| Column | Type | Notes |
-|---|---|---|
-| `user_id` | `uuid` | Primary key, references `auth.users`, cascade delete |
-| `access_token` | `text` | Short-lived Google access token |
-| `refresh_token` | `text` | Long-lived, used to mint new access tokens |
-| `expires_at` | `timestamptz` | When the access token expires |
-| `calendar_id` | `text` | The calendar Slate's own events are copied to. Default `primary` |
-| `hidden_calendar_ids` | `text[]` | Calendars the user switched off in Settings. Default empty: every calendar is shown |
-| `last_pulled_at` | `timestamptz` | When changes made in Google were last pulled into `blocks`. Null until the first pull |
-| `created_at`, `updated_at` | `timestamptz` | |
-
-The existence of a row is what "connected" means in the UI. Tokens are stored
-as plain text and are readable by their owner through RLS.
+> The `google_calendar_tokens` table was dropped. The website no longer connects to Google;
+> see [google-calendar.md](google-calendar.md).
 
 ## Migrations
 

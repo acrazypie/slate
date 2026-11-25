@@ -21,10 +21,8 @@ The interface is in Italian. Live at [slate.egenesio.com](https://slate.egenesio
 - **Shifts**: define a shift once ("Mattina 09:00–13:00") and drop it on any
   day. Overnight shifts are supported.
 - **Weekly and monthly summaries** of hours per category, shifts included.
-- **Google Calendar sync**, two way: your events are copied to Google and
-  changes made there come back, and your Google calendars show up in Slate,
-  where their events can be edited.
-- **Accounts** with email and password or Google sign-in, plus password reset.
+- **Accounts** with email and password, plus password reset. Google calendars
+  are used by the Slate app, not by this website (see docs/google-calendar.md).
 - **Light, dark and system themes**, a configurable accent colour and a
   default view, stored per device.
 - Installable on a phone's home screen.

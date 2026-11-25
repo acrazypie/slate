@@ -10,6 +10,15 @@ export const fr: LegalDocs = {
     ],
     sections: [
       {
+        title: "Données d’agenda dans l’app Slate",
+        blocks: [
+          "Le site Slate ne lit ni n’écrit dans votre Google Agenda ni dans l’agenda de votre téléphone.",
+          "L’app Slate pour Android peut afficher et modifier des événements des agendas de votre téléphone, et afficher des événements de votre compte Google, uniquement après que vous lui en avez donné l’autorisation. Ces données restent sur l’appareil. Elles ne sont envoyées ni à nous, ni à aucun serveur que nous gérons.",
+          "Si vous activez la synchro Google dans l’app, les blocs et services que vous créez dans Slate sont copiés dans un agenda nommé Slate de votre compte Google, avec votre propre connexion. Slate ne conserve votre jeton d’accès Google sur aucun serveur. Vous pouvez révoquer l’accès dans votre compte Google à tout moment.",
+          "Si vous gérez votre propre serveur Slate, il ne reçoit que les blocs, services et réglages que vous choisissez de synchroniser. Les événements de vos agendas du téléphone ou de Google ne lui sont jamais envoyés.",
+        ],
+      },
+      {
         title: '1. Responsable du traitement',
         blocks: [
           'Le responsable du traitement est **Matteo Genesio**, joignable à l’adresse e-mail **egenesio@proton.me**.',

@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Block, BlockFormData } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
-import { syncToGoogleCalendar } from '@/lib/googleCalendarClient';
 import { dateForWeekOffset, isWeekOffsetInSeries, keyFromDate, SeriesLike } from '@/lib/recurrence';
 
 /**
@@ -130,8 +129,6 @@ export function useBlocks(weekOffset: number) {
       }));
     }
 
-    syncToGoogleCalendar({ action: 'upsert', blockIds: [data.id] });
-
     return data;
   };
 
@@ -159,19 +156,15 @@ export function useBlocks(weekOffset: number) {
       })
     );
 
-    syncToGoogleCalendar({ action: 'upsert', blockIds: [id] });
-
     return data;
   };
 
-  const deleteBlock = async (id: string, googleEventId?: string | null): Promise<boolean> => {
+  const deleteBlock = async (id: string): Promise<boolean> => {
     // For a non-recurring block only - deleting one occurrence or a whole
     // recurring series goes through the dedicated recurrence-aware handlers
     // in WeekGrid (deleteOccurrence / truncateSeriesBefore / deleteEntireSeries),
     // since those need exception rows and start-date bookkeeping this
     // single-row delete doesn't know about.
-    const existing = blocks.find((b) => b.id === id);
-
     const { error } = await supabase
       .from('blocks')
       .delete()
@@ -183,13 +176,6 @@ export function useBlocks(weekOffset: number) {
     }
 
     setBlocks((prev) => prev.filter((b) => b.id !== id));
-
-    // The block may not be in this hook's week (deleted from the month view),
-    // so the caller can pass its Google event id directly.
-    const eventId = existing?.google_event_id ?? googleEventId;
-    if (eventId) {
-      syncToGoogleCalendar({ action: 'delete', eventIds: [eventId] });
-    }
 
     return true;
   };

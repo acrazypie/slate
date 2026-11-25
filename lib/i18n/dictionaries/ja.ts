@@ -33,6 +33,7 @@ export const ja: Dictionary = {
     altro: 'その他',
   },
   colors: {
+    gesso: "ジェッソ",
     apricot: 'アプリコット',
     sand: 'サンド',
     dune: 'デューン',
@@ -49,6 +50,32 @@ export const ja: Dictionary = {
     day: '日',
     week: '週',
     month: '月',
+  },
+  site: {
+    downloadTitle: "アプリを入手",
+    downloadLede: "Slateはお使いの端末で動きます。データは端末に残り、ご自身で運用するサーバーに接続しない限り外へは出ません。",
+    downloadApk: "Android版をダウンロード",
+    downloadSoon: "ダウンロードは近日公開",
+    downloadNote: "Android用APKです。iOS版はまだありません。",
+    selfTitle: "自分のサーバーで運用",
+    selfLede: "Dockerで自分のサーバーに立てる、複数ユーザー対応のSlateサーバーです。開発中です。",
+    selfCta: "セットアップ方法",
+    repoSoon: "リポジトリは近日公開",
+    cloudTitle: "クラウド版",
+    cloudLede: "当方がホストする最初のSlateです。既存のアカウント向けです。",
+    cloudCta: "クラウド版を開く",
+    selfPageTitle: "自分のSlateサーバー",
+    selfPageLede: "状況：開発中です。今後のセットアップの流れを先にご覧ください。",
+    selfSteps: [
+      "サーバーのコードをリポジトリから取得し、docs/server-plan.md を読みます。",
+      ".env.example を .env にコピーし、ドメインとデータベースのパスワードを設定します。",
+      "docker compose up -d で起動します。プロキシがドメインのTLS証明書を取得します。",
+      "リポジトリのREADMEにあるコマンドで最初の管理者を作成します。",
+      "アプリで「設定 › アカウント」を開き、「自分のSlateサーバー」を選んでドメインを入力します。"
+    ],
+    selfStatus: "まだ使えません。サーバーを開発中です。",
+    back: "トップに戻る",
+    repoLink: "サーバーのリポジトリ"
   },
   landing: {
     tagline: '1週間を、ブロックで。',
@@ -105,6 +132,17 @@ export const ja: Dictionary = {
     calendar: 'カレンダー',
     shifts: 'シフト',
     settings: '設定',
+  },
+  pay: {
+    title: "給与",
+    rate: "時給",
+    currency: "通貨",
+    overtimeAfter: "残業の基準（週あたり時間）",
+    overtimeOff: "残業なし",
+    multiplier: "残業の割増率",
+    earnings: "収入",
+    overtime: "残業",
+    hint: "収入はシフトのみで計算します。この端末に保存されます。"
   },
   summary: {
     title: '今週のまとめ',

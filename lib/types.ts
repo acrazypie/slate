@@ -24,96 +24,6 @@ export interface Block {
   created_at: string;
 }
 
-/** One of the user's Google calendars, as listed in Settings. */
-export interface GoogleCalendar {
-  id: string;
-  name: string;
-  color: string;
-  primary: boolean;
-  /** False for calendars the user can only read (holidays, shared read-only). */
-  canEdit: boolean;
-  /** Whether its events are shown in Slate. */
-  visible: boolean;
-}
-
-/**
- * An event that lives only in Google Calendar, shown next to Slate's own
- * events. Dates and times are wall-clock values in Slate's time zone. A
- * recurring event arrives already expanded: one entry per occurrence.
- */
-export interface GoogleEvent {
-  id: string;
-  calendarId: string;
-  calendarName: string;
-  title: string;
-  notes: string;
-  location: string | null;
-  color: string;
-  allDay: boolean;
-  /** First day, 'yyyy-MM-dd'. */
-  startDate: string;
-  /** Last day, inclusive. Differs from `startDate` for multi-day events. */
-  endDate: string;
-  /** Start and end times. Both 0 for an all-day event. */
-  start_hour: number;
-  start_minute: number;
-  end_hour: number;
-  end_minute: number;
-  /** Set on an occurrence of a recurring event: the id of the series. */
-  recurringEventId: string | null;
-  canEdit: boolean;
-  htmlLink: string | null;
-}
-
-/** What the edit form sends back for a Google event. */
-export interface GoogleEventChanges {
-  title: string;
-  notes: string;
-  allDay: boolean;
-  startDate: string;
-  endDate: string;
-  start_hour: number;
-  start_minute: number;
-  end_hour: number;
-  end_minute: number;
-}
-
-/** For a recurring Google event: change just this occurrence, or the whole series. */
-export type GoogleEventScope = 'this' | 'all';
-
-/** The part of a Google event that falls on one day, in minutes from midnight. */
-export interface GoogleEventSegment {
-  event: GoogleEvent;
-  start: number;
-  end: number;
-}
-
-/**
- * Splits events into what each day shows: all-day events as a list, timed
- * events as the slice of them that falls on that day (an event running past
- * midnight gives one slice per day).
- */
-export function googleEventsForDay(
-  events: GoogleEvent[],
-  dateKey: string
-): { allDay: GoogleEvent[]; timed: GoogleEventSegment[] } {
-  const allDay: GoogleEvent[] = [];
-  const timed: GoogleEventSegment[] = [];
-  for (const event of events) {
-    if (dateKey < event.startDate || dateKey > event.endDate) continue;
-    if (event.allDay) {
-      allDay.push(event);
-      continue;
-    }
-    const start = dateKey === event.startDate ? event.start_hour * 60 + event.start_minute : 0;
-    const end = dateKey === event.endDate ? event.end_hour * 60 + event.end_minute : 24 * 60;
-    // An event ending at midnight exactly has nothing on its last day.
-    if (end > start) timed.push({ event, start, end });
-  }
-  timed.sort((a, b) => a.start - b.start || a.end - b.end);
-  return { allDay, timed };
-}
-
 /** Where a card sits when several overlap: column `col` of `cols` side by side. */
 export interface OverlapSlot {
   col: number;
@@ -273,7 +183,7 @@ export const COLOR_KEYS = {
 } as const satisfies Record<string, ColorKey>;
 
 export type ColorKey =
-  | 'apricot' | 'sand' | 'dune' | 'cacao' | 'violet' | 'raspberry' | 'teal' | 'skyBlue' | 'amber' | 'sage' | 'pink';
+  | 'apricot' | 'sand' | 'dune' | 'cacao' | 'violet' | 'raspberry' | 'teal' | 'skyBlue' | 'amber' | 'sage' | 'pink' | 'gesso';
 
 export function colorKey(hex: string): ColorKey | undefined {
   return (COLOR_KEYS as Record<string, ColorKey>)[hex];

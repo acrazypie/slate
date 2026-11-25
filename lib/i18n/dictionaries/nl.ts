@@ -33,6 +33,7 @@ export const nl: Dictionary = {
     altro: 'Overig',
   },
   colors: {
+    gesso: "Gesso",
     apricot: 'Abrikoos',
     sand: 'Zand',
     dune: 'Duin',
@@ -49,6 +50,32 @@ export const nl: Dictionary = {
     day: 'Dag',
     week: 'Week',
     month: 'Maand',
+  },
+  site: {
+    downloadTitle: "Download de app",
+    downloadLede: "Slate draait op je telefoon. Je gegevens blijven op het apparaat en verlaten het niet, tenzij je een server koppelt die je zelf beheert.",
+    downloadApk: "Downloaden voor Android",
+    downloadSoon: "Download komt binnenkort",
+    downloadNote: "Android-APK. iOS is nog niet beschikbaar.",
+    selfTitle: "Draai je eigen server",
+    selfLede: "Een Slate-server die je met Docker host, voor meerdere gebruikers, onder jouw beheer. In ontwikkeling.",
+    selfCta: "Zo zet je hem op",
+    repoSoon: "Repository komt binnenkort",
+    cloudTitle: "Cloudversie",
+    cloudLede: "De eerste versie van Slate, door ons gehost, voor bestaande accounts.",
+    cloudCta: "Open de cloud-app",
+    selfPageTitle: "Je eigen Slate-server",
+    selfPageLede: "Status: in ontwikkeling. Dit is de opzet die hij krijgt, zodat je er alvast rekening mee kunt houden.",
+    selfSteps: [
+      "Haal de servercode uit de repository en lees docs/server-plan.md.",
+      "Kopieer .env.example naar .env en vul je domein en een databasewachtwoord in.",
+      "Start hem met docker compose up -d. De proxy haalt het TLS-certificaat voor je domein op.",
+      "Maak de eerste beheerder aan met het commando in de README van de repository.",
+      "Open in de app Instellingen › Account, kies Je eigen Slate-server en vul je domein in."
+    ],
+    selfStatus: "Nog niet bruikbaar: de server wordt gebouwd.",
+    back: "Terug naar het begin",
+    repoLink: "Serverrepository"
   },
   landing: {
     tagline: 'Jouw week, in blokken.',
@@ -106,6 +133,17 @@ export const nl: Dictionary = {
     calendar: 'Agenda',
     shifts: 'Diensten',
     settings: 'Instellingen',
+  },
+  pay: {
+    title: "Loon",
+    rate: "Uurtarief",
+    currency: "Valuta",
+    overtimeAfter: "Overwerk vanaf (uur per week)",
+    overtimeOff: "Geen overwerk",
+    multiplier: "Overwerktoeslag",
+    earnings: "Verdiensten",
+    overtime: "Overwerk",
+    hint: "Verdiensten tellen alleen diensten. Opgeslagen op dit apparaat."
   },
   summary: {
     title: 'Weekoverzicht',

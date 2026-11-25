@@ -1,10 +1,14 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Download, Server, Cloud } from 'lucide-react';
 import { CATEGORY_COLORS } from '@/lib/types';
 import { LanguageSelect } from '@/components/LanguageSelect';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
 import { weekdayNames } from '@/lib/i18n/format';
 import { getI18n } from '@/lib/i18n/server';
+
+// Links are set at build time. Empty means "not published yet": the button shows as coming soon.
+const APK_URL = process.env.NEXT_PUBLIC_APK_URL ?? '';
+const SERVER_REPO_URL = process.env.NEXT_PUBLIC_SERVER_REPO_URL ?? '';
 
 const PREVIEW_HOURS = 8; // 08:00 to 16:00
 
@@ -70,31 +74,63 @@ function WeekPreview({ days, titles }: { days: string[]; titles: Dictionary['lan
   );
 }
 
+function Card({ icon, title, lede, cta, href, external }: { icon: React.ReactNode; title: string; lede: string; cta: string; href: string; external?: boolean }) {
+  const classes = 'inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent text-accent-contrast font-medium text-sm transition-opacity hover:opacity-90';
+  return (
+    <div className="flex-1 min-w-[16rem] rounded-2xl border border-border bg-surface p-6 text-left flex flex-col gap-4">
+      <div className="text-accent-text">{icon}</div>
+      <h2 className="font-serif text-2xl text-text-primary">{title}</h2>
+      <p className="text-sm text-text-secondary leading-relaxed flex-1">{lede}</p>
+      {href ? (
+        external ? (
+          <a href={href} className={classes}>{cta}<ArrowRight className="w-4 h-4" /></a>
+        ) : (
+          <Link href={href} className={classes}>{cta}<ArrowRight className="w-4 h-4" /></Link>
+        )
+      ) : (
+        <span className="inline-flex items-center px-5 py-3 rounded-xl border border-border text-text-tertiary text-sm">{cta}</span>
+      )}
+    </div>
+  );
+}
+
 export default async function Home() {
   const { locale, t } = await getI18n();
+  const s = t.site;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-bg px-4 py-12">
-      <main className="max-w-2xl w-full flex flex-col items-center text-center">
-        <h1 className="font-serif text-6xl md:text-8xl text-text-primary mb-4">
-          Slate
-        </h1>
+    <div className="min-h-screen flex flex-col items-center bg-bg px-4 py-12">
+      <main className="max-w-4xl w-full flex flex-col items-center text-center">
+        <h1 className="font-serif text-6xl md:text-8xl text-text-primary mb-4">Slate</h1>
+        <p className="text-xl md:text-2xl text-text-secondary mb-3">{t.landing.tagline}</p>
+        <p className="text-text-secondary text-sm mb-10">{t.landing.subtitle}</p>
 
-        <p className="text-xl md:text-2xl text-text-secondary mb-3">
-          {t.landing.tagline}
-        </p>
+        <section className="w-full flex flex-wrap gap-4 justify-center">
+          <Card
+            icon={<Download className="w-6 h-6" />}
+            title={s.downloadTitle}
+            lede={s.downloadLede}
+            cta={APK_URL ? s.downloadApk : s.downloadSoon}
+            href={APK_URL}
+            external
+          />
+          <Card
+            icon={<Server className="w-6 h-6" />}
+            title={s.selfTitle}
+            lede={s.selfLede}
+            cta={s.selfCta}
+            href="/self-host"
+          />
+          <Card
+            icon={<Cloud className="w-6 h-6" />}
+            title={s.cloudTitle}
+            lede={s.cloudLede}
+            cta={s.cloudCta}
+            href="/auth/login"
+          />
+        </section>
 
-        <p className="text-text-secondary text-sm mb-8">
-          {t.landing.subtitle}
-        </p>
-
-        <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-accent-contrast rounded-xl font-medium text-lg transition-all duration-200 hover:opacity-90 hover:scale-105"
-        >
-          {t.landing.cta}
-          <ArrowRight className="w-5 h-5" />
-        </Link>
+        <p className="text-xs text-text-tertiary mt-4">{s.downloadNote}</p>
 
         <div className="mt-12 w-full flex justify-center">
           <WeekPreview days={weekdayNames(locale).slice(0, 5)} titles={t.landing.preview} />
@@ -102,12 +138,12 @@ export default async function Home() {
       </main>
 
       <footer className="mt-12 flex flex-wrap items-center justify-center gap-2 text-xs text-text-tertiary">
-        <Link href="/privacy" className="px-2 py-3 hover:text-text-secondary transition-colors">
-          {t.common.privacy}
-        </Link>
-        <Link href="/terms" className="px-2 py-3 hover:text-text-secondary transition-colors">
-          {t.common.terms}
-        </Link>
+        <Link href="/self-host" className="px-2 py-3 hover:text-text-secondary transition-colors">{s.selfCta}</Link>
+        <Link href="/privacy" className="px-2 py-3 hover:text-text-secondary transition-colors">{t.common.privacy}</Link>
+        <Link href="/terms" className="px-2 py-3 hover:text-text-secondary transition-colors">{t.common.terms}</Link>
+        {SERVER_REPO_URL && (
+          <a href={SERVER_REPO_URL} className="px-2 py-3 hover:text-text-secondary transition-colors">{s.repoLink}</a>
+        )}
         <LanguageSelect className="px-2" />
       </footer>
     </div>

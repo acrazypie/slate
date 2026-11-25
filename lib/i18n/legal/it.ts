@@ -12,6 +12,15 @@ export const it: LegalDocs = {
     ],
     sections: [
       {
+        title: "Dati del calendario nell’app Slate",
+        blocks: [
+          "Il sito di Slate non legge né scrive il tuo Google Calendar o il calendario del telefono.",
+          "L’app Slate per Android può mostrare e modificare eventi nei calendari del telefono e mostrare eventi del tuo account Google, solo dopo che gliene dai il permesso. Questi dati restano sul dispositivo. Non vengono inviati a noi né a nessun server gestito da noi.",
+          "Se attivi la sincronizzazione Google nell’app, i blocchi e i turni che crei in Slate vengono copiati in un calendario chiamato Slate nel tuo account Google, con il tuo accesso. Slate non conserva il tuo token di accesso a Google su nessun server. Puoi revocare l’accesso dal tuo account Google in qualsiasi momento.",
+          "Se gestisci un tuo server Slate, riceve solo i blocchi, i turni e le impostazioni che scegli di sincronizzare. Gli eventi dei calendari del telefono o di Google non gli vengono mai inviati.",
+        ],
+      },
+      {
         title: '1. Titolare del trattamento',
         blocks: [
           "Il Titolare del trattamento è **Matteo Genesio**, contattabile all'indirizzo e-mail **egenesio@proton.me**.",

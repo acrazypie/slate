@@ -20,7 +20,6 @@ import {
   viewOffsetFromStored,
   weekOffsetForDate,
 } from '../lib/recurrence';
-import { eventToBlockFields } from '../lib/googleCalendarPull';
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -116,23 +115,6 @@ mock.timers.reset();
 const sundayNightUtc = new Date('2026-11-15T23:30:00Z');
 check('current week in Europe/Rome', currentWeekOffset('Europe/Rome', sundayNightUtc), 150);
 check('current week in UTC', currentWeekOffset('UTC', sundayNightUtc), 149);
-
-// ---------------------------------------------------------------------------
-console.log('\n=== Pulling from Google gives the same week whatever the clock says ===');
-const googleEvent = {
-  id: 'x',
-  summary: 'Lezione',
-  start: { dateTime: '2026-11-11T09:00:00+01:00' },
-  end: { dateTime: '2026-11-11T10:00:00+01:00' },
-  recurrence: ['RRULE:FREQ=WEEKLY;UNTIL=20261209T225900Z', 'EXDATE;TZID=Europe/Rome:20261125T090000'],
-};
-for (const clock of ['2026-11-15', '2026-11-16', '2027-03-29']) {
-  setClock(clock);
-  const pulled = eventToBlockFields(googleEvent as never);
-  check('week_offset, day, end date, skipped weeks', [
-    pulled?.fields.week_offset, pulled?.fields.day_of_week, pulled?.fields.recurrence_end_date, pulled?.skippedWeeks,
-  ], [149, 2, '2026-12-09', [151]]);
-}
 
 mock.timers.reset();
 console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);

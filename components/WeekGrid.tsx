@@ -9,26 +9,18 @@ import { useBlocks } from '@/hooks/useBlocks';
 import { useShifts, useShiftAssignments } from '@/hooks/useShifts';
 import { weekOffsetForDate } from '@/hooks/useMonthBlocks';
 import { dateForWeekOffset, getSeriesOccurrenceWeekOffsets, SeriesLike } from '@/lib/recurrence';
-import { syncToGoogleCalendar, updateGoogleEvent, deleteGoogleEvent } from '@/lib/googleCalendarClient';
-import { useGoogleEvents } from '@/hooks/useGoogleEvents';
 import {
   Block,
   BlockFormData,
-  GoogleEvent,
-  GoogleEventChanges,
-  GoogleEventScope,
   OverlapSlot,
   Shift,
   ShiftAssignment,
   ShiftFormData,
-  googleEventsForDay,
   layoutOverlaps,
 } from '@/lib/types';
 import { DayHeader } from './DayHeader';
 import { BlockCard } from './BlockCard';
 import { BlockModal } from './BlockModal';
-import { GoogleEventCard, AllDayChip } from './GoogleEventCard';
-import { GoogleEventModal } from './GoogleEventModal';
 import { ShiftCard } from './ShiftCard';
 import { ShiftModal } from './ShiftModal';
 import { CreateChoiceSheet } from './CreateChoiceSheet';
@@ -51,8 +43,6 @@ const DAY_HOUR_HEIGHT = 56; // px, matches h-14
 const STRIP_OFFSETS = [-2, -1, 0, 1, 2];
 // All-day events sit in a row under the day headers, every column the same
 // height. Past this many, the last line turns into "+n".
-const MAX_ALL_DAY_ROWS = 3;
-const ALL_DAY_ROW_HEIGHT = 22; // px: a 20px chip and its gap
 
 export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
   const { locale, t } = useI18n();
@@ -108,32 +98,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
     onDataChange?.();
   };
 
-  // Events from the user's Google calendars, shown next to Slate's own. Loading
-  // them also brings back changes made in Google to events created here.
-  const handleBlocksPulled = () => {
-    fetchBlocks();
-    onDataChange?.();
-  };
-  const { events: googleEvents, refetch: refetchGoogleEvents } = useGoogleEvents(weekDays[0], weekDays[6], {
-    enabled: view !== 'month',
-    onBlocksChanged: handleBlocksPulled,
-  });
-  const [selectedGoogleEvent, setSelectedGoogleEvent] = useState<GoogleEvent | null>(null);
-  // Tells the month view to reload its Google events after one is edited here.
-  const [googleRefreshKey, setGoogleRefreshKey] = useState(0);
-
-  const afterGoogleWrite = (ok: boolean) => {
-    if (!ok) return false;
-    setSelectedGoogleEvent(null);
-    refetchGoogleEvents();
-    setGoogleRefreshKey((k) => k + 1);
-    return true;
-  };
-  const handleSaveGoogleEvent = async (changes: GoogleEventChanges, scope: GoogleEventScope) =>
-    !!selectedGoogleEvent && afterGoogleWrite(await updateGoogleEvent(selectedGoogleEvent, changes, scope));
-  const handleDeleteGoogleEvent = async (scope: GoogleEventScope) =>
-    !!selectedGoogleEvent && afterGoogleWrite(await deleteGoogleEvent(selectedGoogleEvent, scope));
-
   const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
     const todayIndex = (new Date().getDay() + 6) % 7;
     return todayIndex;
@@ -172,26 +136,18 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
     return assignments.filter((a) => a.shift_date === dateKey);
   };
 
-  // Everything one day's column draws: Slate events, Google events, and how
-  // the ones that overlap share the width.
+  // Everything one day's column draws: Slate events, and how the ones that
+  // overlap share the width.
   const getDayContent = (dayIndex: number) => {
-    const day = weekDays[dayIndex];
     const dayBlocks = getBlocksForDay(dayIndex);
-    const google = day ? googleEventsForDay(googleEvents, format(day, 'yyyy-MM-dd')) : { allDay: [], timed: [] };
     // Short events are drawn at least half an hour tall, so they overlap as if they were.
-    const slots: Map<string, OverlapSlot> = layoutOverlaps([
-      ...dayBlocks.map((b) => {
+    const slots: Map<string, OverlapSlot> = layoutOverlaps(
+      dayBlocks.map((b) => {
         const start = b.start_hour * 60 + b.start_minute;
         return { key: `b:${b.id}`, start, end: start + Math.max(b.duration_minutes, 30) };
       }),
-      ...google.timed.map((g) => ({ key: `g:${g.event.id}`, start: g.start, end: Math.max(g.end, g.start + 30) })),
-    ]);
-    return { dayBlocks, google, slots };
-  };
-
-  const openGoogleEvent = (event: GoogleEvent, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedGoogleEvent(event);
+    );
+    return { dayBlocks, slots };
   };
 
   // ---- Creating: slot click -> "event or shift?" ----
@@ -257,7 +213,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
 
   const handleDeleteBlock = async () => {
     if (selectedBlock) {
-      await deleteBlock(selectedBlock.id, selectedBlock.google_event_id);
+      await deleteBlock(selectedBlock.id);
       setIsModalOpen(false);
       bumpRefresh();
     }
@@ -342,7 +298,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
         .insert({ block_id: seriesId, occurrence_week_offset: occurrenceWeekOffset });
     }
 
-    syncToGoogleCalendar({ action: 'upsert', blockIds: [seriesId] });
     fetchBlocks();
   };
 
@@ -369,20 +324,13 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
       .eq('block_id', seriesId)
       .gte('occurrence_week_offset', occurrenceWeekOffset);
 
-    syncToGoogleCalendar({ action: 'upsert', blockIds: [seriesId] });
     fetchBlocks();
   };
 
   /** Removes the whole series (and, via cascade, its exceptions). */
   const deleteEntireSeries = async (seriesId: string) => {
     const supabase = createClient();
-    const { data: root } = await supabase.from('blocks').select('google_event_id').eq('id', seriesId).single();
-
     await supabase.from('blocks').delete().eq('id', seriesId);
-
-    if (root?.google_event_id) {
-      syncToGoogleCalendar({ action: 'delete', eventIds: [root.google_event_id] });
-    }
 
     fetchBlocks();
   };
@@ -395,18 +343,12 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
   }, [isCurrentDay, currentHour, currentMinute]);
 
   const selectedDay = weekDays[selectedDayIndex];
-  const {
-    dayBlocks: dayBlocksForSelectedDay,
-    google: googleForSelectedDay,
-    slots: slotsForSelectedDay,
-  } = getDayContent(selectedDayIndex);
+  const { dayBlocks: dayBlocksForSelectedDay, slots: slotsForSelectedDay } = getDayContent(selectedDayIndex);
   const dayAssignmentsForSelectedDay = getAssignmentsForDay(selectedDayIndex);
-  const splitSelectedDay =
-    dayBlocksForSelectedDay.length + googleForSelectedDay.timed.length > 0 && dayAssignmentsForSelectedDay.length > 0;
+  const splitSelectedDay = dayBlocksForSelectedDay.length > 0 && dayAssignmentsForSelectedDay.length > 0;
 
   // The week's columns share one height for their all-day rows: the busiest day's.
   const weekContent = weekDays.map((_, dayIndex) => getDayContent(dayIndex));
-  const allDayRows = Math.min(MAX_ALL_DAY_ROWS, Math.max(0, ...weekContent.map((c) => c.google.allDay.length)));
   const isTodaySelectedDay = selectedDay ? isSameDay(selectedDay, today) : false;
 
   // Moves the selected day by `delta` days, crossing week boundaries (and
@@ -591,13 +533,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
             })}
           </div>
 
-          {googleForSelectedDay.allDay.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 px-3 py-1.5 border-b border-border">
-              {googleForSelectedDay.allDay.map((event) => (
-                <AllDayChip key={event.id} event={event} onClick={(e) => openGoogleEvent(event, e)} />
-              ))}
-            </div>
-          )}
 
           <div
             key={`${weekOffset}-${selectedDayIndex}`}
@@ -650,15 +585,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                     onClick={(e) => handleBlockClick(block, e)}
                   />
                 ))}
-                {googleForSelectedDay.timed.map((segment) => (
-                  <GoogleEventCard
-                    key={segment.event.id}
-                    segment={segment}
-                    half={splitSelectedDay}
-                    slot={slotsForSelectedDay.get(`g:${segment.event.id}`)}
-                    onClick={(e) => openGoogleEvent(segment.event, e)}
-                  />
-                ))}
               </div>
               {isTodaySelectedDay && currentTimePosition !== null && (
                 <div
@@ -685,7 +611,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                 <div className="invisible">
                   <DayHeader date={today} isToday={false} />
                 </div>
-                {allDayRows > 0 && <div style={{ height: `${allDayRows * ALL_DAY_ROW_HEIGHT + 4}px` }} />}
               </div>
               <div className="flex flex-1 flex-col relative">
                 {hours.map((hour) => (
@@ -703,13 +628,9 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
             <div className="flex flex-1">
               {weekDays.map((day, dayIndex) => {
                 const isToday = isSameDay(day, today);
-                const { dayBlocks, google, slots } = weekContent[dayIndex];
+                const { dayBlocks, slots } = weekContent[dayIndex];
                 const dayAssignments = getAssignmentsForDay(dayIndex);
-                const splitDay = dayBlocks.length + google.timed.length > 0 && dayAssignments.length > 0;
-                // With more all-day events than rows, the last row says how many are left.
-                const allDayShown =
-                  google.allDay.length > allDayRows ? google.allDay.slice(0, allDayRows - 1) : google.allDay;
-                const allDayHidden = google.allDay.length - allDayShown.length;
+                const splitDay = dayBlocks.length > 0 && dayAssignments.length > 0;
                 const showCurrentTimeLine = isToday;
 
                 return (
@@ -727,25 +648,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                       >
                         <DayHeader date={day} isToday={isToday} />
                       </button>
-                      {allDayRows > 0 && (
-                        <div
-                          className="flex flex-col gap-0.5 px-1"
-                          style={{ height: `${allDayRows * ALL_DAY_ROW_HEIGHT + 4}px` }}
-                        >
-                          {allDayShown.map((event) => (
-                            <AllDayChip key={event.id} event={event} onClick={(e) => openGoogleEvent(event, e)} />
-                          ))}
-                          {allDayHidden > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => handleSelectDayFromMonth(day)}
-                              className="h-5 px-1.5 rounded text-left text-[10px] leading-5 text-text-secondary hover:bg-surface-hover transition-colors"
-                            >
-                              {fill(t.calendar.more, { count: allDayHidden })}
-                            </button>
-                          )}
-                        </div>
-                      )}
                     </div>
                     <div
                       className="relative cursor-pointer"
@@ -780,15 +682,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                             onClick={(e) => handleBlockClick(block, e)}
                           />
                         ))}
-                        {google.timed.map((segment) => (
-                          <GoogleEventCard
-                            key={segment.event.id}
-                            segment={segment}
-                            half={splitDay}
-                            slot={slots.get(`g:${segment.event.id}`)}
-                            onClick={(e) => openGoogleEvent(segment.event, e)}
-                          />
-                        ))}
                       </div>
                       {showCurrentTimeLine && currentTimePosition !== null && (
                         <div
@@ -811,9 +704,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
           monthDate={monthCursor}
           today={today}
           refreshKey={refreshKey}
-          googleRefreshKey={googleRefreshKey}
-          onBlocksPulled={handleBlocksPulled}
-          onEditGoogleEvent={setSelectedGoogleEvent}
           onAddEvent={(date) => openEventCreate(date, 9)}
           onAddShift={openShiftPicker}
           onEditBlock={openBlockEdit}
@@ -846,16 +736,6 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
         }
         shift={editingShift}
       />
-
-      {selectedGoogleEvent && (
-        <GoogleEventModal
-          key={selectedGoogleEvent.id}
-          event={selectedGoogleEvent}
-          onClose={() => setSelectedGoogleEvent(null)}
-          onSave={handleSaveGoogleEvent}
-          onDelete={handleDeleteGoogleEvent}
-        />
-      )}
 
       {isModalOpen && (
         <BlockModal

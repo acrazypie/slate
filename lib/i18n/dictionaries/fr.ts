@@ -33,6 +33,7 @@ export const fr: Dictionary = {
     altro: 'Autre',
   },
   colors: {
+    gesso: "Gesso",
     apricot: 'Abricot',
     sand: 'Sable',
     dune: 'Dune',
@@ -49,6 +50,32 @@ export const fr: Dictionary = {
     day: 'Jour',
     week: 'Semaine',
     month: 'Mois',
+  },
+  site: {
+    downloadTitle: "Télécharger l’app",
+    downloadLede: "Slate fonctionne sur votre téléphone. Vos données restent sur l’appareil et ne sortent que si vous connectez un serveur que vous gérez vous-même.",
+    downloadApk: "Télécharger pour Android",
+    downloadSoon: "Téléchargement bientôt disponible",
+    downloadNote: "APK Android. iOS n’est pas encore disponible.",
+    selfTitle: "Gérez votre propre serveur",
+    selfLede: "Un serveur Slate que vous hébergez avec Docker, pour plusieurs utilisateurs, sous votre contrôle. En développement.",
+    selfCta: "Comment le configurer",
+    repoSoon: "Dépôt bientôt disponible",
+    cloudTitle: "Version cloud",
+    cloudLede: "La première version de Slate, hébergée par nous, pour les comptes existants.",
+    cloudCta: "Ouvrir l’app cloud",
+    selfPageTitle: "Votre propre serveur Slate",
+    selfPageLede: "Statut : en développement. Voici la configuration prévue, pour que vous puissiez vous organiser.",
+    selfSteps: [
+      "Récupérez le code du serveur depuis son dépôt et lisez docs/server-plan.md.",
+      "Copiez .env.example vers .env et renseignez votre domaine et un mot de passe de base de données.",
+      "Lancez-le avec docker compose up -d. Le proxy obtient le certificat TLS de votre domaine.",
+      "Créez le premier administrateur avec la commande du README du dépôt.",
+      "Dans l’app, ouvrez Réglages › Compte, choisissez Votre propre serveur Slate et saisissez votre domaine."
+    ],
+    selfStatus: "Pas encore utilisable : le serveur est en construction.",
+    back: "Retour à l’accueil",
+    repoLink: "Dépôt du serveur"
   },
   landing: {
     tagline: 'Ta semaine, en blocs.',
@@ -106,6 +133,17 @@ export const fr: Dictionary = {
     calendar: 'Calendrier',
     shifts: 'Services',
     settings: 'Réglages',
+  },
+  pay: {
+    title: "Paie",
+    rate: "Taux horaire",
+    currency: "Devise",
+    overtimeAfter: "Heures sup. au-delà de (heures par semaine)",
+    overtimeOff: "Pas d’heures sup.",
+    multiplier: "Coefficient des heures sup.",
+    earnings: "Gains",
+    overtime: "Heures sup.",
+    hint: "Les gains ne comptent que les services. Enregistré sur cet appareil."
   },
   summary: {
     title: 'Résumé de la semaine',

@@ -4,6 +4,7 @@ import { Block, ShiftAssignment, CATEGORIES, CATEGORY_COLORS, BlockCategory, shi
 import { Clock } from 'lucide-react';
 import { AppTab, TABS } from './BottomNav';
 import { useI18n } from './LanguageProvider';
+import { computePay, formatMoney, usePayRules, weeksOf } from '@/lib/pay';
 
 interface SidebarProps {
   user?: {
@@ -38,7 +39,8 @@ function Summary({
   /** Shown instead of the figures when the period has nothing in it. */
   emptyText?: string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const [rules] = usePayRules();
   const categoryMinutes = blocks.reduce((acc, block) => {
     const category = block.category as BlockCategory;
     acc[category] = (acc[category] || 0) + block.duration_minutes;
@@ -47,6 +49,10 @@ function Summary({
 
   const shiftMinutes = assignments.reduce((sum, a) => sum + shiftDurationMinutes(a.shift), 0);
   const totalMinutes = Object.values(categoryMinutes).reduce((a, b) => a + b, 0) + shiftMinutes;
+  const pay = computePay(
+    weeksOf(assignments.map((a) => ({ shift_date: a.shift_date, minutes: shiftDurationMinutes(a.shift) }))),
+    rules,
+  );
 
   return (
     <section>
@@ -86,6 +92,19 @@ function Summary({
                 <span className="text-text-secondary">{t.common.shifts}</span>
               </div>
               <span className="text-text-primary">{formatHours(shiftMinutes)}</span>
+            </div>
+          )}
+
+          {rules.hourlyRate !== null && shiftMinutes > 0 && (
+            <div className="pt-3 mt-3 border-t border-border space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-text-secondary">{t.pay.earnings}</span>
+                <span className="text-accent-text font-medium">{formatMoney(pay.amount ?? 0, rules.currency, locale)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-text-secondary">{t.pay.overtime}</span>
+                <span className="text-text-primary">{formatHours(pay.overtimeMinutes)}</span>
+              </div>
             </div>
           )}
         </div>

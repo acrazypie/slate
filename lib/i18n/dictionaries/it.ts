@@ -33,6 +33,7 @@ export const it = {
     altro: 'Altro',
   },
   colors: {
+    gesso: "Gesso",
     apricot: 'Albicocca',
     sand: 'Sabbia',
     dune: 'Duna',
@@ -49,6 +50,32 @@ export const it = {
     day: 'Giorno',
     week: 'Settimana',
     month: 'Mese',
+  },
+  site: {
+    downloadTitle: "Scarica l’app",
+    downloadLede: "Slate gira sul tuo telefono. I dati restano sul dispositivo e non escono se non colleghi un server che gestisci tu.",
+    downloadApk: "Scarica per Android",
+    downloadSoon: "Download in arrivo",
+    downloadNote: "APK per Android. iOS non è ancora disponibile.",
+    selfTitle: "Gestisci il tuo server",
+    selfLede: "Un server Slate che ospiti con Docker, per più utenti, sotto il tuo controllo. In sviluppo.",
+    selfCta: "Come configurarlo",
+    repoSoon: "Repository in arrivo",
+    cloudTitle: "Versione cloud",
+    cloudLede: "La prima versione di Slate, ospitata da noi, per gli account già esistenti.",
+    cloudCta: "Apri l’app cloud",
+    selfPageTitle: "Il tuo server Slate",
+    selfPageLede: "Stato: in sviluppo. Questa è la configurazione prevista, così puoi pianificarla.",
+    selfSteps: [
+      "Scarica il codice del server dal suo repository e leggi docs/server-plan.md.",
+      "Copia .env.example in .env e imposta il dominio e una password per il database.",
+      "Avvialo con docker compose up -d. Il proxy ottiene il certificato TLS per il tuo dominio.",
+      "Crea il primo amministratore con il comando nel README del repository.",
+      "Nell’app apri Impostazioni › Account, scegli Il tuo server Slate e inserisci il dominio."
+    ],
+    selfStatus: "Non ancora utilizzabile: il server è in costruzione.",
+    back: "Torna all’inizio",
+    repoLink: "Repository del server"
   },
   landing: {
     tagline: 'La tua settimana, a blocchi.',
@@ -106,6 +133,17 @@ export const it = {
     calendar: 'Calendario',
     shifts: 'Turni',
     settings: 'Impostazioni',
+  },
+  pay: {
+    title: "Paga",
+    rate: "Tariffa oraria",
+    currency: "Valuta",
+    overtimeAfter: "Straordinario oltre (ore a settimana)",
+    overtimeOff: "Nessuno straordinario",
+    multiplier: "Moltiplicatore straordinario",
+    earnings: "Guadagno",
+    overtime: "Straordinario",
+    hint: "Il guadagno conta solo i turni. Salvato su questo dispositivo."
   },
   summary: {
     title: 'Riepilogo della settimana',
