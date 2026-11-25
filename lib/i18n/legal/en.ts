@@ -4,70 +4,87 @@ export const en: LegalDocs = {
   privacy: {
     description:
       'How Slate processes the personal data of its users, under Regulation (EU) 2016/679 (GDPR).',
-    updated: 'Last updated: 10 November 2026',
+    updated: 'Last updated: 25 November 2026',
     intro: [
-      'This policy describes how the personal data of people who use Slate (the “Service”) is processed, in accordance with Article 13 of Regulation (EU) 2016/679 (“GDPR”) and Italian Legislative Decree 196/2003 as amended by Legislative Decree 101/2018 (the “Italian Privacy Code”).',
+      'This policy describes how personal data is handled by Slate: the Android and iOS app and the Slate website. It is written in accordance with Article 13 of Regulation (EU) 2016/679 (“GDPR”) and Italian Legislative Decree 196/2003 as amended by Legislative Decree 101/2018 (the “Italian Privacy Code”).',
     ],
     sections: [
       {
-        title: "Calendar data in the Slate app",
+        title: 'How the Slate app handles your data',
         blocks: [
-          "The Slate website does not read or write your Google Calendar or your phone calendar.",
-          "The Slate app for Android can show and change events in the calendars on your phone, and show events from your Google account, only after you give it permission. This data stays on the device. It is not sent to us or to any server run by us.",
-          "If you turn on Google sync in the app, blocks and shifts you create in Slate are copied to a calendar named Slate in your Google account, using your own sign-in. Slate does not keep your Google access token on any server. You can revoke access in your Google account at any time.",
-          "If you run your own Slate server, it receives only the blocks, shifts and settings you choose to sync with it. Events from your phone calendars or from Google are never sent to it.",
+          'The Slate app keeps your data on your phone. It has no account and no server run by us: your blocks, shifts, rotations, settings and reminders are stored only on the device. We do not receive them. The app contains no analytics, advertising or tracking.',
+          [
+            '**Phone calendars** (Android and iOS). If you allow calendar access, the app shows events from the calendars on your phone and, if you choose, copies your blocks and shifts into a calendar. This happens on the device; nothing is sent to us.',
+            '**Google Calendar** (optional, Android; not yet offered on iOS). If you sign in with Google and turn on sync, the app connects directly from your phone to Google’s Calendar service, with the permissions you approve: reading and writing events, and listing your calendars. Blocks are copied into a calendar named “Slate” in your Google account, and your Google events are shown next to them. The Google access token is kept on your device and is not sent to any server of ours. Slate’s use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy, including its Limited Use requirements. You can revoke access at any time in your Google account or by turning off sync in the app.',
+            '**Reminders and notifications**. Reminders before events and shifts are scheduled and shown by your phone. They do not use any server. You can change or turn them off in Settings › Notifications.',
+            '**Update check** (Android). About every six hours the app asks GitHub (api.github.com) whether a newer release of Slate exists. When you choose to install an update, the APK is downloaded from GitHub and its SHA-256 checksum is verified before installation. GitHub receives the technical data that any such request carries, such as your IP address, under its own privacy statement.',
+            '**Ko-fi**. The support link opens ko-fi.com in your browser. The app sends nothing to Ko-fi. Ko-fi’s privacy policy applies to any donation you make there.',
+            '**Backups**. You can export your data to a file and import it again. The file is saved where you choose and is never sent to us. Anyone who has the file can read it, so keep it safe.',
+          ],
+        ],
+      },
+      {
+        title: 'The Slate website',
+        blocks: [
+          'The website does not read or write your calendars. Website accounts are used to sign in and to keep the content you create on the website.',
         ],
       },
       {
         title: '1. Data controller',
         blocks: [
-          'The data controller is **Matteo Genesio**, who can be reached by email at **egenesio@proton.me**.',
+          'The data controller is **Matteo Genesio**, who can be reached by email at **egenesio@proton.me**. For data that exists only on your device, as described above, we are not able to access it, and the app does not transmit it to us.',
         ],
       },
       {
         title: '2. Data we collect',
         blocks: [
-          'We process the following categories of personal data:',
+          'For the website we process the following categories of personal data:',
           [
             '**Account data**: your email address and, if you sign up with email and password, your password (stored in encrypted form and never readable by us). If you sign in with Google, we receive from Google your email address, name and profile picture, as authorised by you on the Google consent screen.',
-            '**Service usage data**: the content you create in Slate (time-block titles, category, start and end times, colour, recurrence), which is needed for the weekly planner to work.',
+            '**Service data**: the content you create on the website (time-block titles, category, start and end times, colour, recurrence), needed for the planner to work.',
             '**Technical data**: IP address, browser type and device, collected automatically by our infrastructure providers (Vercel, Supabase) for the security and operation of the service.',
-            '**Cookies**: we only use technical cookies needed to keep you signed in (authentication). We do not use profiling, analytics or third-party marketing cookies.',
+            '**Cookies**: we only use technical cookies needed to keep you signed in. We do not use profiling, analytics or third-party marketing cookies.',
           ],
+          'For the app we collect no personal data. The data you enter in the app is described above and stays on your device.',
         ],
       },
       {
         title: '3. Purposes and legal basis of processing',
         blocks: [
           [
-            '**Providing the Service** (creating your account, syncing data between devices): legal basis Art. 6(1)(b) GDPR, performance of a contract to which the data subject is party.',
-            '**Security and the prevention of abuse and fraud**: legal basis Art. 6(1)(f) GDPR, legitimate interest of the controller.',
-            '**Essential service communications** (e.g. notifications about your account): legal basis Art. 6(1)(b) GDPR.',
+            '**Providing the website** (accounts, keeping your content): Art. 6(1)(b) GDPR, performance of a contract.',
+            '**Security and the prevention of abuse and fraud**: Art. 6(1)(f) GDPR, legitimate interest of the controller.',
+            '**Essential service communications** (e.g. account notices): Art. 6(1)(b) GDPR.',
+            '**Phone calendar, Google Calendar and notification features in the app**: Art. 6(1)(a) GDPR, your consent, given when you grant the permission or turn the feature on. You can withdraw it at any time in the app or in your phone’s settings.',
+            '**Update checks and the new-version notice** (Android): Art. 6(1)(f) GDPR, the legitimate interest in letting you install the current version. You can turn the notice off in Settings › Notifications.',
           ],
-          'We do not currently carry out direct marketing, profiling or advertising based on your data.',
+          'We do not carry out direct marketing, profiling or advertising based on your data.',
         ],
       },
       {
         title: '4. Recipients of the data and third-party providers',
         blocks: [
-          'Your data is processed by third-party providers acting as data processors (Art. 28 GDPR), bound by contract to process the data only for the purposes set out above:',
+          'Data handled for the website is processed by providers acting as data processors (Art. 28 GDPR), bound by contract to process it only for the purposes set out above:',
           [
-            '**Supabase Inc.** — database hosting and authentication. Data is stored on servers located in Ireland (EU).',
-            '**Vercel Inc.** — hosting of the web application. A company based in the United States.',
-            '**Google LLC** — authentication through a Google account (OAuth), only if you choose to sign in this way. A company based in the United States.',
+            '**Supabase Inc.**: database hosting and authentication for website accounts. Data is stored on servers located in Ireland (EU).',
+            '**Vercel Inc.**: hosting of the website. A company based in the United States.',
+            '**Google LLC**: sign-in with a Google account, if you choose it on the website; and, if you turn on Google sync in the app, the calendar service you connect to. Google receives the requests you make; we do not receive them. A company based in the United States.',
+            '**GitHub, Inc.**: hosts the Slate releases and answers the app’s update checks. A company based in the United States.',
           ],
+          'Ko-fi is a third-party site. The app only opens it when you tap the link.',
         ],
       },
       {
         title: '5. Transfers of data outside the EU',
         blocks: [
-          'Vercel Inc. and Google LLC are based in the United States. Data is transferred to these providers on the basis of appropriate safeguards under Chapter V of the GDPR, such as the Standard Contractual Clauses approved by the European Commission and/or participation in the EU-US Data Privacy Framework, where applicable. You can ask the controller for more information about these safeguards.',
+          'Vercel Inc., Google LLC and GitHub, Inc. are based in the United States. Transfers to these providers rely on appropriate safeguards under Chapter V of the GDPR, such as the Standard Contractual Clauses approved by the European Commission and/or participation in the EU-US Data Privacy Framework, where applicable. You can ask the controller for more information about these safeguards.',
         ],
       },
       {
         title: '6. Retention period',
         blocks: [
-          'Your account data and the content you create are kept for as long as you have an active Slate account. If you ask for your account to be deleted, your personal data and the related content are deleted within 30 days, except for anything that must be kept longer to comply with legal obligations. Technical logs are kept for a maximum of 12 months.',
+          'Website account data and content are kept for as long as you have an active account. If you ask for your account to be deleted, the personal data and the related content are deleted within 30 days, except for anything that must be kept longer to comply with legal obligations. Technical logs are kept for a maximum of 12 months.',
+          'App data stays on your device until you erase it (Settings › Backup › erase all data) or uninstall the app. Events copied into your Google or phone calendars remain there until you delete them in those services.',
         ],
       },
       {
@@ -83,8 +100,8 @@ export const en: LegalDocs = {
             'object to processing based on legitimate interest (Art. 21 GDPR);',
             'withdraw at any time any consent you have given, without affecting the lawfulness of processing already carried out.',
           ],
-          'You can exercise these rights at any time by writing to **egenesio@proton.me**. You also have the right to lodge a complaint with the competent supervisory authority:',
-          'Italian Data Protection Authority (Garante per la protezione dei dati personali) — Piazza Venezia, 11, 00187 Rome, Italy — www.garanteprivacy.it',
+          'For data kept only on your device, you can exercise these rights yourself: export a backup, correct or delete items in the app, or erase all data. For website data, write to **egenesio@proton.me**. You also have the right to lodge a complaint with the competent supervisory authority:',
+          'Italian Data Protection Authority (Garante per la protezione dei dati personali), Piazza Venezia 11, 00187 Rome, Italy: www.garanteprivacy.it',
         ],
       },
       {
@@ -96,13 +113,13 @@ export const en: LegalDocs = {
       {
         title: '9. Data security',
         blocks: [
-          'We take appropriate technical and organisational measures to protect your data, including encrypted connections (TLS/HTTPS), separation of data between users through Row Level Security at database level, and access to data limited to authorised personnel.',
+          'The app stores its data in its private storage on your device, which other apps cannot read. For the website we take appropriate technical and organisational measures, including encrypted connections (TLS/HTTPS), separation of data between users through Row Level Security at database level, and access to data limited to authorised personnel.',
         ],
       },
       {
         title: '10. Changes to this policy',
         blocks: [
-          'This policy may be updated over time. If we make substantial changes, we will let you know through the Service or by email before the changes take effect.',
+          'This policy may be updated over time, for example when a new feature changes what the app does. If we make substantial changes, we will let you know through the Service or by email before the changes take effect.',
         ],
       },
       {
@@ -115,22 +132,22 @@ export const en: LegalDocs = {
   },
 
   terms: {
-    description: 'Terms and conditions for using the Slate Service.',
-    updated: 'Last updated: 10 November 2026',
+    description: 'Terms and conditions for using the Slate app and website.',
+    updated: 'Last updated: 25 November 2026',
     intro: [
-      'These Terms of Service (“Terms”) govern the use of Slate (the “Service”), provided by **Matteo Genesio** (“the Owner”, “we”). By creating an account or using the Service, you accept these Terms in full.',
+      'These Terms of Service (“Terms”) govern the use of Slate (the “Service”), the Android and iOS app and the website, provided by **Matteo Genesio** (“the Owner”, “we”). By using the Service you accept these Terms in full.',
     ],
     sections: [
       {
         title: '1. Description of the Service',
         blocks: [
-          'Slate is a web application for organising your week in time blocks (study, work, classes and other categories). The Service is currently offered free of charge and is under active development: features may be added, changed or removed over time. In the future we may introduce a paid plan with additional features (“Pro”); if we do, you will be shown specific terms before any charge is made, and your use of the existing free features will not be affected.',
+          'Slate is an app and a website for organising your week in time blocks (study, work, classes and other categories), with shifts, rotations, pay estimates and reminders. The app works on your device without an account. The Service is free: it has no paid features and no subscriptions. Voluntary support through Ko-fi is optional and unlocks nothing. The Service is under active development, so features may be added, changed or removed over time.',
         ],
       },
       {
-        title: '2. Registration and requirements',
+        title: '2. Accounts and requirements',
         blocks: [
-          'To use Slate you must create an account with email and password or by signing in with Google. You must be at least 14 years old to create an account. You are responsible for keeping your credentials confidential and for all activity carried out through your account.',
+          'The app needs no account. Some website features require an account, created with email and password or by signing in with Google. You must be at least 14 years old to create an account. You are responsible for keeping your credentials confidential and for all activity carried out through your account.',
         ],
       },
       {
@@ -148,47 +165,54 @@ export const en: LegalDocs = {
       {
         title: '4. Your content',
         blocks: [
-          'You keep full ownership of the content you put into Slate (block titles, times, categories). You grant us a limited, non-exclusive licence to store and process that content solely in order to provide the Service to you (for example, syncing it between your devices). We claim no rights over your content and do not share it with third parties other than as set out in our [Privacy Policy](/privacy).',
+          'You keep full ownership of the content you put into Slate (block titles, times, categories, shifts). Content in the app stays on your device. For content on the website, you grant us a limited, non-exclusive licence to store and process it solely in order to provide the Service to you. We claim no rights over your content and do not share it with third parties other than as set out in our [Privacy Policy](/privacy).',
         ],
       },
       {
-        title: '5. Intellectual property in the Service',
+        title: '5. Permissions and third-party services',
+        blocks: [
+          'If you allow calendar access, or sign in with Google to sync with Google Calendar, you are responsible for the permissions you grant. Google, GitHub and Ko-fi are third-party services with their own terms and privacy policies; the app only connects to them as described in the [Privacy Policy](/privacy).',
+          'Updates are optional. The app can tell you that a new version is available, but you choose whether and when to install it.',
+        ],
+      },
+      {
+        title: '6. Intellectual property in the Service',
         blocks: [
           'The code, the design, the “Slate” brand and every other part of the Service that is not your content remain the property of the Owner and are protected by the applicable intellectual property laws. You may not copy, modify or distribute them without written permission.',
         ],
       },
       {
-        title: '6. Availability of the Service',
+        title: '7. Availability of the Service',
         blocks: [
-          'The Service is provided “as is”, with no guarantee of continuity, freedom from errors or fitness for a particular purpose. As it is a product under active development, there may be interruptions, maintenance or changes to features. We recommend that you do not treat Slate as your only source of critical information about your commitments.',
+          'The Service is provided “as is”, with no guarantee of continuity, freedom from errors or fitness for a particular purpose. Reminders depend on your phone’s settings and on the operating system, and may be delayed or missed. As it is a product under active development, there may be interruptions, maintenance or changes to features. Do not treat Slate as your only source of critical information about your commitments.',
         ],
       },
       {
-        title: '7. Limitation of liability',
+        title: '8. Limitation of liability',
         blocks: [
-          'To the fullest extent permitted by applicable law, the Owner is not liable for indirect damages, loss of data or loss of profit arising from the use of, or inability to use, the Service. Nothing in these Terms excludes or limits liability that cannot be excluded or limited under applicable law, including the mandatory rights granted to consumers by the Italian Consumer Code (Legislative Decree 206/2005).',
+          'To the fullest extent permitted by applicable law, the Owner is not liable for indirect damages, loss of data or loss of profit arising from the use of, or inability to use, the Service. Nothing in these Terms excludes or limits liability that cannot be excluded or limited under applicable law, including the mandatory rights granted to consumers by the Italian Consumer Code (Legislative Decree 206/2005). Make regular backups from the app’s export function.',
         ],
       },
       {
-        title: '8. Suspension and termination of the account',
+        title: '9. Suspension and termination',
         blocks: [
-          'You can delete your account at any time; on deletion, your data will be handled as described in our [Privacy Policy](/privacy). We reserve the right to suspend or terminate accounts that breach these Terms, giving you notice where reasonably possible.',
+          'You can delete your website account at any time; on deletion, your data will be handled as described in our [Privacy Policy](/privacy). Uninstalling the app removes its data from your phone. We reserve the right to suspend or terminate accounts that breach these Terms, giving you notice where reasonably possible.',
         ],
       },
       {
-        title: '9. Changes to the Terms',
+        title: '10. Changes to the Terms',
         blocks: [
           'We may update these Terms over time. If we make substantial changes, we will let you know through the Service or by email reasonably in advance of their taking effect.',
         ],
       },
       {
-        title: '10. Governing law and jurisdiction',
+        title: '11. Governing law and jurisdiction',
         blocks: [
           'These Terms are governed by Italian law. If you use the Service as a consumer resident in the European Union, you have the right to bring proceedings before the courts of the place where you live, under the mandatory rules that protect consumers. You can also use the European online dispute resolution (ODR) platform, available at [ec.europa.eu/consumers/odr](https://ec.europa.eu/consumers/odr).',
         ],
       },
       {
-        title: '11. Contact',
+        title: '12. Contact',
         blocks: ['For questions about these Terms, write to **egenesio@proton.me**.'],
       },
     ],
