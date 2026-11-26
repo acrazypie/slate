@@ -50,7 +50,7 @@ export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
     <div className="flex-1 overflow-y-auto bg-bg">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between gap-3 mb-2">
-          <h1 className="font-serif text-2xl sm:text-3xl text-text-primary">{t.common.shifts}</h1>
+          <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary">{t.common.shifts}</h1>
           <button
             onClick={openCreate}
             className="flex items-center gap-2 px-4 py-2.5 bg-accent text-accent-contrast rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
@@ -81,9 +81,9 @@ export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
               <li key={shift.id}>
                 <button
                   onClick={() => openEdit(shift)}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 bg-surface rounded-2xl hover:bg-surface-hover transition-colors text-left"
-                  style={{ borderLeft: `4px solid ${shift.color}` }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 bg-surface rounded-3xl hover:bg-surface-hover transition-colors text-left"
                 >
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: shift.color }} aria-hidden="true" />
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium text-text-primary truncate">{shift.title}</span>
                     <span className="block text-xs text-text-secondary">

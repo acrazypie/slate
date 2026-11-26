@@ -514,7 +514,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                   aria-label={formatDate(locale, date, 'fullDay')}
                   className="flex flex-col items-center gap-1 min-w-11 px-1.5 py-1 rounded-xl transition-colors"
                 >
-                  <span className="text-[10px] uppercase tracking-wide text-text-secondary">
+                  <span className="text-[10px] text-text-secondary">
                     {formatDate(locale, date, 'weekdayShort')}
                   </span>
                   <span
@@ -588,7 +588,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
               </div>
               {isTodaySelectedDay && currentTimePosition !== null && (
                 <div
-                  className="absolute left-0 right-0 h-0.5 bg-[#ef4444] z-10 pointer-events-none"
+                  className="absolute left-0 right-0 h-0.5 bg-[#E0475E] z-10 pointer-events-none"
                   style={{ top: `${currentTimePosition}%` }}
                 />
               )}
@@ -685,7 +685,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
                       </div>
                       {showCurrentTimeLine && currentTimePosition !== null && (
                         <div
-                          className="absolute left-0 right-0 h-0.5 bg-[#ef4444] z-10 pointer-events-none"
+                          className="absolute left-0 right-0 h-0.5 bg-[#E0475E] z-10 pointer-events-none"
                           style={{ top: `${currentTimePosition}%` }}
                         />
                       )}

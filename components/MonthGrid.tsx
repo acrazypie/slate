@@ -109,7 +109,7 @@ export function MonthGrid({
         {weekdayLabels.map((label) => (
           <div
             key={label}
-            className="py-2 text-center text-[11px] font-medium uppercase tracking-wide text-text-secondary"
+            className="py-2 text-center text-[11px] font-medium text-text-secondary"
           >
             {label}
           </div>
@@ -164,12 +164,10 @@ export function MonthGrid({
                     {chips.slice(0, MAX_CHIPS_DESKTOP).map((chip, i) => (
                       <div
                         key={chip.key}
-                        className={`rounded px-1 py-0.5 min-w-0 ${i >= MAX_CHIPS_MOBILE ? 'hidden sm:block' : ''} ${
-                          chip.isShift ? 'border border-dashed' : ''
-                        }`}
+                        className={`rounded-md px-1 py-0.5 min-w-0 ${i >= MAX_CHIPS_MOBILE ? 'hidden sm:block' : ''}`}
+                        // Timeline: each chip is a tint of its colour; no stripe or dashes.
                         style={{
                           backgroundColor: `color-mix(in srgb, ${chip.color} 22%, var(--color-surface))`,
-                          ...(chip.isShift ? { borderColor: chip.color } : { borderLeft: `2px solid ${chip.color}` }),
                         }}
                       >
                         <div className="truncate text-[10px] sm:text-[11px] leading-tight text-text-primary">

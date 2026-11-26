@@ -19,7 +19,7 @@ export function DayHeader({ date, isToday }: DayHeaderProps) {
 
   return (
     <span className="flex flex-col items-center py-3 gap-1">
-      <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? 'text-accent-text' : 'text-text-secondary'}`}>
+      <span className={`text-[11px] font-medium ${isToday ? 'text-accent-text' : 'text-text-secondary'}`}>
         {dayName}
       </span>
       <span

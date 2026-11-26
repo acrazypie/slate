@@ -145,10 +145,10 @@ export interface BlockFormData {
 }
 
 export const CATEGORY_COLORS: Record<BlockCategory, string> = {
-  studio: '#BB86FC',
-  lavoro: '#E49C69',
-  lezione: '#FFD9A0',
-  altro: '#CF6679',
+  studio: '#9D8CFF',
+  lavoro: '#6BB6A3',
+  lezione: '#E8B07A',
+  altro: '#8A94AB',
 };
 
 // Category and weekday names are translated: see `t.categories` and

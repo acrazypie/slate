@@ -33,7 +33,7 @@ export const ja: Dictionary = {
     altro: 'その他',
   },
   colors: {
-    gesso: "ジェッソ",
+    gesso: "ライム",
     apricot: 'アプリコット',
     sand: 'サンド',
     dune: 'デューン',

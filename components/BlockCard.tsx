@@ -34,13 +34,13 @@ export function BlockCard({ block, onClick, half, slot }: BlockCardProps) {
         `${startTime}–${endTime}`,
         ...(block.is_recurring ? [t.calendar.recurring] : []),
       ].join(', ')}
-      className={`absolute block text-left ${half ? 'left-1/2' : 'left-1'} right-1 rounded-lg pl-2 pr-1.5 py-1 cursor-pointer overflow-hidden transition-all shadow-sm hover:shadow-md hover:brightness-105 pointer-events-auto`}
+      className={`absolute block text-left ${half ? 'left-1/2' : 'left-1'} right-1 rounded-xl px-2 py-1 cursor-pointer overflow-hidden transition-[filter] hover:brightness-110 pointer-events-auto`}
       style={{
         top: `${top}%`,
         height: `${height}%`,
         minHeight: '22px',
+        // Timeline: a tint of the category colour, no stripe. The name carries the category.
         backgroundColor: `color-mix(in srgb, ${block.color} 22%, var(--color-surface))`,
-        borderLeft: `3px solid ${block.color}`,
         ...overlapPosition(slot, half),
       }}
       onClick={onClick}

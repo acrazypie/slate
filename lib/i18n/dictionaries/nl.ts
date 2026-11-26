@@ -33,7 +33,7 @@ export const nl: Dictionary = {
     altro: 'Overig',
   },
   colors: {
-    gesso: "Gesso",
+    gesso: "Limoen",
     apricot: 'Abrikoos',
     sand: 'Zand',
     dune: 'Duin',

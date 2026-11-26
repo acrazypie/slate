@@ -33,7 +33,7 @@ export const es: Dictionary = {
     altro: 'Otro',
   },
   colors: {
-    gesso: "Gesso",
+    gesso: "Lima",
     apricot: 'Albaricoque',
     sand: 'Arena',
     dune: 'Duna',

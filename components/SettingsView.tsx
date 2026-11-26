@@ -21,7 +21,7 @@ const unselected = 'bg-surface-hover text-text-primary hover:bg-border';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-surface rounded-2xl p-4 sm:p-5">
+    <section className="bg-surface rounded-3xl p-4 sm:p-5">
       <h2 className="text-sm text-text-secondary mb-3">{title}</h2>
       {children}
     </section>
@@ -117,7 +117,7 @@ export function SettingsView({ user }: SettingsViewProps) {
   return (
     <div className="flex-1 overflow-y-auto bg-bg">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-        <h1 className="font-serif text-2xl sm:text-3xl text-text-primary mb-2">{t.settings.title}</h1>
+        <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary mb-2">{t.settings.title}</h1>
 
         <Section title={t.settings.account}>
           <div className="flex items-center gap-3">
@@ -198,7 +198,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                     }`}
                     style={{ backgroundColor: option.value }}
                   >
-                    {isSelected && <Check className="w-4 h-4 text-black/70" />}
+                    {isSelected && <Check className="w-4 h-4 text-accent-contrast" />}
                   </span>
                 </button>
               );

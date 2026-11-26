@@ -62,21 +62,21 @@ interface LegalDocumentProps {
 /** Shared page layout for the privacy policy and the terms of service. */
 export function LegalDocument({ title, doc, backLabel, notice }: LegalDocumentProps) {
   return (
-    <div className="min-h-screen bg-bg px-4 py-12 sm:py-16">
+    <div className="min-h-screen bg-bg px-5 py-10 sm:py-16">
       <div className="max-w-2xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors rounded-full px-3 py-2 -ml-3 mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           {backLabel}
         </Link>
 
-        <h1 className="font-serif text-3xl sm:text-4xl text-text-primary mb-2">{title}</h1>
+        <h1 className="font-semibold tracking-tight text-3xl sm:text-4xl text-text-primary mb-2">{title}</h1>
         <p className="text-xs text-text-tertiary mb-10">{doc.updated}</p>
 
         {notice && (
-          <p className="text-sm text-text-secondary bg-surface border border-border rounded-xl px-4 py-3 mb-6">
+          <p className="text-sm text-text-secondary bg-surface rounded-3xl px-4 py-3 mb-6">
             {notice}
           </p>
         )}
@@ -87,7 +87,7 @@ export function LegalDocument({ title, doc, backLabel, notice }: LegalDocumentPr
 
         {doc.sections.map((section) => (
           <section key={section.title}>
-            <h2 className="text-lg font-medium text-text-primary mt-10 mb-3">{section.title}</h2>
+            <h2 className="text-lg font-semibold text-text-primary mt-10 mb-3">{section.title}</h2>
             {section.blocks.map((block, i) => (
               <Block key={i} block={block} />
             ))}

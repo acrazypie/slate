@@ -29,11 +29,18 @@ export function BottomNav({ active, onChange }: { active: AppTab; onChange: (tab
               key={id}
               onClick={() => onChange(id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[11px] transition-colors ${
-                isActive ? 'text-accent-text bg-surface-hover font-medium' : 'text-text-secondary hover:text-text-primary'
+              className={`flex-1 flex flex-col items-center gap-1 py-1.5 text-[11px] transition-colors ${
+                isActive ? 'text-accent-text font-semibold' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <Icon className="w-5 h-5" />
+              {/* Timeline: the active tab sits on a soft accent pill. */}
+              <span
+                className={`flex items-center justify-center w-14 h-7 rounded-full transition-colors ${
+                  isActive ? 'bg-[color-mix(in_srgb,var(--color-accent)_18%,transparent)]' : ''
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+              </span>
               {t.nav[id]}
             </button>
           );

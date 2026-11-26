@@ -119,7 +119,7 @@ export function Sidebar({ user, blocks, assignments = [], monthBlocks = [], mont
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-border">
-        <p className="font-serif text-2xl text-text-primary">Slate</p>
+        <p className="font-semibold tracking-tight text-2xl text-text-primary">Slate</p>
       </div>
 
       <div className="p-6 border-b border-border">
