@@ -1,64 +1,58 @@
 @import "tailwindcss";
 
-/* Slate design system (slate-app DESIGN.md): near-black, hairlines, one accent
-   (Gesso), Syne for titles and DM Mono for everything else. Semantic names are
-   kept so components follow the palette. */
+/* Slate website, in the Timeline design (see slate-app design/docs/02-tokens.md):
+   a neutral blue-grey ground, hairlines instead of boxes, one accent (violet)
+   for controls and selected states only, and the system font with tabular
+   numbers. Semantic names are kept so components follow the palette. */
 @theme {
-  --font-sans: var(--font-mono);
-  --font-serif: var(--font-syne);
-  --color-bg: var(--color-bg, #0a0a0a);
-  --color-surface: var(--color-surface, #121214);
-  --color-surface-hover: var(--color-surface-hover, #1a1a1e);
-  --color-border: var(--color-border, rgba(255, 255, 255, 0.08));
-  --color-border-strong: var(--color-border-strong, rgba(255, 255, 255, 0.16));
-  --color-text-primary: var(--color-text-primary, #efefef);
-  --color-text-secondary: var(--color-text-secondary, #8d8d96);
-  --color-text-tertiary: var(--color-text-tertiary, #8d8d96);
-  --color-accent: var(--color-accent, #6bb6a3);
-  --color-accent-contrast: var(--color-accent-contrast, #0a0a0a);
-  --color-accent-text: var(--color-accent-text, #6bb6a3);
-  --color-danger: var(--color-danger, #ff5c8a);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-sans);
+  --color-bg: var(--color-bg, #0e1320);
+  --color-surface: var(--color-surface, #161d2e);
+  --color-surface-hover: var(--color-surface-hover, #1e2638);
+  --color-border: var(--color-border, #1e2638);
+  --color-border-strong: var(--color-border-strong, #3a4560);
+  --color-text-primary: var(--color-text-primary, #e8ecf5);
+  --color-text-secondary: var(--color-text-secondary, #8a94ab);
+  --color-text-tertiary: var(--color-text-tertiary, #8a94ab);
+  --color-accent: var(--color-accent, #9d8cff);
+  --color-accent-contrast: var(--color-accent-contrast, #0e1320);
+  --color-accent-text: var(--color-accent-text, #9d8cff);
+  --color-danger: var(--color-danger, #e0475e);
 }
 
 :root {
-  --color-bg: #0a0a0a;
-  --color-surface: #121214;
-  --color-surface-hover: #1a1a1e;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
-  --color-text-primary: #efefef;
-  --color-text-secondary: #8d8d96;
-  /* Used for small text too, so it clears 4.5:1 on every surface. */
-  --color-text-tertiary: #8d8d96;
-  --color-accent: #6bb6a3;
-  --color-accent-contrast: #0a0a0a;
-  --color-accent-text: #6bb6a3;
-  --color-danger: #ff5c8a;
+  --color-bg: #0e1320;
+  --color-surface: #161d2e;
+  --color-surface-hover: #1e2638;
+  --color-border: #1e2638;
+  --color-border-strong: #3a4560;
+  --color-text-primary: #e8ecf5;
+  --color-text-secondary: #8a94ab;
+  /* Same as secondary: the dimmer tones fail 4.5:1 on the ground. */
+  --color-text-tertiary: #8a94ab;
+  --color-accent: #9d8cff;
+  --color-accent-contrast: #0e1320;
+  --color-accent-text: #9d8cff;
+  --color-danger: #e0475e;
   color-scheme: dark;
 }
 
-/* Light theme: a deeper accent, so it keeps its contrast on white. */
+/* Light theme: the deeper violet keeps its contrast on white. */
 .light {
-  --color-bg: #fafafa;
-  --color-surface: #f1f1f4;
-  --color-surface-hover: #e8e8ed;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-strong: rgba(0, 0, 0, 0.16);
-  --color-text-primary: #17171a;
-  --color-text-secondary: #55555f;
-  --color-text-tertiary: #55555f;
-  --color-accent: #2e7266;
+  --color-bg: #f4f6fa;
+  --color-surface: #ffffff;
+  --color-surface-hover: #e3e8f1;
+  --color-border: #e3e8f1;
+  --color-border-strong: #c5ccdb;
+  --color-text-primary: #14182a;
+  --color-text-secondary: #5c6680;
+  --color-text-tertiary: #5c6680;
+  --color-accent: #5b4bc4;
   --color-accent-contrast: #ffffff;
-  --color-accent-text: #2e7266;
-  --color-danger: #e0336a;
+  --color-accent-text: #4a3cb0;
+  --color-danger: #c2344c;
   color-scheme: light;
-}
-
-h1,
-h2,
-.font-serif {
-  font-weight: 700;
-  letter-spacing: -0.03em;
 }
 
 html {
@@ -68,6 +62,14 @@ html {
 body {
   background: var(--color-bg);
   color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Large titles: bold, tight, like the app's 34 px titles. */
+h1,
+h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 :focus-visible {

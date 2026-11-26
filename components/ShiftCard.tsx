@@ -26,13 +26,13 @@ export function ShiftCard({ assignment, onClick, half }: ShiftCardProps) {
     <button
       type="button"
       aria-label={`${fill(t.calendar.shiftLabel, { title: shift.title })}, ${formatTime(shift.start_hour, shift.start_minute)}–${formatTime(shift.end_hour, shift.end_minute)}`}
-      className={`absolute block text-left left-1 ${half ? 'right-1/2' : 'right-1'} rounded-lg px-2 py-1 cursor-pointer overflow-hidden transition-all hover:brightness-105 pointer-events-auto border border-dashed`}
+      className={`absolute block text-left left-1 ${half ? 'right-1/2' : 'right-1'} rounded-xl px-2 py-1 cursor-pointer overflow-hidden transition-[filter] hover:brightness-110 pointer-events-auto`}
       style={{
         top: `${top}%`,
         height: `${height}%`,
         minHeight: '22px',
-        backgroundColor: `color-mix(in srgb, ${shift.color} 16%, var(--color-surface))`,
-        borderColor: shift.color,
+        // Timeline: shifts are a solid tint of their colour; device events are the dashed ones.
+        backgroundColor: `color-mix(in srgb, ${shift.color} 22%, var(--color-surface))`,
       }}
       onClick={onClick}
     >

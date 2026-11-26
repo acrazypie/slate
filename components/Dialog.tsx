@@ -77,9 +77,11 @@ export function Dialog({ label, onClose, size = 'form', zClass = 'z-50', childre
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className={`bg-surface rounded-t-2xl sm:rounded-2xl w-full mx-0 sm:mx-4 overflow-y-auto focus:outline-none ${PANEL[size]}`}
+        className={`bg-surface rounded-t-3xl sm:rounded-3xl w-full mx-0 sm:mx-4 overflow-y-auto focus:outline-none ${PANEL[size]}`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* The sheet grabber, phones only: Timeline's bottom sheets. */}
+        <div className="sm:hidden mx-auto -mt-2 mb-3 h-1 w-9 rounded-full bg-border-strong" aria-hidden="true" />
         {children}
       </div>
     </div>
@@ -94,7 +96,7 @@ export function DialogClose({ onClose }: { onClose: () => void }) {
       type="button"
       onClick={onClose}
       aria-label={t.common.close}
-      className="flex items-center justify-center w-11 h-11 -my-2 -mr-2 flex-shrink-0 rounded-xl hover:bg-surface-hover transition-colors"
+      className="flex items-center justify-center w-11 h-11 -my-2 -mr-2 flex-shrink-0 rounded-full hover:bg-surface-hover transition-colors"
     >
       <X className="w-5 h-5 text-text-secondary" />
     </button>

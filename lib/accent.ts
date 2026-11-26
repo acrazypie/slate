@@ -4,16 +4,15 @@
 export const ACCENT_STORAGE_KEY = 'slate-accent';
 import type { ColorKey } from './types';
 
-export const DEFAULT_ACCENT = '#6BB6A3';
+export const DEFAULT_ACCENT = '#9D8CFF';
 
 /** `name` is a key into `t.colors`. */
 export const ACCENT_OPTIONS: { value: string; name: ColorKey }[] = [
-  // Presets that equal a block colour are left out, so the accent never reads as a block.
+  // The four accents of the Timeline design, as in the Slate app.
   { value: '#6BB6A3', name: 'teal' },
-  { value: '#D4EE5E', name: 'gesso' },
-  { value: '#E0B84C', name: 'amber' },
-  { value: '#8BC48A', name: 'sage' },
-  { value: '#E58FB4', name: 'pink' },
+  { value: '#C3E36B', name: 'gesso' },
+  { value: '#9D8CFF', name: 'violet' },
+  { value: '#E8A36B', name: 'apricot' },
 ];
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -24,7 +23,7 @@ function contrastFor(hex: string): string {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.55 ? '#201a17' : '#ffffff';
+  return luminance > 0.55 ? '#0e1320' : '#ffffff';
 }
 
 export function getStoredAccent(): string {

@@ -12,7 +12,7 @@ import { useI18n } from '@/components/LanguageProvider';
 type Mode = 'signin' | 'signup' | 'reset';
 
 const fieldClass =
-  'w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none transition-colors';
+  'w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-transparent focus:border-accent focus:outline-none transition-colors';
 const labelClass = 'block text-sm text-text-secondary mb-2';
 const linkClass = 'text-accent-text hover:underline';
 
@@ -84,13 +84,13 @@ export default function LoginPage() {
   const submitLabel = mode === 'signup' ? t.auth.signUp : mode === 'reset' ? t.auth.sendLink : t.auth.signIn;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-bg px-5 py-8">
       <div className="max-w-md w-full">
-        <h1 className="font-serif text-4xl text-text-primary text-center mb-8">
+        <h1 className="font-semibold tracking-tight text-4xl text-text-primary text-center mb-8">
           Slate
         </h1>
 
-        <div className="bg-surface rounded-2xl p-6 space-y-6">
+        <div className="bg-surface rounded-3xl p-6 space-y-6">
           {mode === 'reset' ? (
             <div>
               <h2 className="text-lg font-medium text-text-primary mb-1">{t.auth.resetTitle}</h2>
@@ -103,7 +103,7 @@ export default function LoginPage() {
               <button
                 onClick={() => handleOAuthSignIn('google')}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-hover text-text-primary rounded-xl font-medium transition-colors hover:bg-border disabled:opacity-50"
+                className="w-full h-12 flex items-center justify-center gap-3 px-4 bg-surface-hover text-text-primary rounded-2xl font-medium transition-colors hover:bg-border disabled:opacity-50"
               >
                 <GoogleLogo className="w-5 h-5" />
                 {t.auth.continueWithGoogle}
@@ -171,7 +171,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
+              className="w-full h-12 bg-accent text-accent-contrast rounded-2xl font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading ? t.common.loading : submitLabel}
             </button>

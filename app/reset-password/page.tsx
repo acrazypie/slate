@@ -33,12 +33,12 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-bg px-5 py-8">
       <div className="max-w-md w-full">
-        <p className="font-serif text-4xl text-text-primary text-center mb-8">Slate</p>
+        <p className="font-semibold tracking-tight text-4xl text-text-primary text-center mb-8">Slate</p>
 
-        <div className="bg-surface rounded-2xl p-6 space-y-6">
-          <h1 className="text-lg font-medium text-text-primary">{t.auth.chooseNewPassword}</h1>
+        <div className="bg-surface rounded-3xl p-6 space-y-6">
+          <h1 className="text-lg font-semibold text-text-primary">{t.auth.chooseNewPassword}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
                 aria-describedby="new-password-hint"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-border focus:border-accent focus:outline-none transition-colors"
+                className="w-full px-4 py-3 bg-surface-hover text-text-primary rounded-xl border border-transparent focus:border-accent focus:outline-none transition-colors"
                 required
               />
               <p id="new-password-hint" className="text-xs text-text-tertiary mt-2">{t.auth.passwordHint}</p>
@@ -62,7 +62,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-3 bg-accent text-accent-contrast rounded-xl font-medium transition-colors hover:opacity-90 disabled:opacity-50"
+              className="w-full h-12 bg-accent text-accent-contrast rounded-2xl font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading ? t.common.saving : t.auth.savePassword}
             </button>

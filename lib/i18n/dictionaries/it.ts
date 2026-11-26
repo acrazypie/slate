@@ -33,7 +33,7 @@ export const it = {
     altro: 'Altro',
   },
   colors: {
-    gesso: "Gesso",
+    gesso: "Lime",
     apricot: 'Albicocca',
     sand: 'Sabbia',
     dune: 'Duna',

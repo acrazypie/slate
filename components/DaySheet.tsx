@@ -72,7 +72,7 @@ export function DaySheet({
                   {formatTime(a.shift.start_hour, a.shift.start_minute)} – {formatTime(a.shift.end_hour, a.shift.end_minute)}
                 </span>
               </span>
-              <span className="text-[10px] uppercase tracking-wide text-text-tertiary">{t.common.shift}</span>
+              <span className="text-[10px] text-text-tertiary">{t.common.shift}</span>
             </button>
           ))}
 
@@ -92,7 +92,7 @@ export function DaySheet({
                     {formatTime(block.start_hour, block.start_minute)} – {formatTime(end.hour, end.minute)}
                   </span>
                 </span>
-                <span className="text-[10px] uppercase tracking-wide text-text-tertiary">{t.common.event}</span>
+                <span className="text-[10px] text-text-tertiary">{t.common.event}</span>
               </button>
             );
           })}
