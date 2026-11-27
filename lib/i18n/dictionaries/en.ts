@@ -45,6 +45,9 @@ export const en: Dictionary = {
     amber: 'Amber',
     sage: 'Sage',
     pink: 'Pink',
+    coral: 'Coral',
+    periwinkle: 'Periwinkle',
+    chalk: 'Chalk',
   },
   views: {
     day: 'Day',
@@ -242,7 +245,7 @@ export const en: Dictionary = {
     themeSystem: 'System',
     accent: 'Accent colour',
     customColor: 'Custom colour',
-    accentHint: 'Used for buttons, selections and today across the app, on this device.',
+    accentHint: 'Used for buttons, selections and today across the app, on this device. Also sets the tab icon.',
     defaultView: 'Default view',
     languageHint: 'Applies to this browser.',
     gcalChecking: 'Checking connection...',

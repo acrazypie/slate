@@ -45,6 +45,9 @@ export const nl: Dictionary = {
     amber: 'Amber',
     sage: 'Salie',
     pink: 'Roze',
+    coral: 'Koraal',
+    periwinkle: 'Vinca',
+    chalk: 'Krijt',
   },
   views: {
     day: 'Dag',
@@ -244,7 +247,7 @@ export const nl: Dictionary = {
     themeSystem: 'Systeem',
     accent: 'Accentkleur',
     customColor: 'Eigen kleur',
-    accentHint: 'Geldt voor knoppen, selecties en de dag van vandaag in de hele app, op dit apparaat.',
+    accentHint: 'Geldt voor knoppen, selecties en de dag van vandaag in de hele app, op dit apparaat. Past ook het tabblad-icoon aan.',
     defaultView: 'Standaardweergave',
     languageHint: 'Geldt voor deze browser.',
     gcalChecking: 'Koppeling controleren...',

@@ -45,6 +45,9 @@ export const es: Dictionary = {
     amber: 'Ámbar',
     sage: 'Salvia',
     pink: 'Rosa',
+    coral: 'Coral',
+    periwinkle: 'Periwinkle',
+    chalk: 'Tiza',
   },
   views: {
     day: 'Día',
@@ -243,7 +246,7 @@ export const es: Dictionary = {
     themeSystem: 'Sistema',
     accent: 'Color principal',
     customColor: 'Color personalizado',
-    accentHint: 'Se usa en botones, selecciones y el día de hoy en toda la app, en este dispositivo.',
+    accentHint: 'Se usa en botones, selecciones y el día de hoy en toda la app, en este dispositivo. También cambia el icono de la pestaña.',
     defaultView: 'Vista predeterminada',
     languageHint: 'Se aplica a este navegador.',
     gcalChecking: 'Comprobando la conexión...',

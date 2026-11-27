@@ -45,6 +45,9 @@ export const it = {
     amber: 'Ambra',
     sage: 'Salvia',
     pink: 'Rosa',
+    coral: 'Corallo',
+    periwinkle: 'Periwinkle',
+    chalk: 'Gesso',
   },
   views: {
     day: 'Giorno',
@@ -244,7 +247,7 @@ export const it = {
     themeSystem: 'Sistema',
     accent: 'Colore principale',
     customColor: 'Colore personalizzato',
-    accentHint: "Vale per pulsanti, selezioni e il giorno di oggi in tutta l'app, su questo dispositivo.",
+    accentHint: "Vale per pulsanti, selezioni e il giorno di oggi in tutta l'app, su questo dispositivo. Cambia anche l'icona della scheda.",
     defaultView: 'Vista predefinita',
     languageHint: 'Vale per questo browser.',
     gcalChecking: 'Verifica collegamento...',

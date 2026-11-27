@@ -180,7 +180,7 @@ export function SettingsView({ user }: SettingsViewProps) {
         <PaySection />
 
         <Section title={t.settings.accent}>
-          <div className="flex flex-wrap items-center -mx-1.5">
+          <div className="grid grid-cols-5 justify-items-center gap-y-1">
             {ACCENT_OPTIONS.map((option) => {
               const isSelected = option.value.toLowerCase() === accent.toLowerCase();
               return (

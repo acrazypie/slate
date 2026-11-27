@@ -45,6 +45,9 @@ export const ja: Dictionary = {
     amber: 'アンバー',
     sage: 'セージ',
     pink: 'ピンク',
+    coral: 'コーラル',
+    periwinkle: 'ペリウィンクル',
+    chalk: 'チョーク',
   },
   views: {
     day: '日',
@@ -243,7 +246,7 @@ export const ja: Dictionary = {
     themeSystem: 'システム',
     accent: 'アクセントカラー',
     customColor: 'カスタムカラー',
-    accentHint: 'このデバイスで、アプリ全体のボタン、選択項目、今日の日付に使われます。',
+    accentHint: 'このデバイスで、アプリ全体のボタン、選択項目、今日の日付に使われます。タブのアイコンも変わります。',
     defaultView: 'デフォルトの表示',
     languageHint: 'このブラウザに適用されます。',
     gcalChecking: '接続を確認中...',

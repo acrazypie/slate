@@ -45,6 +45,9 @@ export const fr: Dictionary = {
     amber: 'Ambre',
     sage: 'Sauge',
     pink: 'Rose',
+    coral: 'Corail',
+    periwinkle: 'Pervenche',
+    chalk: 'Craie',
   },
   views: {
     day: 'Jour',
@@ -244,7 +247,7 @@ export const fr: Dictionary = {
     themeSystem: 'Système',
     accent: 'Couleur principale',
     customColor: 'Couleur personnalisée',
-    accentHint: 'S’applique aux boutons, aux sélections et au jour actuel dans toute l’app, sur cet appareil.',
+    accentHint: 'S’applique aux boutons, aux sélections et au jour actuel dans toute l’app, sur cet appareil. Change aussi l’icône de l’onglet.',
     defaultView: 'Vue par défaut',
     languageHint: 'S’applique à ce navigateur.',
     gcalChecking: 'Vérification de la connexion...',
