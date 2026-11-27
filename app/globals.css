@@ -55,6 +55,14 @@
   color-scheme: light;
 }
 
+/* OLED: the dark theme on pure black (Settings > Appearance). Same as the app. */
+.dark[data-oled="true"] {
+  --color-bg: #000000;
+  --color-surface: #0c0c0e;
+  --color-surface-hover: #121212;
+  --color-border: #121212;
+}
+
 html {
   background: var(--color-bg);
 }

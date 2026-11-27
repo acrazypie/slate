@@ -8,6 +8,7 @@ import { Sun, Moon, Monitor, ChevronDown, ChevronUp, CalendarCheck, Loader2, Log
 import { createClient } from '@/lib/supabase/client';
 import { ViewMode } from '@/hooks/useWeek';
 import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
+import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
 import { useI18n } from './LanguageProvider';
@@ -85,9 +86,10 @@ export function SettingsView({ user }: SettingsViewProps) {
   const { theme, setTheme } = useTheme();
   const { locale, t, setLocale } = useI18n();
   const [defaultView, setDefaultView] = useState<ViewMode>(
-    () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'week'
+    () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'day'
   );
   const [accent, setAccentState] = useState<string>(() => getStoredAccent());
+  const [oled, setOledState] = useState<boolean>(() => getOled());
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -156,7 +158,11 @@ export function SettingsView({ user }: SettingsViewProps) {
           <p className="text-xs text-text-tertiary mt-3">{t.settings.languageHint}</p>
         </Section>
 
-        <Section title={t.settings.theme}>
+
+        <PaySection />
+
+
+        <Section title={t.settings.appearance}>
           <div className="grid grid-cols-3 gap-2">
             {([
               ['light', t.settings.themeLight, Sun],
@@ -175,58 +181,80 @@ export function SettingsView({ user }: SettingsViewProps) {
               </button>
             ))}
           </div>
-        </Section>
-
-        <PaySection />
-
-        <Section title={t.settings.accent}>
-          <div className="grid grid-cols-5 justify-items-center gap-y-1">
-            {ACCENT_OPTIONS.map((option) => {
-              const isSelected = option.value.toLowerCase() === accent.toLowerCase();
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => handleAccentChange(option.value)}
-                  aria-label={t.colors[option.name]}
-                  aria-pressed={isSelected}
-                  title={t.colors[option.name]}
-                  className="flex items-center justify-center w-11 h-11 rounded-full"
+          {theme === 'dark' && (
+            <label className="flex items-center justify-between gap-4 mt-4 cursor-pointer">
+              <span>
+                <span className="block text-sm text-text-primary">{t.settings.oled}</span>
+                <span className="block text-xs text-text-tertiary mt-0.5">{t.settings.oledHint}</span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={oled}
+                aria-label={t.settings.oled}
+                onClick={() => {
+                  const next = !oled;
+                  setOledState(next);
+                  setOled(next);
+                  applyOled(next);
+                }}
+                className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${oled ? 'bg-accent' : 'bg-surface-hover'}`}
+              >
+                <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-text-primary transition-transform ${oled ? 'translate-x-5' : ''}`} />
+              </button>
+            </label>
+          )}
+          <div className="mt-5">
+            <h3 className="text-sm text-text-secondary mb-3">{t.settings.accent}</h3>
+                      <div className="grid grid-cols-5 justify-items-center gap-y-1">
+                {ACCENT_OPTIONS.map((option) => {
+                  const isSelected = option.value.toLowerCase() === accent.toLowerCase();
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => handleAccentChange(option.value)}
+                      aria-label={t.colors[option.name]}
+                      aria-pressed={isSelected}
+                      title={t.colors[option.name]}
+                      className="flex items-center justify-center w-11 h-11 rounded-full"
+                    >
+                      <span
+                        className={`flex items-center justify-center w-8 h-8 rounded-full transition-transform ${
+                          isSelected ? 'scale-110 ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
+                        }`}
+                        style={{ backgroundColor: option.value }}
+                      >
+                        {isSelected && <Check className="w-4 h-4 text-accent-contrast" />}
+                      </span>
+                    </button>
+                  );
+                })}
+                <label
+                  className="relative flex items-center justify-center w-11 h-11 rounded-full cursor-pointer focus-within:outline-2 focus-within:outline-accent-text"
+                  title={t.settings.customColor}
                 >
                   <span
-                    className={`flex items-center justify-center w-8 h-8 rounded-full transition-transform ${
-                      isSelected ? 'scale-110 ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-border-strong ${
+                      !isPreset ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
                     }`}
-                    style={{ backgroundColor: option.value }}
+                    style={!isPreset ? { backgroundColor: accent } : undefined}
                   >
-                    {isSelected && <Check className="w-4 h-4 text-accent-contrast" />}
+                    {isPreset && <span className="text-text-secondary text-lg leading-none">+</span>}
                   </span>
-                </button>
-              );
-            })}
-            <label
-              className="relative flex items-center justify-center w-11 h-11 rounded-full cursor-pointer focus-within:outline-2 focus-within:outline-accent-text"
-              title={t.settings.customColor}
-            >
-              <span
-                className={`flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-border-strong ${
-                  !isPreset ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
-                }`}
-                style={!isPreset ? { backgroundColor: accent } : undefined}
-              >
-                {isPreset && <span className="text-text-secondary text-lg leading-none">+</span>}
-              </span>
-              <input
-                type="color"
-                value={accent}
-                onChange={(e) => handleAccentChange(e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                aria-label={t.settings.customColor}
-              />
-            </label>
+                  <input
+                    type="color"
+                    value={accent}
+                    onChange={(e) => handleAccentChange(e.target.value)}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    aria-label={t.settings.customColor}
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-text-tertiary mt-3">
+                {t.settings.accentHint}
+              </p>
+
           </div>
-          <p className="text-xs text-text-tertiary mt-3">
-            {t.settings.accentHint}
-          </p>
         </Section>
 
         <Section title={t.settings.defaultView}>

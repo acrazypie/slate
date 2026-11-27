@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Download, Server, Cloud } from 'lucide-react';
+import { ArrowRight, Download } from 'lucide-react';
 import { CATEGORY_COLORS } from '@/lib/types';
 import { LanguageSelect } from '@/components/LanguageSelect';
 import type { Dictionary } from '@/lib/i18n/dictionaries';
@@ -36,7 +36,7 @@ function WeekPreview({ days, titles }: { days: string[]; titles: Dictionary['lan
   const hourRows = Array.from({ length: PREVIEW_HOURS }, (_, i) => PREVIEW_START + i);
   const nowTop = ((PREVIEW_NOW - PREVIEW_START) / PREVIEW_HOURS) * 100;
   return (
-    <div aria-hidden="true" className="w-full rounded-3xl bg-surface p-4 sm:p-5 text-left">
+    <div aria-hidden="true" className="w-full text-left">
       <div className="flex">
         <div className="w-9 flex-shrink-0 pt-7">
           <div className="relative h-72 sm:h-80">
@@ -54,7 +54,7 @@ function WeekPreview({ days, titles }: { days: string[]; titles: Dictionary['lan
         <div className="flex-1 min-w-0 grid grid-cols-5 gap-1 sm:gap-1.5">
           {days.map((day, dayIndex) => (
             <div key={day} className="min-w-0">
-              <div className="h-7 flex items-center justify-center text-[11px] font-medium text-text-secondary">{day}</div>
+              <div className="h-7 flex items-center justify-center text-[11px] font-medium tabular-nums text-text-tertiary">{day}</div>
               <div
                 className="relative h-72 sm:h-80 border-l border-border"
                 style={{
@@ -91,35 +91,30 @@ function WeekPreview({ days, titles }: { days: string[]; titles: Dictionary['lan
   );
 }
 
-/** One way in: a row of a grouped list, as in the app's settings. */
-function Row({ icon, title, lede, cta, href, external }: { icon: React.ReactNode; title: string; lede: string; cta: string; href: string; external?: boolean }) {
+/** A way in: a row between hairlines, the title and where it goes. No descriptions. */
+function Way({ title, cta, href, external }: { title: string; cta: string; href: string; external?: boolean }) {
   const body = (
     <>
-      <span className="flex items-center justify-center w-11 h-11 rounded-full bg-[color-mix(in_srgb,var(--color-accent)_18%,transparent)] text-accent-text flex-shrink-0">
-        {icon}
-      </span>
-      <span className="flex-1 min-w-0">
-        <span className="block text-base font-semibold text-text-primary">{title}</span>
-        <span className="block text-sm text-text-secondary leading-relaxed mt-0.5">{lede}</span>
-      </span>
-      <span className={`flex items-center gap-1 text-sm font-medium flex-shrink-0 ${href ? 'text-accent-text' : 'text-text-tertiary'}`}>
-        <span className="hidden sm:inline">{cta}</span>
+      <span className="flex-1 min-w-0 text-base font-medium text-text-primary">{title}</span>
+      <span className={`flex items-center gap-1.5 text-sm font-medium ${href ? 'text-accent-text' : 'text-text-tertiary'}`}>
+        {cta}
         {href && <ArrowRight className="w-4 h-4" />}
       </span>
     </>
   );
-  const classes = 'flex items-center gap-4 px-5 py-4 min-h-[4.5rem]';
+  const classes = 'flex items-center gap-4 py-4 min-h-14 border-t border-border transition-colors hover:text-accent-text';
   if (!href) return <div className={classes}>{body}</div>;
   return external ? (
-    <a href={href} className={`${classes} transition-colors hover:bg-surface-hover`}>{body}</a>
+    <a href={href} className={classes}>{body}</a>
   ) : (
-    <Link href={href} className={`${classes} transition-colors hover:bg-surface-hover`}>{body}</Link>
+    <Link href={href} className={classes}>{body}</Link>
   );
 }
 
 export default async function Home() {
   const { locale, t } = await getI18n();
   const s = t.site;
+  const days = weekdayNames(locale).slice(0, 5);
 
   return (
     <div className="min-h-screen flex flex-col bg-bg">
@@ -128,45 +123,40 @@ export default async function Home() {
         <LanguageSelect />
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-5 pt-10 pb-16 md:pt-16 grid gap-10 md:grid-cols-2 md:items-center">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-5 pt-12 pb-20 md:pt-20 grid gap-14 md:grid-cols-[1fr_1.1fr] md:gap-16 md:items-center">
         <div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-[1.05]">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-text-primary leading-[1.02]">
             {t.landing.tagline}
           </h1>
-          <p className="mt-4 text-lg text-text-secondary leading-relaxed">{t.landing.subtitle}</p>
+          <p className="mt-5 text-lg text-text-secondary">{t.landing.subtitle}</p>
 
-          <section className="mt-8 rounded-3xl bg-surface divide-y divide-border overflow-hidden">
-            <Row
-              icon={<Download className="w-5 h-5" />}
-              title={s.downloadTitle}
-              lede={s.downloadLede}
-              cta={APK_URL ? s.downloadApk : s.downloadSoon}
-              href={APK_URL}
-              external
-            />
-            <Row
-              icon={<Server className="w-5 h-5" />}
-              title={s.selfTitle}
-              lede={s.selfLede}
-              cta={s.selfCta}
-              href="/self-host"
-            />
-            <Row
-              icon={<Cloud className="w-5 h-5" />}
-              title={s.cloudTitle}
-              lede={s.cloudLede}
-              cta={s.cloudCta}
-              href="/auth/login"
-            />
-          </section>
-          <p className="text-xs text-text-tertiary mt-3 px-1">{s.downloadNote}</p>
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-3">
+            {APK_URL ? (
+              <a
+                href={APK_URL}
+                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-2xl bg-accent text-accent-contrast font-semibold transition-opacity hover:opacity-90"
+              >
+                <Download className="w-4 h-4" />
+                {s.downloadApk}
+              </a>
+            ) : (
+              <span className="inline-flex items-center justify-center h-12 px-6 rounded-2xl bg-surface-hover text-text-tertiary font-semibold whitespace-nowrap">
+                {s.downloadSoon}
+              </span>
+            )}
+            <span className="text-xs text-text-tertiary">{s.downloadNote}</span>
+          </div>
+
+          <nav className="mt-10 border-b border-border">
+            <Way title={s.selfTitle} cta={s.selfCta} href="/self-host" />
+            <Way title={s.cloudTitle} cta={s.cloudCta} href="/auth/login" />
+          </nav>
         </div>
 
-        <WeekPreview days={weekdayNames(locale).slice(0, 5)} titles={t.landing.preview} />
+        <WeekPreview days={days} titles={t.landing.preview} />
       </main>
 
       <footer className="mx-auto w-full max-w-5xl px-5 pb-8 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-tertiary">
-        <Link href="/self-host" className="px-2 py-3 hover:text-text-secondary transition-colors">{s.selfCta}</Link>
         <Link href="/privacy" className="px-2 py-3 hover:text-text-secondary transition-colors">{t.common.privacy}</Link>
         <Link href="/terms" className="px-2 py-3 hover:text-text-secondary transition-colors">{t.common.terms}</Link>
         {SERVER_REPO_URL && (

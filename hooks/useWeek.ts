@@ -14,7 +14,7 @@ export function useWeek() {
   // different, fixed numbering - see `storedWeekOffset` below.
   const [weekOffset, setWeekOffset] = useState(0);
   const [view, setView] = useState<ViewMode>(
-    () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'week'
+    () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'day'
   );
 
   const currentWeekStart = useMemo(() => {
