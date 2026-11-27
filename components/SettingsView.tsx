@@ -10,6 +10,7 @@ import { ViewMode } from '@/hooks/useWeek';
 import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
 import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
+import { BackupSection } from './BackupSection';
 import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
 import { useI18n } from './LanguageProvider';
@@ -279,6 +280,10 @@ export function SettingsView({ user }: SettingsViewProps) {
           </div>
         </Section>
 
+
+        <Section title={t.backup.title}>
+          <BackupSection />
+        </Section>
 
         <Section title={t.settings.installTitle}>
           <p className="text-sm text-text-secondary leading-relaxed mb-3">
