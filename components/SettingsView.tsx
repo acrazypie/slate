@@ -11,6 +11,7 @@ import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
 import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
 import { BackupSection } from './BackupSection';
+import { RemindersSettings } from './RemindersSettings';
 import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
 import { useI18n } from './LanguageProvider';
@@ -280,6 +281,11 @@ export function SettingsView({ user }: SettingsViewProps) {
           </div>
         </Section>
 
+
+        <Section title={t.reminders.title}>
+          <p className="text-xs text-text-tertiary mb-4">{t.reminders.lede}</p>
+          <RemindersSettings />
+        </Section>
 
         <Section title={t.backup.title}>
           <BackupSection />

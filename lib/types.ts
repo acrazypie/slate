@@ -15,6 +15,8 @@ export interface Block {
   week_offset: number;
   notes: string | null;
   is_recurring: boolean;
+  /** Minutes before the start to remind; null = the default, -1 = no reminder. */
+  reminder_minutes?: number | null;
   recurrence_type?: RecurrenceType;
   recurrence_end_date?: string;
   recurrence_group_id?: string;
@@ -75,6 +77,8 @@ export interface Shift {
   /** Unpaid break inside the shift, in minutes. Not paid, not counted as hours worked. */
   break_minutes: number;
   color: string;
+  /** Minutes before the start to remind; null = the default, -1 = no reminder. */
+  reminder_minutes?: number | null;
   created_at: string;
 }
 
@@ -86,6 +90,7 @@ export interface ShiftFormData {
   end_minute: number;
   break_minutes: number;
   color: string;
+  reminder_minutes?: number | null;
 }
 
 /** A shift placed on one specific calendar day. */
@@ -149,6 +154,7 @@ export interface BlockFormData {
   duration_minutes: number;
   notes: string;
   is_recurring?: boolean;
+  reminder_minutes?: number | null;
   recurrence_type?: RecurrenceType;
   recurrence_end_date?: string;
 }

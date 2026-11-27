@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { reminderLabel, reminderText, reminderToForm, formToReminder, getLeadMinutes, REMINDER_OPTIONS } from '@/lib/reminders';
 import { Shift, ShiftFormData, COLOR_PALETTE, colorKey, SHIFT_DEFAULT_COLOR, formatTime } from '@/lib/types';
 import { fill } from '@/lib/i18n/format';
 import { useI18n } from './LanguageProvider';
@@ -28,6 +29,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
   const [end, setEnd] = useState('17:00');
   const [color, setColor] = useState(SHIFT_DEFAULT_COLOR);
   const [breakMinutes, setBreakMinutes] = useState('0');
+  const [reminder, setReminder] = useState('default');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   // Deleting a shift takes it off every day, so it asks once more first.
@@ -41,8 +43,10 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
       setEnd(formatTime(shift.end_hour, shift.end_minute));
       setColor(shift.color);
       setBreakMinutes(String(shift.break_minutes ?? 0));
+      setReminder(reminderToForm(shift.reminder_minutes));
     } else {
       setBreakMinutes('0');
+      setReminder('default');
       setTitle('');
       setStart('09:00');
       setEnd('17:00');
@@ -68,7 +72,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
 
     setLoading(true);
     const breakValue = Math.min(240, Math.max(0, Math.round(Number(breakMinutes) || 0)));
-    await onSave({ title: title.trim(), start_hour: sh, start_minute: sm, end_hour: eh, end_minute: em, break_minutes: breakValue, color });
+    await onSave({ title: title.trim(), start_hour: sh, start_minute: sm, end_hour: eh, end_minute: em, break_minutes: breakValue, color, reminder_minutes: formToReminder(reminder) });
     setLoading(false);
   };
 
@@ -127,6 +131,17 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
             className={inputClass}
           />
           <p className="text-xs text-text-tertiary mt-1">{t.shiftModal.breakHint}</p>
+        </div>
+
+        <div>
+          <label htmlFor="shift-reminder" className={labelClass}>{t.reminders.label}</label>
+          <select id="shift-reminder" value={reminder} onChange={(e) => setReminder(e.target.value)} className={inputClass}>
+            <option value="default">{reminderLabel(null, reminderText(t), getLeadMinutes())}</option>
+            <option value="off">{t.reminders.off}</option>
+            {REMINDER_OPTIONS.map((m) => (
+              <option key={m} value={String(m)}>{reminderLabel(m, reminderText(t), 0)}</option>
+            ))}
+          </select>
         </div>
 
         <div role="group" aria-labelledby="shift-color-label">

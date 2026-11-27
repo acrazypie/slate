@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { reminderLabel, reminderText, reminderToForm, formToReminder, getLeadMinutes, REMINDER_OPTIONS } from '@/lib/reminders';
 import { Block, BlockCategory, BlockFormData, CATEGORIES, COLOR_PALETTE, colorKey, DURATION_OPTIONS, CATEGORY_COLORS, RecurrenceType } from '@/lib/types';
 import { weekdayNames } from '@/lib/i18n/format';
 import { useI18n } from './LanguageProvider';
@@ -31,6 +32,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
   const [start_minute, setStartMinute] = useState(0);
   const [duration_minutes, setDurationMinutes] = useState(60);
   const [notes, setNotes] = useState('');
+  const [reminder, setReminder] = useState('default');
   const [loading, setLoading] = useState(false);
   
   const [is_recurring, setIsRecurring] = useState(false);
@@ -50,6 +52,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
       setStartMinute(block.start_minute);
       setDurationMinutes(block.duration_minutes);
       setNotes(block.notes || '');
+      setReminder(reminderToForm(block.reminder_minutes));
       setIsRecurring(block.is_recurring || false);
       setRecurrenceType(block.recurrence_type || 'weekly');
       setRecurrenceEndDate(block.recurrence_end_date || '');
@@ -91,6 +94,7 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
       start_minute,
       duration_minutes,
       notes,
+      reminder_minutes: formToReminder(reminder),
       is_recurring,
       recurrence_type: is_recurring ? recurrence_type : undefined,
       recurrence_end_date: is_recurring && recurrence_end_date ? recurrence_end_date : undefined,
@@ -228,6 +232,17 @@ export function BlockModal({ isOpen, onClose, onSave, onDelete, onDeleteRecurrin
               <option key={`${opt.hour}:${opt.minute}`} value={`${opt.hour}:${opt.minute.toString().padStart(2, '0')}`}>
                 {opt.hour.toString().padStart(2, '0')}:{opt.minute.toString().padStart(2, '0')}
               </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="block-reminder" className={labelClass}>{t.reminders.label}</label>
+          <select id="block-reminder" value={reminder} onChange={(e) => setReminder(e.target.value)} className={fieldClass}>
+            <option value="default">{reminderLabel(null, reminderText(t), getLeadMinutes())}</option>
+            <option value="off">{t.reminders.off}</option>
+            {REMINDER_OPTIONS.map((m) => (
+              <option key={m} value={String(m)}>{reminderLabel(m, reminderText(t), 0)}</option>
             ))}
           </select>
         </div>
