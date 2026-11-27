@@ -15,7 +15,9 @@ import { useMonthBlocks, weekOffsetForDate } from '@/hooks/useMonthBlocks';
 import { useShiftAssignments } from '@/hooks/useShifts';
 import { Block, ShiftAssignment, blockEndTime, formatCompactRange } from '@/lib/types';
 import { DaySheet } from './DaySheet';
-import { fill, weekdayNames } from '@/lib/i18n/format';
+import { capitalize, fill, formatDate, weekdayNames } from '@/lib/i18n/format';
+import { getMonthStyle } from '@/lib/monthStyle';
+import { Plus } from 'lucide-react';
 import { useI18n } from './LanguageProvider';
 
 interface MonthGridProps {
@@ -55,6 +57,10 @@ export function MonthGrid({
   const { locale, t } = useI18n();
   const weekdayLabels = useMemo(() => weekdayNames(locale), [locale]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  // 'compact' shows coloured squares and lists the chosen day below; 'detailed' opens a sheet.
+  const [style] = useState(() => getMonthStyle());
+  const [chosenDay, setChosenDay] = useState<Date>(() => (isSameMonth(today, monthDate) ? today : startOfMonth(monthDate)));
+  const activeDay = isSameMonth(chosenDay, monthDate) ? chosenDay : startOfMonth(monthDate);
 
   const gridStart = useMemo(() => startOfWeek(startOfMonth(monthDate), { weekStartsOn: 1 }), [monthDate]);
   const gridEnd = useMemo(() => endOfWeek(endOfMonth(monthDate), { weekStartsOn: 1 }), [monthDate]);
@@ -103,6 +109,31 @@ export function MonthGrid({
     return result;
   }, [days]);
 
+  const compactItems: { key: string; title: string; time: string; color: string; start: number; assignment?: ShiftAssignment; block?: Block }[] =
+    style === 'compact'
+      ? [
+          ...assignmentsFor(activeDay).map((a) => ({
+            key: `s-${a.id}`,
+            title: a.shift.title,
+            time: formatCompactRange(a.shift.start_hour, a.shift.start_minute, a.shift.end_hour, a.shift.end_minute),
+            color: a.shift.color,
+            start: a.shift.start_hour * 60 + a.shift.start_minute,
+            assignment: a,
+          })),
+          ...blocksFor(activeDay).map((b) => {
+            const end = blockEndTime(b);
+            return {
+              key: `b-${b.id}`,
+              title: b.title,
+              time: formatCompactRange(b.start_hour, b.start_minute, end.hour, end.minute),
+              color: b.color,
+              start: b.start_hour * 60 + b.start_minute,
+              block: b,
+            };
+          }),
+        ].sort((a, b) => a.start - b.start)
+      : [];
+
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="grid grid-cols-7 border-b border-border">
@@ -148,10 +179,10 @@ export function MonthGrid({
               return (
                 <button
                   key={day.toISOString()}
-                  onClick={() => setSelectedDate(day)}
+                  onClick={() => (style === 'compact' ? setChosenDay(day) : setSelectedDate(day))}
                   className={`flex flex-col items-stretch text-left p-1 sm:p-2 min-w-0 border-r border-b border-border [&:nth-child(7n)]:border-r-0 hover:bg-surface-hover/50 transition-colors ${
                     inMonth ? '' : 'opacity-40'
-                  }`}
+                  } ${style === 'compact' && isSameDay(day, activeDay) ? 'bg-surface-hover' : ''}`}
                 >
                   <span
                     className={`self-start flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium mb-1 ${
@@ -160,6 +191,13 @@ export function MonthGrid({
                   >
                     {format(day, 'd')}
                   </span>
+                  {style === 'compact' ? (
+                    <div className="flex flex-wrap gap-0.5 mt-auto">
+                      {chips.slice(0, 4).map((chip) => (
+                        <span key={chip.key} className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: chip.color }} />
+                      ))}
+                    </div>
+                  ) : (
                   <div className="flex flex-col gap-0.5 min-w-0">
                     {chips.slice(0, MAX_CHIPS_DESKTOP).map((chip, i) => (
                       <div
@@ -189,12 +227,50 @@ export function MonthGrid({
                       </div>
                     )}
                   </div>
+                  )}
                 </button>
               );
             })}
           </div>
         ))}
       </div>
+
+      {style === 'compact' && (
+        <section className="px-4 sm:px-6 py-5 border-t border-border">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h2 className="text-lg font-semibold text-text-primary">{capitalize(formatDate(locale, activeDay, 'fullDay'))}</h2>
+            <button
+              type="button"
+              onClick={() => onAddEvent(activeDay)}
+              aria-label={t.blockModal.newTitle}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-accent text-accent-contrast flex-shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          {compactItems.length === 0 ? (
+            <p className="text-sm text-text-tertiary">{t.agenda.empty}</p>
+          ) : (
+            <ul className="space-y-2">
+              {compactItems.map((item) => (
+                <li key={item.key}>
+                  <button
+                    type="button"
+                    onClick={() => (item.assignment ? onEditAssignment(item.assignment) : item.block && onEditBlock(item.block))}
+                    className="w-full flex items-stretch gap-3 rounded-2xl bg-surface px-4 py-3 text-left hover:bg-surface-hover transition-colors"
+                  >
+                    <span className="w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-medium text-text-primary truncate">{item.title}</span>
+                      <span className="block text-xs text-text-secondary tabular-nums mt-0.5">{item.time}</span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <DaySheet
         date={selectedDate}

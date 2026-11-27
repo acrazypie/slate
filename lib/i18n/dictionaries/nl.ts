@@ -427,6 +427,10 @@ export const nl: Dictionary = {
     gcalReconnectHint: 'Koppel Google Agenda opnieuw om al je agenda’s te zien.',
     gcalReconnect: 'Opnieuw koppelen',
     installTitle: 'Installeren als app',
+    monthStyle: "Maandweergave",
+    monthCompact: "Compact",
+    monthDetailed: "Gedetailleerd",
+    monthStyleHint: "Compact toont gekleurde vierkantjes, met de gekozen dag onder de maand.",
     installIntro: 'Zet Slate op je beginscherm om het schermvullend te gebruiken.',
     iosTitle: 'iPhone / iPad (Safari)',
     iosSteps: [

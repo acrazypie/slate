@@ -56,13 +56,13 @@ function DashboardContent() {
   }
 
   return (
-    <div className="flex h-dvh bg-bg text-text-primary">
+    <div className="fixed inset-0 flex bg-bg text-text-primary">
       {/* Desktop sidebar - always visible */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-surface">
         <Sidebar user={currentUser} nav={{ active: tab, onChange: setTab }} />
       </aside>
 
-      <div className="flex flex-1 min-w-0 flex-col">
+      <div className="flex flex-1 min-w-0 min-h-0 flex-col">
         <div className="flex flex-1 min-h-0 flex-col">
           {tab === 'calendar' && <WeekGrid user={currentUser} onOpenSidebar={handleOpenSummary} />}
           {tab === 'summary' && <SummaryView onOpenSettings={() => setTab('settings')} />}

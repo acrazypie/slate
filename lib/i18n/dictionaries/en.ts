@@ -425,6 +425,10 @@ export const en: Dictionary = {
     gcalReconnectHint: 'To see all your calendars, reconnect Google Calendar.',
     gcalReconnect: 'Reconnect',
     installTitle: 'Install as an app',
+    monthStyle: "Month view",
+    monthCompact: "Compact",
+    monthDetailed: "Detailed",
+    monthStyleHint: "Compact shows coloured squares, with the selected day listed below the month.",
     installIntro: 'Add Slate to your Home screen to use it full screen.',
     iosTitle: 'iPhone / iPad (Safari)',
     iosSteps: [

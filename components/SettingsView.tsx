@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Monitor, ChevronDown, ChevronUp, CalendarCheck, Loader2, LogOut, Check, Smartphone } from 'lucide-react';
+import { Sun, Moon, Monitor, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CalendarCheck, Loader2, LogOut, Check, Smartphone } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ViewMode } from '@/hooks/useWeek';
 import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
 import { applyOled, getOled, setOled } from '@/lib/appearance';
+import { getMonthStyle, setMonthStyle, type MonthStyle } from '@/lib/monthStyle';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
 import { BackupSection } from './BackupSection';
 import { RemindersSettings } from './RemindersSettings';
@@ -20,6 +21,8 @@ interface SettingsViewProps {
   user?: { email: string; name?: string };
 }
 
+type SettingsPage = 'account' | 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'reminders' | 'backup' | 'install';
+
 const selected = 'bg-accent text-accent-contrast font-medium';
 const unselected = 'bg-surface-hover text-text-primary hover:bg-border';
 
@@ -30,6 +33,25 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       {children}
     </section>
   );
+}
+
+/** The cards of Settings, each one a page of its own. */
+function SETTINGS_PAGES(
+  t: { settings: { account: string; appearance: string; defaultView: string; installTitle: string }; common: { language: string }; pay: { title: string }; settingsSummary: { title: string }; reminders: { title: string }; backup: { title: string } },
+  user: SettingsViewProps['user'],
+  locale: string,
+): { key: SettingsPage; title: string; hint: string }[] {
+  return [
+    { key: 'account', title: t.settings.account, hint: user?.email ?? '' },
+    { key: 'language', title: t.common.language, hint: (LOCALE_NAMES as Record<string, string>)[locale] ?? '' },
+    { key: 'pay', title: t.pay.title, hint: '' },
+    { key: 'appearance', title: t.settings.appearance, hint: '' },
+    { key: 'summary', title: t.settingsSummary.title, hint: '' },
+    { key: 'defaultView', title: t.settings.defaultView, hint: '' },
+    { key: 'reminders', title: t.reminders.title, hint: '' },
+    { key: 'backup', title: t.backup.title, hint: '' },
+    { key: 'install', title: t.settings.installTitle, hint: '' },
+  ];
 }
 
 /** Hourly rate, currency and overtime rules. Kept on this device; see lib/pay.ts. */
@@ -94,6 +116,8 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [accent, setAccentState] = useState<string>(() => getStoredAccent());
   const [oled, setOledState] = useState<boolean>(() => getOled());
   const [openGuide, setOpenGuide] = useState<string | null>(null);
+  const [page, setPage] = useState<SettingsPage | null>(null);
+  const [monthStyleState, setMonthStyleState] = useState<MonthStyle>(() => getMonthStyle());
   const [loggingOut, setLoggingOut] = useState(false);
 
   const handleViewChange = (view: ViewMode) => {
@@ -122,8 +146,45 @@ export function SettingsView({ user }: SettingsViewProps) {
   return (
     <div className="flex-1 overflow-y-auto bg-bg">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-        <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary mb-2">{t.settings.title}</h1>
+        {page === null ? (
+          <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary mb-2">{t.settings.title}</h1>
+        ) : (
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              type="button"
+              onClick={() => setPage(null)}
+              aria-label={t.common.back}
+              className="flex items-center justify-center w-11 h-11 -ml-2 rounded-xl hover:bg-surface-hover transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6 text-text-secondary" />
+            </button>
+            <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary">
+              {SETTINGS_PAGES(t, user, locale).find((x) => x.key === page)?.title}
+            </h1>
+          </div>
+        )}
 
+        {page === null && (
+          <ul className="space-y-2">
+            {SETTINGS_PAGES(t, user, locale).map((item) => (
+              <li key={item.key}>
+                <button
+                  type="button"
+                  onClick={() => setPage(item.key)}
+                  className="w-full flex items-center justify-between gap-3 rounded-2xl bg-surface px-5 py-4 text-left hover:bg-surface-hover transition-colors"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-base font-medium text-text-primary">{item.title}</span>
+                    {item.hint && <span className="block text-xs text-text-tertiary truncate mt-0.5">{item.hint}</span>}
+                  </span>
+                  <ChevronRight className="w-5 h-5 text-text-tertiary flex-shrink-0" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {page === 'account' && (
         <Section title={t.settings.account}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
@@ -143,7 +204,9 @@ export function SettingsView({ user }: SettingsViewProps) {
             </button>
           </div>
         </Section>
+        )}
 
+        {page === 'language' && (
         <Section title={t.common.language}>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {LOCALES.map((code) => (
@@ -160,11 +223,13 @@ export function SettingsView({ user }: SettingsViewProps) {
           </div>
           <p className="text-xs text-text-tertiary mt-3">{t.settings.languageHint}</p>
         </Section>
+        )}
 
 
-        <PaySection />
+        {page === 'pay' && <PaySection />}
 
 
+        {page === 'appearance' && (
         <Section title={t.settings.appearance}>
           <div className="grid grid-cols-3 gap-2">
             {([
@@ -259,12 +324,16 @@ export function SettingsView({ user }: SettingsViewProps) {
 
           </div>
         </Section>
+        )}
 
+        {page === 'summary' && (
         <Section title={t.settingsSummary.title}>
           <p className="text-xs text-text-tertiary mb-4">{t.settingsSummary.lede}</p>
           <SummaryRangeSettings />
         </Section>
+        )}
 
+        {page === 'defaultView' && (
         <Section title={t.settings.defaultView}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {(['day', 'week', 'month', 'agenda'] as const).map((value) => (
@@ -279,18 +348,43 @@ export function SettingsView({ user }: SettingsViewProps) {
               </button>
             ))}
           </div>
+          <div className="mt-6">
+            <h3 className="text-sm text-text-secondary mb-3">{t.settings.monthStyle}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {(['compact', 'detailed'] as const).map((value) => (
+                <button
+                  key={value}
+                  onClick={() => {
+                    setMonthStyleState(value);
+                    setMonthStyle(value);
+                  }}
+                  aria-pressed={monthStyleState === value}
+                  className={`px-3 py-3 rounded-xl text-sm transition-colors ${monthStyleState === value ? selected : unselected}`}
+                >
+                  {value === 'compact' ? t.settings.monthCompact : t.settings.monthDetailed}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-text-tertiary mt-3">{t.settings.monthStyleHint}</p>
+          </div>
         </Section>
+        )}
 
 
+        {page === 'reminders' && (
         <Section title={t.reminders.title}>
           <p className="text-xs text-text-tertiary mb-4">{t.reminders.lede}</p>
           <RemindersSettings />
         </Section>
+        )}
 
+        {page === 'backup' && (
         <Section title={t.backup.title}>
           <BackupSection />
         </Section>
+        )}
 
+        {page === 'install' && (
         <Section title={t.settings.installTitle}>
           <p className="text-sm text-text-secondary leading-relaxed mb-3">
             {t.settings.installIntro}
@@ -332,7 +426,9 @@ export function SettingsView({ user }: SettingsViewProps) {
             })}
           </div>
         </Section>
+        )}
 
+        {page === null && (
         <div className="flex gap-4 px-1 pt-2 text-xs text-text-tertiary">
           <Link href="/privacy" className="hover:text-text-secondary transition-colors">
             {t.common.privacy}
@@ -341,6 +437,7 @@ export function SettingsView({ user }: SettingsViewProps) {
             {t.common.terms}
           </Link>
         </div>
+        )}
       </div>
     </div>
   );

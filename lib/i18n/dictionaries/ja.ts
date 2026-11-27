@@ -426,6 +426,10 @@ export const ja: Dictionary = {
     gcalReconnectHint: 'すべてのカレンダーを表示するには、Googleカレンダーを接続し直してください。',
     gcalReconnect: '再接続',
     installTitle: 'アプリとしてインストール',
+    monthStyle: "月表示",
+    monthCompact: "コンパクト",
+    monthDetailed: "詳細",
+    monthStyleHint: "コンパクトでは色の四角を表示し、選んだ日の予定を月の下に並べます。",
     installIntro: 'Slateをホーム画面に追加すると、全画面で使えます。',
     iosTitle: 'iPhone / iPad (Safari)',
     iosSteps: [

@@ -427,6 +427,10 @@ export const fr: Dictionary = {
     gcalReconnectHint: 'Pour voir tous tes agendas, reconnecte Google Agenda.',
     gcalReconnect: 'Reconnecter',
     installTitle: 'Installer comme app',
+    monthStyle: "Vue mois",
+    monthCompact: "Compacte",
+    monthDetailed: "Détaillée",
+    monthStyleHint: "La vue compacte affiche des carrés colorés, avec le jour choisi sous le mois.",
     installIntro: 'Ajoute Slate à ton écran d’accueil pour l’utiliser en plein écran.',
     iosTitle: 'iPhone / iPad (Safari)',
     iosSteps: [

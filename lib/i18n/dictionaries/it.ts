@@ -427,6 +427,10 @@ export const it = {
     gcalReconnectHint: 'Per vedere tutti i tuoi calendari, ricollega Google Calendar.',
     gcalReconnect: 'Ricollega',
     installTitle: 'Installa come app',
+    monthStyle: "Vista mese",
+    monthCompact: "Compatta",
+    monthDetailed: "Dettagliata",
+    monthStyleHint: "La vista compatta mostra quadratini colorati, con il giorno scelto sotto il mese.",
     installIntro: 'Aggiungi Slate alla schermata Home per usarla a schermo intero.',
     iosTitle: 'iPhone / iPad (Safari)',
     iosSteps: [
