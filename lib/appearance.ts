@@ -1,6 +1,8 @@
 // Appearance options that are not colours: the OLED setting (pure black
 // background in the dark theme). Stored per device, like the accent.
 
+import { applyGround, getStoredAccent } from './accent';
+
 export const OLED_STORAGE_KEY = 'slate-oled';
 
 export function getOled(): boolean {
@@ -22,4 +24,6 @@ export function setOled(on: boolean) {
 /** Sets the OLED background; only the dark theme uses it (see globals.css). */
 export function applyOled(on: boolean) {
   document.documentElement.dataset.oled = on ? 'true' : 'false';
+  // The tinted background must step aside for pure black, and come back when OLED is off.
+  applyGround(getStoredAccent());
 }

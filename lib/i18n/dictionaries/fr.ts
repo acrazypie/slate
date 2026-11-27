@@ -400,6 +400,11 @@ export const fr: Dictionary = {
     createFirst: 'Crée ton premier service',
     nextDay: '(lendemain)',
   },
+  settingsGroups: {
+    permissions: 'Autorisations',
+    work: 'Travail',
+    data: 'Données',
+  },
   settings: {
     title: 'Réglages',
     account: 'Compte',
@@ -414,6 +419,9 @@ export const fr: Dictionary = {
     accent: 'Couleur principale',
     customColor: 'Couleur personnalisée',
     accentHint: 'S’applique aux boutons, aux sélections et au jour actuel dans toute l’app, sur cet appareil. Change aussi l’icône de l’onglet.',
+    matchAccent: 'Le fond suit l’accent',
+    matchAccentHint: 'Activé : le fond prend la couleur de l’accent. Désactivé : choisissez un fond ci-dessous.',
+    backgroundColour: 'Couleur de fond',
     defaultView: 'Vue par défaut',
     languageHint: 'S’applique à ce navigateur.',
     gcalChecking: 'Vérification de la connexion...',

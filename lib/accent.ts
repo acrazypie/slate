@@ -21,7 +21,8 @@ export const ACCENT_OPTIONS: { value: string; light: string; name: AccentName; i
   { value: '#E58FB4', light: '#A8346A', name: 'pink', icon: 'pink' },
   { value: '#F0785A', light: '#A34A30', name: 'coral', icon: 'coral' },
   { value: '#8FA8FF', light: '#3F55B8', name: 'periwinkle', icon: 'periwinkle' },
-  { value: '#F0EEE8', light: '#5E5B52', name: 'chalk', icon: 'chalk' },
+  // Chalk is white on the dark theme and near black on the light one.
+  { value: '#F0EEE8', light: '#1B1B1B', name: 'chalk', icon: 'chalk' },
 ];
 
 export const DEFAULT_ACCENT = '#6BB6A3';
@@ -110,6 +111,7 @@ export function applyAccent(hex: string, light = document.documentElement.classL
   root.style.setProperty('--color-accent-text', shade);
   root.style.setProperty('--color-accent-contrast', contrastFor(shade));
   setTabIcon(iconFor(hex));
+  applyGround(hex, light);
 }
 
 export function setAccent(hex: string) {
@@ -120,4 +122,90 @@ export function setAccent(hex: string) {
   } catch {
     // Storage unavailable (private mode): the colour still applies for this visit.
   }
+}
+
+// ---- Background ------------------------------------------------------------
+//
+// The ground (page background, cards, hover and hairlines) is a tint of the
+// accent by default, so the whole app takes the accent's colour. A switch in
+// Settings > Appearance turns that off, and then one of the ten accent colours
+// is chosen as the background instead.
+
+export const BACKGROUND_STORAGE_KEY = 'slate-background';
+/** Stored value meaning "follow the accent". Otherwise a hex from ACCENT_OPTIONS. */
+export const MATCH_ACCENT = 'match';
+
+export function getStoredBackground(): string {
+  try {
+    const stored = localStorage.getItem(BACKGROUND_STORAGE_KEY);
+    return stored === MATCH_ACCENT || (stored && HEX.test(stored)) ? stored : MATCH_ACCENT;
+  } catch {
+    return MATCH_ACCENT;
+  }
+}
+
+const DARK_GROUND = '#0E1320';
+const LIGHT_GROUND = '#F4F6FA';
+
+/** `a` weighted by `weight` (0-1) over `b`. */
+function mix(a: string, b: string, weight: number): string {
+  const ra = rgb(a);
+  const rb = rgb(b);
+  return '#' + ra.map((v, i) => Math.round(v * weight + rb[i] * (1 - weight)).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+/** The four ground colours for a base hue: page, card, hover and hairline. */
+function groundFor(base: string, light: boolean) {
+  if (light) {
+    return {
+      bg: mix(base, LIGHT_GROUND, 0.12),
+      surface: mix(base, '#FFFFFF', 0.04),
+      hover: mix(base, '#E3E8F1', 0.22),
+      border: mix(base, '#E3E8F1', 0.22),
+    };
+  }
+  return {
+    bg: mix(base, DARK_GROUND, 0.12),
+    surface: mix(base, DARK_GROUND, 0.18),
+    hover: mix(base, DARK_GROUND, 0.26),
+    border: mix(base, DARK_GROUND, 0.26),
+  };
+}
+
+/** The page colour a background choice gives, for swatches. */
+export function groundPreview(hex: string, light: boolean): string {
+  return groundFor(hex, light).bg;
+}
+
+const GROUND_VARS = ['--color-bg', '--color-surface', '--color-surface-hover', '--color-border'];
+
+/**
+ * Applies the background for the accent `accentHex`. OLED black (dark theme)
+ * comes from the stylesheet, so any inline colour is removed for it.
+ */
+export function applyGround(accentHex: string, light = document.documentElement.classList.contains('light')) {
+  if (!HEX.test(accentHex)) return;
+  const root = document.documentElement;
+  if (!light && root.dataset.oled === 'true') {
+    GROUND_VARS.forEach((v) => root.style.removeProperty(v));
+    return;
+  }
+  const stored = getStoredBackground();
+  const base = stored === MATCH_ACCENT ? accentHex : stored;
+  const g = groundFor(base, light);
+  root.style.setProperty('--color-bg', g.bg);
+  root.style.setProperty('--color-surface', g.surface);
+  root.style.setProperty('--color-surface-hover', g.hover);
+  root.style.setProperty('--color-border', g.border);
+}
+
+/** Stores the background choice ('match' or an accent hex) and applies it. */
+export function setBackground(choice: string) {
+  if (choice !== MATCH_ACCENT && !HEX.test(choice)) return;
+  try {
+    localStorage.setItem(BACKGROUND_STORAGE_KEY, choice);
+  } catch {
+    // Storage unavailable: the choice applies for this visit only.
+  }
+  applyGround(getStoredAccent());
 }

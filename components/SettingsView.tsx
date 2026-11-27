@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes';
 import { Sun, Moon, Monitor, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CalendarCheck, Loader2, LogOut, Check, Smartphone } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ViewMode } from '@/hooks/useWeek';
-import { ACCENT_OPTIONS, getStoredAccent, setAccent } from '@/lib/accent';
+import { ACCENT_OPTIONS, MATCH_ACCENT, getStoredAccent, getStoredBackground, groundPreview, setAccent, setBackground } from '@/lib/accent';
 import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { getMonthStyle, setMonthStyle, type MonthStyle } from '@/lib/monthStyle';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
@@ -35,22 +35,50 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** The cards of Settings, each one a page of its own. */
-function SETTINGS_PAGES(
-  t: { settings: { account: string; appearance: string; defaultView: string; installTitle: string }; common: { language: string }; pay: { title: string }; settingsSummary: { title: string }; reminders: { title: string }; backup: { title: string } },
+type SettingsItem = { key: SettingsPage; title: string; hint: string };
+
+/**
+ * The cards of Settings, grouped as on Android (an unlabelled group is a single
+ * card). Each card opens a page of its own.
+ */
+function SETTINGS_GROUPS(
+  t: {
+    settings: { account: string; appearance: string; defaultView: string; installTitle: string };
+    settingsGroups: { permissions: string; work: string; data: string };
+    common: { language: string };
+    pay: { title: string };
+    settingsSummary: { title: string };
+    reminders: { title: string };
+    backup: { title: string };
+  },
   user: SettingsViewProps['user'],
   locale: string,
-): { key: SettingsPage; title: string; hint: string }[] {
+): { label: string; items: SettingsItem[] }[] {
   return [
-    { key: 'account', title: t.settings.account, hint: user?.email ?? '' },
-    { key: 'language', title: t.common.language, hint: (LOCALE_NAMES as Record<string, string>)[locale] ?? '' },
-    { key: 'pay', title: t.pay.title, hint: '' },
-    { key: 'appearance', title: t.settings.appearance, hint: '' },
-    { key: 'summary', title: t.settingsSummary.title, hint: '' },
-    { key: 'defaultView', title: t.settings.defaultView, hint: '' },
-    { key: 'reminders', title: t.reminders.title, hint: '' },
-    { key: 'backup', title: t.backup.title, hint: '' },
-    { key: 'install', title: t.settings.installTitle, hint: '' },
+    { label: '', items: [{ key: 'account', title: t.settings.account, hint: user?.email ?? '' }] },
+    {
+      label: t.settings.appearance,
+      items: [
+        { key: 'appearance', title: t.settings.appearance, hint: '' },
+        { key: 'defaultView', title: t.settings.defaultView, hint: '' },
+      ],
+    },
+    { label: t.settingsGroups.permissions, items: [{ key: 'reminders', title: t.reminders.title, hint: '' }] },
+    { label: '', items: [{ key: 'language', title: t.common.language, hint: (LOCALE_NAMES as Record<string, string>)[locale] ?? '' }] },
+    {
+      label: t.settingsGroups.work,
+      items: [
+        { key: 'summary', title: t.settingsSummary.title, hint: '' },
+        { key: 'pay', title: t.pay.title, hint: '' },
+      ],
+    },
+    {
+      label: t.settingsGroups.data,
+      items: [
+        { key: 'backup', title: t.backup.title, hint: '' },
+        { key: 'install', title: t.settings.installTitle, hint: '' },
+      ],
+    },
   ];
 }
 
@@ -108,7 +136,8 @@ function PaySection() {
 
 export function SettingsView({ user }: SettingsViewProps) {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const light = resolvedTheme === 'light';
   const { locale, t, setLocale } = useI18n();
   const [defaultView, setDefaultView] = useState<ViewMode>(
     () => (localStorage.getItem('slate-default-view') as ViewMode) ?? 'day'
@@ -128,6 +157,19 @@ export function SettingsView({ user }: SettingsViewProps) {
   const handleAccentChange = (value: string) => {
     setAccentState(value);
     setAccent(value);
+  };
+
+  // The background follows the accent unless the switch is off; then one of the ten colours is chosen.
+  const [background, setBackgroundState] = useState<string>(() => getStoredBackground());
+  const matchAccent = background === MATCH_ACCENT;
+  const handleMatchAccentChange = (match: boolean) => {
+    const next = match ? MATCH_ACCENT : accent;
+    setBackgroundState(next);
+    setBackground(next);
+  };
+  const handleBackgroundChange = (value: string) => {
+    setBackgroundState(value);
+    setBackground(value);
   };
 
   const handleLogout = async () => {
@@ -159,29 +201,36 @@ export function SettingsView({ user }: SettingsViewProps) {
               <ChevronLeft className="w-6 h-6 text-text-secondary" />
             </button>
             <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary">
-              {SETTINGS_PAGES(t, user, locale).find((x) => x.key === page)?.title}
+              {SETTINGS_GROUPS(t, user, locale).flatMap((g) => g.items).find((x) => x.key === page)?.title}
             </h1>
           </div>
         )}
 
         {page === null && (
-          <ul className="space-y-2">
-            {SETTINGS_PAGES(t, user, locale).map((item) => (
-              <li key={item.key}>
-                <button
-                  type="button"
-                  onClick={() => setPage(item.key)}
-                  className="w-full flex items-center justify-between gap-3 rounded-2xl bg-surface px-5 py-4 text-left hover:bg-surface-hover transition-colors"
-                >
-                  <span className="min-w-0">
-                    <span className="block text-base font-medium text-text-primary">{item.title}</span>
-                    {item.hint && <span className="block text-xs text-text-tertiary truncate mt-0.5">{item.hint}</span>}
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-text-tertiary flex-shrink-0" />
-                </button>
-              </li>
+          <div className="space-y-6">
+            {SETTINGS_GROUPS(t, user, locale).map((group, groupIndex) => (
+              <section key={groupIndex}>
+                {group.label && <h2 className="text-sm text-text-secondary mb-2 px-1">{group.label}</h2>}
+                <ul className="bg-surface rounded-3xl divide-y divide-border overflow-hidden">
+                  {group.items.map((item) => (
+                    <li key={item.key}>
+                      <button
+                        type="button"
+                        onClick={() => setPage(item.key)}
+                        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-surface-hover transition-colors"
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-base font-medium text-text-primary">{item.title}</span>
+                          {item.hint && <span className="block text-xs text-text-tertiary truncate mt-0.5">{item.hint}</span>}
+                        </span>
+                        <ChevronRight className="w-5 h-5 text-text-tertiary flex-shrink-0" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
 
         {page === 'account' && (
@@ -290,7 +339,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                         className={`flex items-center justify-center w-8 h-8 rounded-full transition-transform ${
                           isSelected ? 'scale-110 ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
                         }`}
-                        style={{ backgroundColor: option.value }}
+                        style={{ backgroundColor: light ? option.light : option.value }}
                       >
                         {isSelected && <Check className="w-4 h-4 text-accent-contrast" />}
                       </span>
@@ -321,6 +370,52 @@ export function SettingsView({ user }: SettingsViewProps) {
               <p className="text-xs text-text-tertiary mt-3">
                 {t.settings.accentHint}
               </p>
+
+              <div className="mt-6">
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <span>
+                    <span className="block text-sm text-text-primary">{t.settings.matchAccent}</span>
+                    <span className="block text-xs text-text-tertiary mt-0.5">{t.settings.matchAccentHint}</span>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={matchAccent}
+                    aria-label={t.settings.matchAccent}
+                    onClick={() => handleMatchAccentChange(!matchAccent)}
+                    className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${matchAccent ? 'bg-accent' : 'bg-surface-hover'}`}
+                  >
+                    <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-text-primary transition-transform ${matchAccent ? 'translate-x-5' : ''}`} />
+                  </button>
+                </label>
+                {!matchAccent && (
+                  <>
+                    <h3 className="text-sm text-text-secondary mt-4 mb-3">{t.settings.backgroundColour}</h3>
+                    <div className="grid grid-cols-5 justify-items-center gap-y-1">
+                      {ACCENT_OPTIONS.map((option) => {
+                        const isSelected = background.toLowerCase() === option.value.toLowerCase();
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => handleBackgroundChange(option.value)}
+                            aria-label={`${t.settings.backgroundColour}: ${t.colors[option.name]}`}
+                            aria-pressed={isSelected}
+                            title={t.colors[option.name]}
+                            className="flex items-center justify-center w-11 h-11 rounded-full"
+                          >
+                            <span
+                              className={`w-8 h-8 rounded-full border border-border-strong transition-transform ${
+                                isSelected ? 'scale-110 ring-2 ring-text-primary ring-offset-2 ring-offset-surface' : ''
+                              }`}
+                              style={{ backgroundColor: groundPreview(option.value, light) }}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
 
           </div>
         </Section>

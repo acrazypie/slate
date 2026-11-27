@@ -399,6 +399,11 @@ export const es: Dictionary = {
     createFirst: 'Crea el primer turno',
     nextDay: '(día siguiente)',
   },
+  settingsGroups: {
+    permissions: 'Permisos',
+    work: 'Trabajo',
+    data: 'Datos',
+  },
   settings: {
     title: 'Ajustes',
     account: 'Cuenta',
@@ -413,6 +418,9 @@ export const es: Dictionary = {
     accent: 'Color principal',
     customColor: 'Color personalizado',
     accentHint: 'Se usa en botones, selecciones y el día de hoy en toda la app, en este dispositivo. También cambia el icono de la pestaña.',
+    matchAccent: 'El fondo sigue al acento',
+    matchAccentHint: 'Activado: el fondo toma el color del acento. Desactivado: elige un fondo abajo.',
+    backgroundColour: 'Color de fondo',
     defaultView: 'Vista predeterminada',
     languageHint: 'Se aplica a este navegador.',
     gcalChecking: 'Comprobando la conexión...',

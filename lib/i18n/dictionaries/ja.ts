@@ -399,6 +399,11 @@ export const ja: Dictionary = {
     createFirst: '最初のシフトを作成',
     nextDay: '（翌日）',
   },
+  settingsGroups: {
+    permissions: '権限',
+    work: '仕事',
+    data: 'データ',
+  },
   settings: {
     title: '設定',
     account: 'アカウント',
@@ -413,6 +418,9 @@ export const ja: Dictionary = {
     accent: 'アクセントカラー',
     customColor: 'カスタムカラー',
     accentHint: 'このデバイスで、アプリ全体のボタン、選択項目、今日の日付に使われます。タブのアイコンも変わります。',
+    matchAccent: '背景をアクセントに合わせる',
+    matchAccentHint: 'オン: 背景がアクセントの色になります。オフ: 下から背景色を選びます。',
+    backgroundColour: '背景色',
     defaultView: 'デフォルトの表示',
     languageHint: 'このブラウザに適用されます。',
     gcalChecking: '接続を確認中...',

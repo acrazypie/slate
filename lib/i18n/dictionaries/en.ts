@@ -398,6 +398,11 @@ export const en: Dictionary = {
     createFirst: 'Create your first shift',
     nextDay: '(next day)',
   },
+  settingsGroups: {
+    permissions: 'Permissions',
+    work: 'Work',
+    data: 'Data',
+  },
   settings: {
     title: 'Settings',
     account: 'Account',
@@ -412,6 +417,9 @@ export const en: Dictionary = {
     accent: 'Accent colour',
     customColor: 'Custom colour',
     accentHint: 'Used for buttons, selections and today across the app, on this device. Also sets the tab icon.',
+    matchAccent: 'Background follows accent',
+    matchAccentHint: 'On: the background takes the accent colour. Off: pick a background below.',
+    backgroundColour: 'Background colour',
     defaultView: 'Default view',
     languageHint: 'Applies to this browser.',
     gcalChecking: 'Checking connection...',

@@ -400,6 +400,11 @@ export const it = {
     createFirst: 'Crea il primo turno',
     nextDay: '(giorno dopo)',
   },
+  settingsGroups: {
+    permissions: 'Permessi',
+    work: 'Lavoro',
+    data: 'Dati',
+  },
   settings: {
     title: 'Impostazioni',
     account: 'Account',
@@ -414,6 +419,9 @@ export const it = {
     accent: 'Colore principale',
     customColor: 'Colore personalizzato',
     accentHint: "Vale per pulsanti, selezioni e il giorno di oggi in tutta l'app, su questo dispositivo. Cambia anche l'icona della scheda.",
+    matchAccent: 'Lo sfondo segue l’accento',
+    matchAccentHint: 'Attivo: lo sfondo prende il colore dell’accento. Disattivo: scegli uno sfondo qui sotto.',
+    backgroundColour: 'Colore dello sfondo',
     defaultView: 'Vista predefinita',
     languageHint: 'Vale per questo browser.',
     gcalChecking: 'Verifica collegamento...',

@@ -400,6 +400,11 @@ export const nl: Dictionary = {
     createFirst: 'Maak je eerste dienst',
     nextDay: '(volgende dag)',
   },
+  settingsGroups: {
+    permissions: 'Rechten',
+    work: 'Werk',
+    data: 'Gegevens',
+  },
   settings: {
     title: 'Instellingen',
     account: 'Account',
@@ -414,6 +419,9 @@ export const nl: Dictionary = {
     accent: 'Accentkleur',
     customColor: 'Eigen kleur',
     accentHint: 'Geldt voor knoppen, selecties en de dag van vandaag in de hele app, op dit apparaat. Past ook het tabblad-icoon aan.',
+    matchAccent: 'Achtergrond volgt accent',
+    matchAccentHint: 'Aan: de achtergrond krijgt de kleur van het accent. Uit: kies hieronder een achtergrondkleur.',
+    backgroundColour: 'Achtergrondkleur',
     defaultView: 'Standaardweergave',
     languageHint: 'Geldt voor deze browser.',
     gcalChecking: 'Koppeling controleren...',

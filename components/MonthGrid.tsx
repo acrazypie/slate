@@ -149,7 +149,14 @@ export function MonthGrid({
 
       <div className="flex-1 flex flex-col">
         {weeks.map((week, weekIdx) => (
-          <div key={weekIdx} className="flex-1 grid grid-cols-7 min-h-[104px] sm:min-h-[132px]">
+          <div
+            key={weekIdx}
+            className={
+              style === 'compact'
+                ? 'grid grid-cols-7 min-h-[56px]'
+                : 'flex-1 grid grid-cols-7 min-h-[104px] sm:min-h-[132px]'
+            }
+          >
             {week.map((day) => {
               const inMonth = isSameMonth(day, monthDate);
               const isToday = isSameDay(day, today);
@@ -180,19 +187,23 @@ export function MonthGrid({
                 <button
                   key={day.toISOString()}
                   onClick={() => (style === 'compact' ? setChosenDay(day) : setSelectedDate(day))}
-                  className={`flex flex-col items-stretch text-left p-1 sm:p-2 min-w-0 border-r border-b border-border [&:nth-child(7n)]:border-r-0 hover:bg-surface-hover/50 transition-colors ${
-                    inMonth ? '' : 'opacity-40'
-                  } ${style === 'compact' && isSameDay(day, activeDay) ? 'bg-surface-hover' : ''}`}
+                  className={`flex flex-col min-w-0 border-r border-b border-border [&:nth-child(7n)]:border-r-0 hover:bg-surface-hover/50 transition-colors ${
+                    style === 'compact' ? 'items-center text-center py-1 px-0.5' : 'items-stretch text-left p-1 sm:p-2'
+                  } ${inMonth ? '' : 'opacity-40'}`}
                 >
                   <span
-                    className={`self-start flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium mb-1 ${
-                      isToday ? 'bg-accent text-accent-contrast' : 'text-text-primary'
+                    className={`${style === 'compact' ? 'self-center' : 'self-start'} flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium mb-1 ${
+                      isToday
+                        ? 'bg-accent text-accent-contrast'
+                        : style === 'compact' && isSameDay(day, activeDay)
+                          ? 'border-2 border-accent text-text-primary'
+                          : 'text-text-primary'
                     }`}
                   >
                     {format(day, 'd')}
                   </span>
                   {style === 'compact' ? (
-                    <div className="flex flex-wrap gap-0.5 mt-auto">
+                    <div className="flex flex-wrap justify-center gap-0.5 mt-auto">
                       {chips.slice(0, 4).map((chip) => (
                         <span key={chip.key} className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: chip.color }} />
                       ))}
