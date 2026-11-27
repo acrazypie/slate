@@ -413,6 +413,14 @@ export const en: Dictionary = {
     backup: 'Save a copy of your data, restore it, or erase it.',
     install: 'Add Slate to your home screen to open it like an app.',
   },
+  deleteAccount: {
+    button: 'Delete account',
+    title: 'Delete your account?',
+    body: 'This permanently deletes your account and everything in it: blocks, shifts, rotations, reminder settings and push subscriptions. It cannot be undone. Type your email address to confirm.',
+    label: 'Your email address',
+    confirm: 'Delete my account',
+    failed: 'Could not delete the account. Try again.',
+  },
   settings: {
     title: 'Settings',
     account: 'Account',

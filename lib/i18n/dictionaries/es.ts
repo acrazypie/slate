@@ -414,6 +414,14 @@ export const es: Dictionary = {
     backup: 'Guarda una copia de tus datos, restáurala o bórrala.',
     install: 'Añade Slate a tu pantalla de inicio para abrirla como una app.',
   },
+  deleteAccount: {
+    button: 'Eliminar cuenta',
+    title: '¿Eliminar tu cuenta?',
+    body: 'Esto borra de forma permanente tu cuenta y todo lo que contiene: bloques, turnos, rotaciones, ajustes de recordatorios y suscripciones push. No se puede deshacer. Escribe tu correo electrónico para confirmar.',
+    label: 'Tu correo electrónico',
+    confirm: 'Eliminar mi cuenta',
+    failed: 'No se pudo eliminar la cuenta. Inténtalo de nuevo.',
+  },
   settings: {
     title: 'Ajustes',
     account: 'Cuenta',

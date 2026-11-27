@@ -12,6 +12,7 @@ import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { getMonthStyle, setMonthStyle, type MonthStyle } from '@/lib/monthStyle';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
 import { BackupSection } from './BackupSection';
+import { DeleteAccount } from './DeleteAccount';
 import { RemindersSettings } from './RemindersSettings';
 import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
@@ -254,6 +255,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                 </ul>
               </section>
             ))}
+            <DeleteAccount email={user?.email ?? ''} />
           </div>
         )}
 

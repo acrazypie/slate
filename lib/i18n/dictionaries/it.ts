@@ -415,6 +415,14 @@ export const it = {
     backup: 'Salva una copia dei tuoi dati, ripristinala o cancellala.',
     install: 'Aggiungi Slate alla schermata Home per aprirla come un’app.',
   },
+  deleteAccount: {
+    button: 'Elimina account',
+    title: 'Eliminare il tuo account?',
+    body: 'Questo elimina in modo permanente il tuo account e tutto ciò che contiene: blocchi, turni, rotazioni, impostazioni dei promemoria e iscrizioni alle notifiche. Non si può annullare. Scrivi il tuo indirizzo email per confermare.',
+    label: 'La tua email',
+    confirm: 'Elimina il mio account',
+    failed: 'Impossibile eliminare l’account. Riprova.',
+  },
   settings: {
     title: 'Impostazioni',
     account: 'Account',

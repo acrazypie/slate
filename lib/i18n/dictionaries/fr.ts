@@ -415,6 +415,14 @@ export const fr: Dictionary = {
     backup: 'Enregistrez une copie de vos données, restaurez-la ou effacez-la.',
     install: 'Ajoutez Slate à votre écran d’accueil pour l’ouvrir comme une app.',
   },
+  deleteAccount: {
+    button: 'Supprimer le compte',
+    title: 'Supprimer votre compte ?',
+    body: 'Cela supprime définitivement votre compte et tout ce qu’il contient : blocs, services, rotations, réglages des rappels et abonnements aux notifications. Action irréversible. Saisissez votre adresse e-mail pour confirmer.',
+    label: 'Votre adresse e-mail',
+    confirm: 'Supprimer mon compte',
+    failed: 'Impossible de supprimer le compte. Réessayez.',
+  },
   settings: {
     title: 'Réglages',
     account: 'Compte',

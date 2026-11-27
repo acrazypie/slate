@@ -415,6 +415,14 @@ export const nl: Dictionary = {
     backup: 'Sla een kopie van je gegevens op, herstel die of wis ze.',
     install: 'Voeg Slate toe aan je beginscherm om het als app te openen.',
   },
+  deleteAccount: {
+    button: 'Account verwijderen',
+    title: 'Je account verwijderen?',
+    body: 'Dit verwijdert je account en alles erin voorgoed: blokken, diensten, rotaties, herinneringsinstellingen en pushabonnementen. Dit kan niet ongedaan worden. Typ je e-mailadres om te bevestigen.',
+    label: 'Je e-mailadres',
+    confirm: 'Mijn account verwijderen',
+    failed: 'Het account kon niet worden verwijderd. Probeer het opnieuw.',
+  },
   settings: {
     title: 'Instellingen',
     account: 'Account',
