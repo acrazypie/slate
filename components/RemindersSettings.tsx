@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useI18n } from './LanguageProvider';
 import { getLeadMinutes, setLeadMinutes, getNotifySettings, setNotifySettings, REMINDER_OPTIONS, reminderLabel, reminderText, type NotifySettings } from '@/lib/reminders';
+import { pushSupported, subscribeForReminders, syncReminderSettings } from '@/lib/push';
 
 type Permission = 'granted' | 'denied' | 'default' | 'unsupported';
 
@@ -15,7 +16,7 @@ function currentPermission(): Permission {
 }
 
 export function RemindersSettings() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [lead, setLead] = useState(() => getLeadMinutes());
   const [notify, setNotify] = useState<NotifySettings>(() => getNotifySettings());
   const [permission, setPermission] = useState<Permission>(() => currentPermission());
@@ -24,12 +25,16 @@ export function RemindersSettings() {
   const changeNotify = (next: NotifySettings) => {
     setNotify(next);
     setNotifySettings(next);
+    void syncReminderSettings(locale).catch(() => {});
   };
 
   const allow = async () => {
     if (permission === 'unsupported') return;
     const result = await Notification.requestPermission();
     setPermission(result === 'granted' ? 'granted' : result === 'denied' ? 'denied' : 'default');
+    if (result === 'granted' && pushSupported()) {
+      await subscribeForReminders(locale).catch(() => {});
+    }
   };
 
   const status =
@@ -46,6 +51,7 @@ export function RemindersSettings() {
             const value = Number(e.target.value);
             setLead(value);
             setLeadMinutes(value);
+            void syncReminderSettings(locale).catch(() => {});
           }}
         >
           {REMINDER_OPTIONS.map((m) => (
