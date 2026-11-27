@@ -27,6 +27,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
   const [start, setStart] = useState('09:00');
   const [end, setEnd] = useState('17:00');
   const [color, setColor] = useState(SHIFT_DEFAULT_COLOR);
+  const [breakMinutes, setBreakMinutes] = useState('0');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   // Deleting a shift takes it off every day, so it asks once more first.
@@ -39,7 +40,9 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
       setStart(formatTime(shift.start_hour, shift.start_minute));
       setEnd(formatTime(shift.end_hour, shift.end_minute));
       setColor(shift.color);
+      setBreakMinutes(String(shift.break_minutes ?? 0));
     } else {
+      setBreakMinutes('0');
       setTitle('');
       setStart('09:00');
       setEnd('17:00');
@@ -64,7 +67,8 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
     const [eh, em] = end.split(':').map(Number);
 
     setLoading(true);
-    await onSave({ title: title.trim(), start_hour: sh, start_minute: sm, end_hour: eh, end_minute: em, color });
+    const breakValue = Math.min(240, Math.max(0, Math.round(Number(breakMinutes) || 0)));
+    await onSave({ title: title.trim(), start_hour: sh, start_minute: sm, end_hour: eh, end_minute: em, break_minutes: breakValue, color });
     setLoading(false);
   };
 
@@ -109,6 +113,21 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
           </div>
         </div>
         {overnight && <p className="text-xs text-text-tertiary">{t.shiftModal.overnight}</p>}
+
+        <div>
+          <label htmlFor="shift-break" className={labelClass}>{t.shiftModal.break}</label>
+          <input
+            id="shift-break"
+            type="number"
+            min={0}
+            max={240}
+            step={5}
+            value={breakMinutes}
+            onChange={(e) => setBreakMinutes(e.target.value)}
+            className={inputClass}
+          />
+          <p className="text-xs text-text-tertiary mt-1">{t.shiftModal.breakHint}</p>
+        </div>
 
         <div role="group" aria-labelledby="shift-color-label">
           <span id="shift-color-label" className={labelClass}>{t.common.color}</span>

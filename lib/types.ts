@@ -72,6 +72,8 @@ export interface Shift {
   start_minute: number;
   end_hour: number;
   end_minute: number;
+  /** Unpaid break inside the shift, in minutes. Not paid, not counted as hours worked. */
+  break_minutes: number;
   color: string;
   created_at: string;
 }
@@ -82,6 +84,7 @@ export interface ShiftFormData {
   start_minute: number;
   end_hour: number;
   end_minute: number;
+  break_minutes: number;
   color: string;
 }
 
@@ -120,6 +123,12 @@ export function shiftDurationMinutes(shift: Pick<Shift, 'start_hour' | 'start_mi
   const start = shift.start_hour * 60 + shift.start_minute;
   const end = shift.end_hour * 60 + shift.end_minute;
   return end > start ? end - start : end + 24 * 60 - start;
+}
+
+/** Paid minutes of a shift: its length minus the unpaid break. */
+export function paidShiftMinutes(shift: Pick<Shift, 'start_hour' | 'start_minute' | 'end_hour' | 'end_minute' | 'break_minutes'>): number {
+  const length = shiftDurationMinutes(shift);
+  return length - Math.min(shift.break_minutes ?? 0, length);
 }
 
 export function getContrastColor(hexColor: string): string {

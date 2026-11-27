@@ -1,14 +1,15 @@
 'use client';
 
-import { CalendarDays, Briefcase, Settings } from 'lucide-react';
+import { CalendarDays, Briefcase, ChartNoAxesColumn, Settings } from 'lucide-react';
 import { useI18n } from './LanguageProvider';
 
-export type AppTab = 'calendar' | 'shifts' | 'settings';
+export type AppTab = 'calendar' | 'shifts' | 'summary' | 'settings';
 
 /** Tab ids double as keys into `t.nav` for the labels. */
 export const TABS: { id: AppTab; Icon: typeof CalendarDays }[] = [
   { id: 'calendar', Icon: CalendarDays },
   { id: 'shifts', Icon: Briefcase },
+  { id: 'summary', Icon: ChartNoAxesColumn },
   { id: 'settings', Icon: Settings },
 ];
 
