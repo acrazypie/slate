@@ -41,6 +41,15 @@ function DashboardContent() {
     getUser();
   }, [supabase]);
 
+  // Deep link: /dashboard?tab=settings (or calendar, shifts, summary) opens that tab.
+  // Read after mount so the server and the first client render match.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    if (requested === 'calendar' || requested === 'shifts' || requested === 'summary' || requested === 'settings') {
+      setTab(requested);
+    }
+  }, []);
+
 
   const currentUser = user ? { email: user.email || '', name: user.user_metadata?.name } : undefined;
 
