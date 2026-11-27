@@ -4,7 +4,8 @@
 // period kinds), its hours and earnings, and the reports the user added.
 
 import { useMemo, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Download, Plus, X } from 'lucide-react';
+import { PdfExportSheet } from './PdfExportSheet';
 import { useI18n } from './LanguageProvider';
 import { Dialog } from './Dialog';
 import { usePeriodData } from '@/hooks/usePeriodData';
@@ -35,6 +36,7 @@ export function SummaryView({ onOpenSettings }: { onOpenSettings: () => void }) 
   const { reports, add, remove } = useReports();
   const [pay] = usePayRules();
   const [adding, setAdding] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const period = useMemo(() => periodFor(range, new Date()), [range]);
   const { data } = usePeriodData(period);
@@ -158,8 +160,18 @@ export function SummaryView({ onOpenSettings }: { onOpenSettings: () => void }) 
             <Plus className="w-4 h-4" />
             {t.summaryUi.addReport}
           </button>
+          <button
+            type="button"
+            onClick={() => setExporting(true)}
+            className="mt-3 ml-0 sm:ml-3 flex items-center gap-2 h-11 px-4 rounded-xl text-accent-text text-sm font-medium hover:bg-surface-hover transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            {t.summaryUi.exportPdf}
+          </button>
         </section>
       </div>
+
+      {exporting && <PdfExportSheet period={period} data={data} onClose={() => setExporting(false)} />}
 
       {adding && (
         <Dialog label={t.summaryUi.pickReport} onClose={() => setAdding(false)} size="sheet">
