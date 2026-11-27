@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
-import { format, isSameDay, addDays, addMonths, subMonths } from 'date-fns';
+import { format, isSameDay, addDays, addMonths, subMonths, startOfDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, ChartNoAxesColumn } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
@@ -25,7 +25,8 @@ import { ShiftCard } from './ShiftCard';
 import { ShiftModal } from './ShiftModal';
 import { CreateChoiceSheet } from './CreateChoiceSheet';
 import { MonthGrid } from './MonthGrid';
-import { capitalize, fill, formatDate } from '@/lib/i18n/format';
+import { capitalize, fill, formatDate, formatDayRange } from '@/lib/i18n/format';
+import { AgendaView } from './AgendaView';
 import { useI18n } from './LanguageProvider';
 
 interface WeekGridProps {
@@ -104,6 +105,8 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
   });
   const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
   const [monthCursor, setMonthCursor] = useState(() => new Date());
+  // First day of the agenda's seven days; previous and next move it by a week.
+  const [agendaStart, setAgendaStart] = useState(() => startOfDay(new Date()));
   const touchStartRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -398,23 +401,30 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
     if (newView === 'month') {
       setMonthCursor(weekDays[0] || new Date());
     }
+    if (newView === 'agenda') {
+      setAgendaStart(startOfDay(new Date()));
+    }
     setViewMode(newView);
   };
 
   const handlePrev = () => {
-    if (view === 'day') goToDayOffset(-1);
+    if (view === 'agenda') setAgendaStart((prev) => addDays(prev, -7));
+    else if (view === 'day') goToDayOffset(-1);
     else if (view === 'week') goToPrevWeek();
     else setMonthCursor((prev) => subMonths(prev, 1));
   };
 
   const handleNext = () => {
-    if (view === 'day') goToDayOffset(1);
+    if (view === 'agenda') setAgendaStart((prev) => addDays(prev, 7));
+    else if (view === 'day') goToDayOffset(1);
     else if (view === 'week') goToNextWeek();
     else setMonthCursor((prev) => addMonths(prev, 1));
   };
 
   const handleToday = () => {
-    if (view === 'month') {
+    if (view === 'agenda') {
+      setAgendaStart(startOfDay(new Date()));
+    } else if (view === 'month') {
       setMonthCursor(new Date());
     } else {
       goToCurrentWeek();
@@ -432,7 +442,14 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
     if (el) el.scrollTop = Math.max(0, new Date().getHours() - 1) * DAY_HOUR_HEIGHT;
   }, []);
 
-  const headerTitle = view === 'day' ? selectedDayName : view === 'week' ? formatWeekRange : monthTitle;
+  const headerTitle =
+    view === 'day'
+      ? selectedDayName
+      : view === 'week'
+        ? formatWeekRange
+        : view === 'agenda'
+          ? formatDayRange(locale, agendaStart, addDays(agendaStart, 6))
+          : monthTitle;
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-bg">
@@ -462,7 +479,7 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
           aria-label={t.calendar.view}
           className="order-last sm:order-none w-full sm:w-auto flex items-center bg-surface rounded-xl p-0.5"
         >
-          {(['day', 'week', 'month'] as const).map((v) => (
+          {(['day', 'week', 'month', 'agenda'] as const).map((v) => (
             <button
               key={v}
               onClick={() => handleViewChange(v)}
@@ -699,6 +716,8 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
       )}
 
       {/* Month view */}
+      {view === 'agenda' && <AgendaView start={agendaStart} />}
+
       {view === 'month' && (
         <MonthGrid
           monthDate={monthCursor}

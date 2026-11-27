@@ -258,8 +258,8 @@ export function SettingsView({ user }: SettingsViewProps) {
         </Section>
 
         <Section title={t.settings.defaultView}>
-          <div className="grid grid-cols-3 gap-2">
-            {(['day', 'week', 'month'] as const).map((value) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(['day', 'week', 'month', 'agenda'] as const).map((value) => (
               <button
                 key={value}
                 onClick={() => handleViewChange(value)}

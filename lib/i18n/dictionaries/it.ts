@@ -53,6 +53,10 @@ export const it = {
     day: 'Giorno',
     week: 'Settimana',
     month: 'Mese',
+    agenda: 'Agenda',
+  },
+  agenda: {
+    empty: 'Niente in programma',
   },
   site: {
     downloadTitle: "Scarica l’app",

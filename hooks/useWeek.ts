@@ -6,7 +6,7 @@ import { useI18n } from '@/components/LanguageProvider';
 import { formatDayRange } from '@/lib/i18n/format';
 import { weekOffsetForDate, viewOffsetFromStored } from '@/lib/recurrence';
 
-export type ViewMode = 'day' | 'week' | 'month';
+export type ViewMode = 'day' | 'week' | 'month' | 'agenda';
 
 export function useWeek() {
   const { locale } = useI18n();

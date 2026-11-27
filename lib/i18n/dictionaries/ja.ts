@@ -53,6 +53,10 @@ export const ja: Dictionary = {
     day: '日',
     week: '週',
     month: '月',
+    agenda: '予定',
+  },
+  agenda: {
+    empty: '予定はありません',
   },
   site: {
     downloadTitle: "アプリを入手",

@@ -53,6 +53,10 @@ export const es: Dictionary = {
     day: 'Día',
     week: 'Semana',
     month: 'Mes',
+    agenda: 'Agenda',
+  },
+  agenda: {
+    empty: 'Nada planificado',
   },
   site: {
     downloadTitle: "Descarga la app",

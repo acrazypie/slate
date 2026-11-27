@@ -53,6 +53,10 @@ export const nl: Dictionary = {
     day: 'Dag',
     week: 'Week',
     month: 'Maand',
+    agenda: 'Agenda',
+  },
+  agenda: {
+    empty: 'Niets gepland',
   },
   site: {
     downloadTitle: "Download de app",
