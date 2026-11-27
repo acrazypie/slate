@@ -426,9 +426,16 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
     } else if (view === 'month') {
       setMonthCursor(new Date());
     } else {
+      // Already on today the title does not change, so the timeline scrolls to now instead.
+      const onToday = view === 'day' && !!selectedDay && isSameDay(selectedDay, new Date());
       goToCurrentWeek();
       // Already on this week the offset doesn't change, so pick the day here too.
       setSelectedDayIndex((new Date().getDay() + 6) % 7);
+      if (onToday) {
+        document
+          .getElementById('day-scroller')
+          ?.scrollTo({ top: Math.max(0, new Date().getHours() - 1) * DAY_HOUR_HEIGHT, behavior: 'smooth' });
+      }
     }
   };
 
@@ -547,6 +554,7 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
 
           <div
             key={`${weekOffset}-${selectedDayIndex}`}
+            id="day-scroller"
             ref={scrollDayToNow}
             className={`flex-1 overflow-y-auto ${slideDirection > 0 ? 'animate-day-in-right' : 'animate-day-in-left'}`}
           >
