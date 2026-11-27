@@ -5,6 +5,9 @@ import { Plus, Briefcase, ChevronRight } from 'lucide-react';
 import { useShifts } from '@/hooks/useShifts';
 import { Shift, ShiftFormData, formatTime, isOvernightShift, shiftDurationMinutes } from '@/lib/types';
 import { ShiftModal } from './ShiftModal';
+import { RotationModal } from './RotationModal';
+import { useRotations } from '@/hooks/useRotations';
+import type { Rotation } from '@/lib/types';
 import { fill } from '@/lib/i18n/format';
 import { useI18n } from './LanguageProvider';
 
@@ -20,6 +23,9 @@ export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
   const { t } = useI18n();
   const [editing, setEditing] = useState<Shift | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const rotationApi = useRotations();
+  // undefined = closed, null = new rotation, a rotation = editing it.
+  const [editingRotation, setEditingRotation] = useState<Rotation | null | undefined>(undefined);
 
   const openCreate = () => {
     setEditing(null);
@@ -100,7 +106,47 @@ export function ShiftsView({ onDataChange }: { onDataChange?: () => void }) {
             ))}
           </ul>
         )}
+
+        <section className="mt-10">
+          <h2 className="text-sm text-text-secondary mb-2">{t.rotation.section}</h2>
+          <p className="text-sm text-text-tertiary mb-4">{t.rotation.intro}</p>
+          <ul className="rounded-2xl bg-surface divide-y divide-border overflow-hidden">
+            {rotationApi.rotations.map((r) => (
+              <li key={r.id}>
+                <button
+                  type="button"
+                  onClick={() => setEditingRotation(r)}
+                  className="w-full flex items-center justify-between gap-4 px-4 py-3 text-left hover:bg-surface-hover transition-colors"
+                >
+                  <span className="text-sm font-medium text-text-primary truncate">{r.title}</span>
+                  <span className="text-xs text-text-secondary flex-shrink-0">{fill(t.rotation.days, { n: r.pattern.length })}</span>
+                </button>
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                onClick={() => setEditingRotation(null)}
+                className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-accent-text hover:bg-surface-hover transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                {t.rotation.add}
+              </button>
+            </li>
+          </ul>
+          {rotationApi.rotations.length === 0 && (
+            <p className="text-sm text-text-tertiary mt-3">{t.rotation.empty}</p>
+          )}
+        </section>
       </div>
+
+      {editingRotation !== undefined && (
+        <RotationModal
+          rotation={editingRotation}
+          api={rotationApi}
+          onClose={() => setEditingRotation(undefined)}
+        />
+      )}
 
       <ShiftModal
         isOpen={isModalOpen}

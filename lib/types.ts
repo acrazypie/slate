@@ -212,3 +212,20 @@ export function overlapPosition(slot: OverlapSlot | undefined, half?: boolean): 
   const right = 100 - (areaStart + ((slot.col + 1) / slot.cols) * areaWidth);
   return { left: `calc(${left}% + 2px)`, right: `calc(${right}% + 2px)` };
 }
+
+/** A repeating cycle of shifts (null = a day off). Same as the Android app. */
+export interface Rotation {
+  id: string;
+  user_id: string;
+  title: string;
+  pattern: (string | null)[];
+  created_at: string;
+}
+
+export interface RotationFormData {
+  title: string;
+  pattern: (string | null)[];
+}
+
+export const ROTATION_MIN_DAYS = 2;
+export const ROTATION_MAX_DAYS = 28;
