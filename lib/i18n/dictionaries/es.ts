@@ -404,6 +404,16 @@ export const es: Dictionary = {
     work: 'Trabajo',
     data: 'Datos',
   },
+  settingsLede: {
+    language: 'El idioma de la app en este navegador.',
+    pay: 'Tu tarifa por hora y las reglas de horas extra. Se usan para los totales de pago del resumen. Se guardan en este dispositivo.',
+    appearance: 'Tema, negro OLED, color de acento y fondo.',
+    summary: 'El periodo que cubre el resumen y los informes que guardas.',
+    defaultView: 'La vista con la que se abre el calendario y cómo se dibuja el mes.',
+    reminders: 'Recibe una notificación antes de que empiece un bloque o turno.',
+    backup: 'Guarda una copia de tus datos, restáurala o bórrala.',
+    install: 'Añade Slate a tu pantalla de inicio para abrirla como una app.',
+  },
   settings: {
     title: 'Ajustes',
     account: 'Cuenta',

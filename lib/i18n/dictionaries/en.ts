@@ -403,6 +403,16 @@ export const en: Dictionary = {
     work: 'Work',
     data: 'Data',
   },
+  settingsLede: {
+    language: 'The language of the app in this browser.',
+    pay: 'Your hourly rate and overtime rules. Used for the pay totals in the summary. Kept on this device.',
+    appearance: 'Theme, OLED black, accent colour and background.',
+    summary: 'The period the summary covers, and the reports you save.',
+    defaultView: 'The view the calendar opens on, and how the month is drawn.',
+    reminders: 'Get a notification before a block or shift starts.',
+    backup: 'Save a copy of your data, restore it, or erase it.',
+    install: 'Add Slate to your home screen to open it like an app.',
+  },
   settings: {
     title: 'Settings',
     account: 'Account',

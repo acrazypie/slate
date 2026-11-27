@@ -405,6 +405,16 @@ export const fr: Dictionary = {
     work: 'Travail',
     data: 'Données',
   },
+  settingsLede: {
+    language: 'La langue de l’app dans ce navigateur.',
+    pay: 'Votre taux horaire et les règles d’heures supplémentaires. Utilisés pour les totaux du résumé. Conservés sur cet appareil.',
+    appearance: 'Thème, noir OLED, couleur d’accent et fond.',
+    summary: 'La période couverte par le résumé et les rapports enregistrés.',
+    defaultView: 'La vue sur laquelle s’ouvre l’agenda et la façon dont le mois est affiché.',
+    reminders: 'Recevez une notification avant le début d’un bloc ou d’un service.',
+    backup: 'Enregistrez une copie de vos données, restaurez-la ou effacez-la.',
+    install: 'Ajoutez Slate à votre écran d’accueil pour l’ouvrir comme une app.',
+  },
   settings: {
     title: 'Réglages',
     account: 'Compte',

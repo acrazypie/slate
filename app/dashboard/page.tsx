@@ -44,9 +44,6 @@ function DashboardContent() {
 
   const currentUser = user ? { email: user.email || '', name: user.user_metadata?.name } : undefined;
 
-  // The summary is its own tab now; the calendar's summary button opens it.
-  const handleOpenSummary = () => setTab('summary');
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg">
@@ -64,7 +61,7 @@ function DashboardContent() {
 
       <div className="flex flex-1 min-w-0 min-h-0 flex-col">
         <div className="flex flex-1 min-h-0 flex-col">
-          {tab === 'calendar' && <WeekGrid user={currentUser} onOpenSidebar={handleOpenSummary} />}
+          {tab === 'calendar' && <WeekGrid user={currentUser} />}
           {tab === 'summary' && <SummaryView onOpenSettings={() => setTab('settings')} />}
           {tab === 'shifts' && <ShiftsView />}
           {tab === 'settings' && <SettingsView user={currentUser} />}

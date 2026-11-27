@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { format, isSameDay, addDays, addMonths, subMonths, startOfDay } from 'date-fns';
-import { ChevronLeft, ChevronRight, ChartNoAxesColumn } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LocateFixed } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
 import { useBlocks } from '@/hooks/useBlocks';
@@ -34,7 +34,6 @@ interface WeekGridProps {
     email: string;
     name?: string;
   };
-  onOpenSidebar?: () => void;
   /** Called after anything is created, edited or deleted, so the weekly summary can reload. */
   onDataChange?: () => void;
 }
@@ -45,7 +44,7 @@ const STRIP_OFFSETS = [-2, -1, 0, 1, 2];
 // All-day events sit in a row under the day headers, every column the same
 // height. Past this many, the last line turns into "+n".
 
-export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
+export function WeekGrid({ user, onDataChange }: WeekGridProps) {
   const { locale, t } = useI18n();
   const {
     weekOffset,
@@ -496,16 +495,11 @@ export function WeekGrid({ user, onOpenSidebar, onDataChange }: WeekGridProps) {
         <div className="flex items-center gap-0 sm:gap-1 flex-shrink-0">
           <button
             onClick={handleToday}
-            className="px-3 h-11 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+            aria-label={t.calendar.today}
+            title={t.calendar.today}
+            className="flex items-center justify-center w-11 h-11 rounded-xl text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
           >
-            {t.calendar.today}
-          </button>
-          <button
-            onClick={onOpenSidebar}
-            className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl hover:bg-surface-hover transition-colors"
-            aria-label={t.summary.title}
-          >
-            <ChartNoAxesColumn className="w-5 h-5 text-text-secondary" />
+            <LocateFixed className="w-5 h-5" />
           </button>
         </div>
       </div>

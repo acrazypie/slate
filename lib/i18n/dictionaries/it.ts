@@ -405,6 +405,16 @@ export const it = {
     work: 'Lavoro',
     data: 'Dati',
   },
+  settingsLede: {
+    language: 'La lingua dell’app in questo browser.',
+    pay: 'La tariffa oraria e le regole per gli straordinari. Usate per i totali del riepilogo. Salvate su questo dispositivo.',
+    appearance: 'Tema, nero OLED, colore di accento e sfondo.',
+    summary: 'Il periodo coperto dal riepilogo e i report salvati.',
+    defaultView: 'La vista con cui si apre il calendario e come viene disegnato il mese.',
+    reminders: 'Ricevi una notifica prima che inizi un blocco o un turno.',
+    backup: 'Salva una copia dei tuoi dati, ripristinala o cancellala.',
+    install: 'Aggiungi Slate alla schermata Home per aprirla come un’app.',
+  },
   settings: {
     title: 'Impostazioni',
     account: 'Account',

@@ -405,6 +405,16 @@ export const nl: Dictionary = {
     work: 'Werk',
     data: 'Gegevens',
   },
+  settingsLede: {
+    language: 'De taal van de app in deze browser.',
+    pay: 'Je uurloon en de regels voor overwerk. Gebruikt voor de betaaltotalen in het overzicht. Blijft op dit apparaat.',
+    appearance: 'Thema, OLED-zwart, accentkleur en achtergrond.',
+    summary: 'De periode die het overzicht beslaat, en de rapporten die je opslaat.',
+    defaultView: 'De weergave waarmee de agenda opent en hoe de maand wordt getekend.',
+    reminders: 'Ontvang een melding voordat een blok of dienst begint.',
+    backup: 'Sla een kopie van je gegevens op, herstel die of wis ze.',
+    install: 'Voeg Slate toe aan je beginscherm om het als app te openen.',
+  },
   settings: {
     title: 'Instellingen',
     account: 'Account',

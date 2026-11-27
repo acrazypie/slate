@@ -404,6 +404,16 @@ export const ja: Dictionary = {
     work: '仕事',
     data: 'データ',
   },
+  settingsLede: {
+    language: 'このブラウザでのアプリの言語です。',
+    pay: '時給と残業のルールです。サマリーの給与合計に使われます。この端末に保存されます。',
+    appearance: 'テーマ、OLED黒、アクセントカラー、背景。',
+    summary: 'サマリーが対象とする期間と、保存したレポートです。',
+    defaultView: 'カレンダーを開いたときの表示と、月の描き方です。',
+    reminders: 'ブロックや勤務が始まる前に通知を受け取ります。',
+    backup: 'データのコピーを保存、復元、または消去します。',
+    install: 'Slateをホーム画面に追加すると、アプリのように開けます。',
+  },
   settings: {
     title: '設定',
     account: 'アカウント',

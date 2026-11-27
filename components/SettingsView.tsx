@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -21,18 +21,14 @@ interface SettingsViewProps {
   user?: { email: string; name?: string };
 }
 
-type SettingsPage = 'account' | 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'reminders' | 'backup' | 'install';
+type SettingsPage = 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'reminders' | 'backup' | 'install';
 
 const selected = 'bg-accent text-accent-contrast font-medium';
 const unselected = 'bg-surface-hover text-text-primary hover:bg-border';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="bg-surface rounded-3xl p-4 sm:p-5">
-      <h2 className="text-sm text-text-secondary mb-3">{title}</h2>
-      {children}
-    </section>
-  );
+/** A settings page's content. Flat, no card: the page title and description sit above it. */
+function Section({ children }: { title?: string; children: React.ReactNode }) {
+  return <section>{children}</section>;
 }
 
 type SettingsItem = { key: SettingsPage; title: string; hint: string };
@@ -51,11 +47,10 @@ function SETTINGS_GROUPS(
     reminders: { title: string };
     backup: { title: string };
   },
-  user: SettingsViewProps['user'],
   locale: string,
+  showInstall: boolean,
 ): { label: string; items: SettingsItem[] }[] {
   return [
-    { label: '', items: [{ key: 'account', title: t.settings.account, hint: user?.email ?? '' }] },
     {
       label: t.settings.appearance,
       items: [
@@ -76,7 +71,8 @@ function SETTINGS_GROUPS(
       label: t.settingsGroups.data,
       items: [
         { key: 'backup', title: t.backup.title, hint: '' },
-        { key: 'install', title: t.settings.installTitle, hint: '' },
+        // Hidden once the app is installed: it is already on the home screen.
+        ...(showInstall ? [{ key: 'install' as const, title: t.settings.installTitle, hint: '' }] : []),
       ],
     },
   ];
@@ -148,6 +144,13 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [page, setPage] = useState<SettingsPage | null>(null);
   const [monthStyleState, setMonthStyleState] = useState<MonthStyle>(() => getMonthStyle());
   const [loggingOut, setLoggingOut] = useState(false);
+  // Installed as an app (home-screen or standalone window): the install guide is not needed.
+  const [showInstall, setShowInstall] = useState(true);
+  useEffect(() => {
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setShowInstall(!standalone);
+  }, []);
 
   const handleViewChange = (view: ViewMode) => {
     setDefaultView(view);
@@ -191,24 +194,45 @@ export function SettingsView({ user }: SettingsViewProps) {
         {page === null ? (
           <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary mb-2">{t.settings.title}</h1>
         ) : (
-          <div className="flex items-center gap-2 mb-2">
-            <button
-              type="button"
-              onClick={() => setPage(null)}
-              aria-label={t.common.back}
-              className="flex items-center justify-center w-11 h-11 -ml-2 rounded-xl hover:bg-surface-hover transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6 text-text-secondary" />
-            </button>
-            <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary">
-              {SETTINGS_GROUPS(t, user, locale).flatMap((g) => g.items).find((x) => x.key === page)?.title}
-            </h1>
-          </div>
+          <>
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setPage(null)}
+                aria-label={t.common.back}
+                className="flex items-center justify-center w-11 h-11 -ml-2 rounded-xl hover:bg-surface-hover transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6 text-text-secondary" />
+              </button>
+              <h1 className="font-semibold tracking-tight text-2xl sm:text-3xl text-text-primary">
+                {SETTINGS_GROUPS(t, locale, showInstall).flatMap((g) => g.items).find((x) => x.key === page)?.title}
+              </h1>
+            </div>
+            <p className="text-sm text-text-secondary mb-4">{t.settingsLede[page]}</p>
+          </>
         )}
 
         {page === null && (
           <div className="space-y-6">
-            {SETTINGS_GROUPS(t, user, locale).map((group, groupIndex) => (
+            {/* The account, as a plain row: no card. */}
+            <div className="flex items-center gap-3 px-1">
+              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                <span className="text-accent-contrast font-medium">{user?.email?.[0]?.toUpperCase() || 'U'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-base text-text-primary font-medium truncate">{user?.name || t.common.user}</p>
+                <p className="text-xs text-text-secondary truncate">{user?.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="flex items-center gap-2 px-3 min-h-11 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 flex-shrink-0"
+              >
+                {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                {t.settings.logout}
+              </button>
+            </div>
+            {SETTINGS_GROUPS(t, locale, showInstall).map((group, groupIndex) => (
               <section key={groupIndex}>
                 {group.label && <h2 className="text-sm text-text-secondary mb-2 px-1">{group.label}</h2>}
                 <ul className="bg-surface rounded-3xl divide-y divide-border overflow-hidden">
@@ -231,28 +255,6 @@ export function SettingsView({ user }: SettingsViewProps) {
               </section>
             ))}
           </div>
-        )}
-
-        {page === 'account' && (
-        <Section title={t.settings.account}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
-              <span className="text-accent-contrast font-medium">{user?.email?.[0]?.toUpperCase() || 'U'}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-text-primary font-medium truncate">{user?.name || t.common.user}</p>
-              <p className="text-xs text-text-secondary truncate">{user?.email}</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="flex items-center gap-2 px-3 min-h-11 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 flex-shrink-0"
-            >
-              {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-              {t.settings.logout}
-            </button>
-          </div>
-        </Section>
         )}
 
         {page === 'language' && (
@@ -317,7 +319,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                 }}
                 className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${oled ? 'bg-accent' : 'bg-surface-hover'}`}
               >
-                <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-text-primary transition-transform ${oled ? 'translate-x-5' : ''}`} />
+                <span className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-transform ${oled ? 'bg-accent-contrast translate-x-5' : 'bg-text-primary'}`} />
               </button>
             </label>
           )}
@@ -385,7 +387,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                     onClick={() => handleMatchAccentChange(!matchAccent)}
                     className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${matchAccent ? 'bg-accent' : 'bg-surface-hover'}`}
                   >
-                    <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-text-primary transition-transform ${matchAccent ? 'translate-x-5' : ''}`} />
+                    <span className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-transform ${matchAccent ? 'bg-accent-contrast translate-x-5' : 'bg-text-primary'}`} />
                   </button>
                 </label>
                 {!matchAccent && (
