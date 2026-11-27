@@ -84,6 +84,23 @@ export const nl: Dictionary = {
     delete: "Cyclus verwijderen",
     days: "{n} dagen",
   },
+  onboarding: {
+    titleBefore: "Jouw week,",
+    titleAccent: "in blokken.",
+    lede: "Zet studie, werk en lessen op een visueel rooster. Je planning wordt bewaard in je account.",
+    points: [
+      { name: "Blokken voor studie, werk en lessen", text: "Zet ze op een dag, een week of een maand." },
+      { name: "Diensten en cycli", text: "Herhaal een dienstpatroon over de weken die je kiest." },
+      { name: "Je gegevens, je account", text: "Log op elk apparaat in en je planning is er." },
+    ],
+    remTitleBefore: "Krijg herinneringen",
+    remTitleAccent: "op tijd.",
+    remLede: "Slate kan je waarschuwen voordat een blok of dienst begint. Dit kun je altijd wijzigen in Instellingen.",
+    start: "Aan de slag",
+    notNow: "Niet nu",
+    skip: "Overslaan",
+    continue: "Doorgaan",
+  },
   site: {
     downloadTitle: "Download de app",
     downloadLede: "Slate draait op je telefoon. Je gegevens blijven op het apparaat en verlaten het niet, tenzij je een server koppelt die je zelf beheert.",

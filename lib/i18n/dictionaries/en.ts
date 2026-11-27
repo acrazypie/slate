@@ -84,6 +84,23 @@ export const en: Dictionary = {
     delete: "Delete rotation",
     days: "{n} days",
   },
+  onboarding: {
+    titleBefore: "Your week,",
+    titleAccent: "in blocks.",
+    lede: "Lay out study, work and classes on a visual grid. Your plans are kept in your account.",
+    points: [
+      { name: "Blocks for study, work and classes", text: "Place them on a day, a week or a month." },
+      { name: "Shifts and rotations", text: "Repeat a pattern of shifts over the weeks you choose." },
+      { name: "Your data, your account", text: "Sign in on any device and your plans are there." },
+    ],
+    remTitleBefore: "Get reminders",
+    remTitleAccent: "on time.",
+    remLede: "Slate can remind you before a block or a shift starts. You can change this any time in Settings.",
+    start: "Get started",
+    notNow: "Not now",
+    skip: "Skip",
+    continue: "Continue",
+  },
   site: {
     downloadTitle: "Get the app",
     downloadLede: "Slate runs on your phone. Your data stays on the device, and nothing leaves it unless you connect a server you run yourself.",

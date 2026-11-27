@@ -84,6 +84,23 @@ export const it = {
     delete: "Elimina rotazione",
     days: "{n} giorni",
   },
+  onboarding: {
+    titleBefore: "La tua settimana,",
+    titleAccent: "a blocchi.",
+    lede: "Organizza studio, lavoro e lezioni su una griglia visiva. I tuoi piani restano nel tuo account.",
+    points: [
+      { name: "Blocchi per studio, lavoro e lezioni", text: "Mettili in un giorno, una settimana o un mese." },
+      { name: "Turni e rotazioni", text: "Ripeti uno schema di turni per le settimane che scegli." },
+      { name: "I tuoi dati, il tuo account", text: "Accedi da qualsiasi dispositivo e i tuoi piani ci sono." },
+    ],
+    remTitleBefore: "Ricevi promemoria",
+    remTitleAccent: "in tempo.",
+    remLede: "Slate può avvisarti prima che inizi un blocco o un turno. Puoi cambiarlo quando vuoi nelle Impostazioni.",
+    start: "Inizia",
+    notNow: "Non ora",
+    skip: "Salta",
+    continue: "Continua",
+  },
   site: {
     downloadTitle: "Scarica l’app",
     downloadLede: "Slate gira sul tuo telefono. I dati restano sul dispositivo e non escono se non colleghi un server che gestisci tu.",

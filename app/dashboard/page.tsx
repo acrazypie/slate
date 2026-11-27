@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Onboarding, isOnboarded } from '@/components/Onboarding';
 import { startOfWeek, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, isSameMonth } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -16,7 +17,21 @@ import { dateForWeekOffset, weekOffsetForDate } from '@/lib/recurrence';
 import { useShiftAssignments } from '@/hooks/useShifts';
 import { useI18n } from '@/components/LanguageProvider';
 
+/** The dashboard, with the first-visit onboarding on top until it is done on this device. */
 export default function DashboardPage() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    setShowOnboarding(!isOnboarded());
+  }, []);
+  return (
+    <>
+      <DashboardContent />
+      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
+    </>
+  );
+}
+
+function DashboardContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<AppTab>('calendar');

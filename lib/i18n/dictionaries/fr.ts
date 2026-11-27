@@ -84,6 +84,23 @@ export const fr: Dictionary = {
     delete: "Supprimer la rotation",
     days: "{n} jours",
   },
+  onboarding: {
+    titleBefore: "Ta semaine,",
+    titleAccent: "en blocs.",
+    lede: "Organise études, travail et cours sur une grille visuelle. Tes plans sont gardés dans ton compte.",
+    points: [
+      { name: "Blocs pour études, travail et cours", text: "Place-les sur un jour, une semaine ou un mois." },
+      { name: "Postes et rotations", text: "Répète un schéma de postes sur les semaines de ton choix." },
+      { name: "Tes données, ton compte", text: "Connecte-toi sur n’importe quel appareil et tes plans sont là." },
+    ],
+    remTitleBefore: "Reçois des rappels",
+    remTitleAccent: "à temps.",
+    remLede: "Slate peut te prévenir avant qu’un bloc ou un poste commence. Tu peux changer ça à tout moment dans les réglages.",
+    start: "Commencer",
+    notNow: "Pas maintenant",
+    skip: "Passer",
+    continue: "Continuer",
+  },
   site: {
     downloadTitle: "Télécharger l’app",
     downloadLede: "Slate fonctionne sur votre téléphone. Vos données restent sur l’appareil et ne sortent que si vous connectez un serveur que vous gérez vous-même.",

@@ -84,6 +84,23 @@ export const ja: Dictionary = {
     delete: "ローテーションを削除",
     days: "{n}日",
   },
+  onboarding: {
+    titleBefore: "あなたの一週間を、",
+    titleAccent: "ブロックで。",
+    lede: "勉強・仕事・授業を、見やすいグリッドに並べます。予定はあなたのアカウントに保存されます。",
+    points: [
+      { name: "勉強・仕事・授業のブロック", text: "日、週、月のいずれにも配置できます。" },
+      { name: "シフトとローテーション", text: "選んだ週の間、シフトのパターンを繰り返せます。" },
+      { name: "データはあなたのアカウントに", text: "どの端末からサインインしても予定が見られます。" },
+    ],
+    remTitleBefore: "リマインダーを",
+    remTitleAccent: "受け取る。",
+    remLede: "ブロックやシフトが始まる前に通知できます。設定でいつでも変更できます。",
+    start: "はじめる",
+    notNow: "あとで",
+    skip: "スキップ",
+    continue: "次へ",
+  },
   site: {
     downloadTitle: "アプリを入手",
     downloadLede: "Slateはお使いの端末で動きます。データは端末に残り、ご自身で運用するサーバーに接続しない限り外へは出ません。",
