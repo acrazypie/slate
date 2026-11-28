@@ -197,6 +197,7 @@ export const fr: Dictionary = {
     title: "Sauvegarde",
   },
   reminders: {
+    turnOff: 'Désactiver les rappels',
     label: "Rappel",
     off: "Pas de rappel",
     before: "{n} min avant",

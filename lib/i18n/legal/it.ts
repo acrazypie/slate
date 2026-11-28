@@ -4,7 +4,7 @@ export const it: LegalDocs = {
   privacy: {
     description:
       'Come Slate tratta i dati personali dei suoi utenti, ai sensi del Regolamento (UE) 2016/679 (GDPR).',
-    updated: 'Ultimo aggiornamento: 25 novembre 2026',
+    updated: 'Ultimo aggiornamento: 28 novembre 2026',
     intro: [
       'Questa informativa descrive come Slate tratta i dati personali: l’app per Android e iOS e il sito web di Slate. È redatta ai sensi dell’articolo 13 del Regolamento (UE) 2016/679 (“GDPR”) e del Codice in materia di protezione dei dati personali, D.Lgs. 196/2003 come modificato dal D.Lgs. 101/2018 (il “Codice Privacy”).',
     ],
@@ -26,7 +26,7 @@ export const it: LegalDocs = {
       {
         title: 'Il sito web di Slate',
         blocks: [
-          'Il sito web non legge né scrive i tuoi calendari. Gli account del sito servono per accedere e per conservare i contenuti che crei sul sito.',
+          'Il sito web usa lo stesso planner nel tuo browser. Non ha account né accesso. I tuoi blocchi, turni, rotazioni e impostazioni sono salvati nella memoria locale del browser e non vengono inviati ai nostri server. Le uniche cose che il sito invia ai nostri server sono i promemoria che attivi, come descritto sotto.',
         ],
       },
       {
@@ -38,12 +38,12 @@ export const it: LegalDocs = {
       {
         title: '2. Dati trattati',
         blocks: [
-          'Per il sito web trattiamo le seguenti categorie di dati personali:',
+          'Per i promemoria del sito web trattiamo le seguenti categorie di dati personali:',
           [
-            '**Dati dell’account**: il tuo indirizzo email e, se ti registri con email e password, la password (conservata in forma cifrata e mai leggibile da noi). Se accedi con Google, riceviamo da Google il tuo indirizzo email, nome e immagine del profilo, come autorizzato da te nella schermata di consenso di Google.',
-            '**Dati del servizio**: i contenuti che crei sul sito (titoli dei blocchi, categoria, orari di inizio e fine, colore, ricorrenza), necessari al funzionamento del planner.',
-            '**Dati tecnici**: indirizzo IP, tipo di browser e dispositivo, raccolti automaticamente dai nostri fornitori di infrastruttura (Vercel, Supabase) per la sicurezza e il funzionamento del servizio.',
-            '**Cookie**: usiamo solo cookie tecnici necessari a mantenerti connesso. Non usiamo cookie di profilazione, di analisi o di marketing di terze parti.',
+            '**Dati dei promemoria**: una chiave casuale del dispositivo, conservata solo nel browser. Conserviamo solo un hash crittografico della chiave, mai la chiave. Con essa, gli elementi di promemoria che il browser ci invia: titoli e orari di inizio dei tuoi blocchi e turni delle prossime due settimane, l’anticipo scelto e le impostazioni di notifica. Il titolo fa parte della notifica mostrata sul dispositivo.',
+            '**Iscrizione push**: l’indirizzo che il browser fornisce per le notifiche push (endpoint e chiavi di cifratura), insieme alla lingua dell’app.',
+            '**Dati tecnici**: indirizzo IP e dati tecnici delle richieste, raccolti dai nostri fornitori di infrastruttura (Vercel, Supabase) per la sicurezza e il funzionamento del servizio.',
+            '**Memorizzazione**: il sito conserva le impostazioni e i dati del planner nella memoria locale del browser. Non imposta cookie di tracciamento, analisi o marketing.',
           ],
           'Per l’app non raccogliamo dati personali. I dati che inserisci nell’app sono descritti sopra e restano sul tuo dispositivo.',
         ],
@@ -52,9 +52,9 @@ export const it: LegalDocs = {
         title: '3. Finalità e basi giuridiche del trattamento',
         blocks: [
           [
-            '**Fornitura del sito** (account, conservazione dei tuoi contenuti): art. 6(1)(b) GDPR, esecuzione di un contratto.',
+            '**Fornitura dei promemoria** che attivi: art. 6(1)(b) GDPR, esecuzione di un contratto.',
             '**Sicurezza e prevenzione di abusi e frodi**: art. 6(1)(f) GDPR, legittimo interesse del titolare.',
-            '**Comunicazioni di servizio essenziali** (ad es. avvisi sull’account): art. 6(1)(b) GDPR.',
+            '**Attivazione e disattivazione dei promemoria**: art. 6(1)(a) GDPR, il tuo consenso, che puoi revocare in qualsiasi momento.',
             '**Calendario del telefono, Google Calendar e notifiche nell’app**: art. 6(1)(a) GDPR, il tuo consenso, espresso quando concedi il permesso o attivi la funzione. Puoi revocarlo in qualsiasi momento dall’app o dalle impostazioni del telefono.',
             '**Controllo degli aggiornamenti e avviso di nuova versione** (Android): art. 6(1)(f) GDPR, legittimo interesse a farti installare la versione corrente. Puoi disattivare l’avviso in Impostazioni › Notifiche.',
           ],
@@ -64,11 +64,11 @@ export const it: LegalDocs = {
       {
         title: '4. Destinatari dei dati e fornitori terzi',
         blocks: [
-          'I dati trattati per il sito sono affidati a fornitori che agiscono come responsabili del trattamento (art. 28 GDPR), vincolati per contratto a trattarli solo per le finalità indicate sopra:',
+          'I dati dei promemoria sono trattati da fornitori che agiscono come responsabili del trattamento (art. 28 GDPR), vincolati per contratto a trattarli solo per le finalità indicate sopra:',
           [
-            '**Supabase Inc.**: hosting del database e autenticazione per gli account del sito. I dati sono conservati su server in Irlanda (UE).',
+            '**Supabase Inc.**: conserva i dati dei promemoria ed esegue le funzioni che inviano le notifiche. I dati sono memorizzati su server situati in Irlanda (UE).',
             '**Vercel Inc.**: hosting del sito web. Società con sede negli Stati Uniti.',
-            '**Google LLC**: accesso con account Google, se lo scegli sul sito; e, se attivi la sincronizzazione Google nell’app, il servizio calendario a cui ti colleghi. Google riceve le richieste che fai; noi non le riceviamo. Società con sede negli Stati Uniti.',
+            '**Servizi push dei browser** (ad esempio Google, Mozilla o Apple): consegnano ogni promemoria al browser; non li controlliamo. Google riceve anche le richieste che fai se colleghi Google Calendar nell’app. Società con sede negli Stati Uniti.',
             '**GitHub, Inc.**: ospita le release di Slate e risponde ai controlli di aggiornamento dell’app. Società con sede negli Stati Uniti.',
           ],
           'Ko-fi è un sito di terze parti. L’app lo apre solo quando tocchi il link.',
@@ -83,7 +83,7 @@ export const it: LegalDocs = {
       {
         title: '6. Periodo di conservazione',
         blocks: [
-          'I dati dell’account del sito e i contenuti sono conservati finché hai un account attivo. Se chiedi la cancellazione dell’account, i dati personali e i contenuti correlati vengono cancellati entro 30 giorni, salvo quanto debba essere conservato più a lungo per obblighi di legge. I log tecnici sono conservati per un massimo di 12 mesi.',
+          'I dati dei promemoria sono conservati così. Gli elementi vengono cancellati quando è passato il loro orario di inizio (al massimo un giorno dopo) e sostituiti a ogni sincronizzazione del browser. La chiave del dispositivo e l’iscrizione push restano finché disattivi i promemoria nelle impostazioni, il che le cancella subito. I registri tecnici sono conservati per un massimo di 12 mesi.',
           'I dati dell’app restano sul tuo dispositivo finché non li cancelli (Impostazioni › Backup › cancella tutti i dati) o non disinstalli l’app. Gli eventi copiati nei calendari Google o del telefono restano lì finché non li elimini da quei servizi.',
         ],
       },
@@ -100,7 +100,7 @@ export const it: LegalDocs = {
             'opporti al trattamento basato sul legittimo interesse (art. 21 GDPR);',
             'revocare in qualsiasi momento il consenso prestato, senza pregiudicare la liceità del trattamento effettuato in precedenza.',
           ],
-          'Per i dati conservati solo sul tuo dispositivo puoi esercitare questi diritti da solo: esporta un backup, correggi o elimina elementi nell’app, oppure cancella tutti i dati. Per i dati del sito, scrivi a **egenesio@proton.me**. Hai inoltre il diritto di proporre reclamo all’autorità di controllo competente:',
+          'Per i dati conservati solo sul tuo dispositivo puoi esercitare questi diritti da solo: esportare un backup, correggere o eliminare elementi nell’app, oppure cancellare tutti i dati. Per i dati dei promemoria del sito web, puoi disattivare i promemoria nelle impostazioni, il che li elimina subito dai nostri server. Per qualsiasi altra richiesta, scrivi a **egenesio@proton.me**. Hai anche il diritto di proporre reclamo all’autorità di controllo competente:',
           'Garante per la protezione dei dati personali, Piazza Venezia 11, 00187 Roma: www.garanteprivacy.it',
         ],
       },
@@ -113,7 +113,7 @@ export const it: LegalDocs = {
       {
         title: '9. Sicurezza dei dati',
         blocks: [
-          'L’app conserva i propri dati nello spazio privato dell’app sul tuo dispositivo, che le altre app non possono leggere. Per il sito adottiamo misure tecniche e organizzative adeguate, tra cui connessioni cifrate (TLS/HTTPS), separazione dei dati tra utenti tramite Row Level Security a livello di database e accesso ai dati limitato al personale autorizzato.',
+          'L’app conserva i suoi dati sul tuo dispositivo, dove altre app non possono leggerli. Per i promemoria adottiamo misure tecniche e organizzative adeguate: la chiave del dispositivo è conservata solo nel browser e sui nostri server ne è memorizzato solo un hash; le connessioni sono cifrate (TLS/HTTPS); le tabelle dei promemoria non sono leggibili dal sito web e sono usate solo dalle nostre funzioni dedicate; l’accesso è limitato al personale autorizzato.',
         ],
       },
       {
@@ -133,7 +133,7 @@ export const it: LegalDocs = {
 
   terms: {
     description: 'Condizioni per l’uso dell’app e del sito Slate.',
-    updated: 'Ultimo aggiornamento: 25 novembre 2026',
+    updated: 'Ultimo aggiornamento: 28 novembre 2026',
     intro: [
       'I presenti Termini di servizio (“Termini”) regolano l’uso di Slate (il “Servizio”), l’app per Android e iOS e il sito web, forniti da **Matteo Genesio** (“il Titolare”, “noi”). Usando il Servizio accetti integralmente questi Termini.',
     ],
@@ -141,13 +141,13 @@ export const it: LegalDocs = {
       {
         title: '1. Descrizione del Servizio',
         blocks: [
-          'Slate è un’app e un sito per organizzare la settimana in blocchi di tempo (studio, lavoro, lezioni e altre categorie), con turni, rotazioni, stime della paga e promemoria. L’app funziona sul tuo dispositivo senza account. Il Servizio è gratuito: non ha funzioni a pagamento né abbonamenti. Il sostegno volontario tramite Ko-fi è facoltativo e non sblocca nulla. Il Servizio è in sviluppo attivo, quindi le funzioni possono essere aggiunte, modificate o rimosse nel tempo.',
+          'Slate è un’app e un sito per organizzare la settimana in blocchi di tempo (studio, lavoro, lezioni e altre categorie), con turni, rotazioni, stime della paga e promemoria. Entrambi funzionano sul tuo dispositivo senza account. Il servizio è gratuito: non ha funzioni a pagamento né abbonamenti. Il sostegno volontario tramite Ko-fi è facoltativo e non sblocca nulla. Il servizio è in sviluppo attivo, quindi le funzioni possono essere aggiunte, modificate o rimosse nel tempo.',
         ],
       },
       {
-        title: '2. Account e requisiti',
+        title: '2. Nessun account e requisiti',
         blocks: [
-          'L’app non richiede un account. Alcune funzioni del sito richiedono un account, creato con email e password oppure accedendo con Google. Per creare un account devi avere almeno 14 anni. Sei responsabile della riservatezza delle tue credenziali e di tutte le attività svolte tramite il tuo account.',
+          'Slate non ha account. I tuoi dati sono conservati nel browser o nell’app del dispositivo che usi, e sei responsabile di tenere al sicuro quel dispositivo. Cancellare i dati del sito dal browser, o disinstallare l’app, rimuove i dati conservati su quel dispositivo, e poiché non c’è un account non possiamo recuperarli per te. I promemoria del sito web richiedono un browser che supporti le notifiche push.',
         ],
       },
       {
@@ -165,7 +165,7 @@ export const it: LegalDocs = {
       {
         title: '4. I tuoi contenuti',
         blocks: [
-          'Conservi la piena titolarità dei contenuti che inserisci in Slate (titoli dei blocchi, orari, categorie, turni). I contenuti nell’app restano sul tuo dispositivo. Per i contenuti sul sito, concedi a noi una licenza limitata e non esclusiva per conservarli e trattarli al solo scopo di fornirti il Servizio. Non rivendichiamo alcun diritto sui tuoi contenuti e non li condividiamo con terzi se non come indicato nella nostra [Informativa privacy](/privacy).',
+          'Conservi la piena titolarità dei contenuti che inserisci in Slate (titoli dei blocchi, orari, categorie, turni). I contenuti restano sul tuo dispositivo. I dati dei promemoria ci arrivano solo come descritto nella nostra [Informativa sulla privacy](/privacy), e solo per fornirti i promemoria che attivi. Non rivendichiamo alcun diritto sui tuoi contenuti e non li condividiamo con terzi se non come indicato nell’Informativa sulla privacy.',
         ],
       },
       {
@@ -196,7 +196,7 @@ export const it: LegalDocs = {
       {
         title: '9. Sospensione e cessazione',
         blocks: [
-          'Puoi eliminare il tuo account del sito in qualsiasi momento; in caso di cancellazione, i tuoi dati saranno trattati come descritto nella nostra [Informativa privacy](/privacy). Disinstallando l’app ne rimuovi i dati dal telefono. Ci riserviamo il diritto di sospendere o chiudere gli account che violano i presenti Termini, dandone avviso ove ragionevolmente possibile.',
+          'Puoi disattivare i promemoria in qualsiasi momento nelle impostazioni, il che elimina i dati dei promemoria conservati per il tuo browser. Cancellare i dati del sito dal browser, o disinstallare l’app, rimuove i dati conservati sul tuo dispositivo. Ci riserviamo il diritto di sospendere il servizio o i promemoria di chi viola questi Termini, dando avviso quando ragionevolmente possibile.',
         ],
       },
       {

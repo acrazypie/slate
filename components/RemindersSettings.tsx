@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useI18n } from './LanguageProvider';
 import { getLeadMinutes, setLeadMinutes, getNotifySettings, setNotifySettings, REMINDER_OPTIONS, reminderLabel, reminderText, type NotifySettings } from '@/lib/reminders';
-import { pushSupported, subscribeForReminders, syncReminderSettings } from '@/lib/push';
+import { pushSupported, remindersOn, subscribeForReminders, syncReminders, turnOffReminders } from '@/lib/push';
 
 type Permission = 'granted' | 'denied' | 'default' | 'unsupported';
 
@@ -20,12 +20,13 @@ export function RemindersSettings() {
   const [lead, setLead] = useState(() => getLeadMinutes());
   const [notify, setNotify] = useState<NotifySettings>(() => getNotifySettings());
   const [permission, setPermission] = useState<Permission>(() => currentPermission());
+  const [on, setOn] = useState(() => remindersOn());
   const text = reminderText(t);
 
   const changeNotify = (next: NotifySettings) => {
     setNotify(next);
     setNotifySettings(next);
-    void syncReminderSettings(locale).catch(() => {});
+    void syncReminders(locale).catch(() => {});
   };
 
   const allow = async () => {
@@ -33,7 +34,7 @@ export function RemindersSettings() {
     const result = await Notification.requestPermission();
     setPermission(result === 'granted' ? 'granted' : result === 'denied' ? 'denied' : 'default');
     if (result === 'granted' && pushSupported()) {
-      await subscribeForReminders(locale).catch(() => {});
+      await subscribeForReminders(locale).then(() => setOn(true)).catch(() => {});
     }
   };
 
@@ -51,7 +52,7 @@ export function RemindersSettings() {
             const value = Number(e.target.value);
             setLead(value);
             setLeadMinutes(value);
-            void syncReminderSettings(locale).catch(() => {});
+            void syncReminders(locale).catch(() => {});
           }}
         >
           {REMINDER_OPTIONS.map((m) => (
@@ -80,6 +81,15 @@ export function RemindersSettings() {
         {permission !== 'granted' && permission !== 'unsupported' && permission !== 'denied' && (
           <button type="button" onClick={allow} className="h-11 rounded-xl bg-accent text-accent-contrast font-medium">
             {t.reminders.allow}
+          </button>
+        )}
+        {on && (
+          <button
+            type="button"
+            onClick={() => void turnOffReminders().then(() => setOn(false)).catch(() => {})}
+            className="h-11 rounded-xl bg-surface-hover text-danger font-medium"
+          >
+            {t.reminders.turnOff}
           </button>
         )}
       </div>

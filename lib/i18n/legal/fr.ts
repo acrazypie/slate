@@ -4,7 +4,7 @@ export const fr: LegalDocs = {
   privacy: {
     description:
       'Comment Slate traite les données personnelles de ses utilisateurs, au regard du règlement (UE) 2016/679 (RGPD).',
-    updated: 'Dernière mise à jour : 25 novembre 2026',
+    updated: 'Dernière mise à jour : 28 novembre 2026',
     intro: [
       'Cette politique décrit comment Slate traite les données personnelles : l’application Android et iOS et le site web de Slate. Elle est rédigée conformément à l’article 13 du règlement (UE) 2016/679 (« RGPD ») et au décret législatif italien 196/2003 modifié par le décret législatif 101/2018 (le « Code italien de la vie privée »).',
     ],
@@ -26,7 +26,7 @@ export const fr: LegalDocs = {
       {
         title: 'Le site web de Slate',
         blocks: [
-          'Le site web ne lit ni n’écrit dans vos agendas. Les comptes du site servent à vous connecter et à conserver les contenus que vous y créez.',
+          'Le site web utilise le même planificateur dans votre navigateur. Il n’a ni comptes ni connexion. Vos blocs, services, rotations et réglages sont enregistrés dans le stockage local de votre navigateur et ne sont pas envoyés à nos serveurs. Les seules données que le site envoie à nos serveurs sont les rappels que vous activez, comme décrit ci-dessous.',
         ],
       },
       {
@@ -38,12 +38,12 @@ export const fr: LegalDocs = {
       {
         title: '2. Données traitées',
         blocks: [
-          'Pour le site web, nous traitons les catégories de données personnelles suivantes :',
+          'Pour les rappels sur le site web, nous traitons les catégories de données personnelles suivantes :',
           [
-            '**Données de compte** : votre adresse email et, si vous vous inscrivez avec email et mot de passe, votre mot de passe (conservé sous forme chiffrée et jamais lisible par nous). Si vous vous connectez avec Google, nous recevons de Google votre adresse email, votre nom et votre photo de profil, comme vous l’avez autorisé sur l’écran de consentement Google.',
-            '**Données de service** : les contenus que vous créez sur le site (titres des blocs, catégorie, heures de début et de fin, couleur, récurrence), nécessaires au fonctionnement du planificateur.',
-            '**Données techniques** : adresse IP, type de navigateur et d’appareil, collectés automatiquement par nos fournisseurs d’infrastructure (Vercel, Supabase) pour la sécurité et le fonctionnement du service.',
-            '**Cookies** : nous n’utilisons que des cookies techniques nécessaires à votre connexion. Nous n’utilisons ni cookies de profilage, ni d’analyse, ni de marketing tiers.',
+            '**Données de rappel** : une clé aléatoire de l’appareil, conservée uniquement dans votre navigateur. Nous ne conservons qu’un hachage cryptographique de cette clé, jamais la clé. Avec elle, les éléments de rappel que votre navigateur nous transmet : les titres et heures de début de vos blocs et services des deux prochaines semaines, le délai choisi et les réglages de notification. Le titre fait partie de la notification affichée sur votre appareil.',
+            '**Abonnement push** : l’adresse que votre navigateur fournit pour les notifications push (point de terminaison et clés de chiffrement), avec la langue de l’application.',
+            '**Données techniques** : adresse IP et données techniques des requêtes, collectées par nos prestataires d’infrastructure (Vercel, Supabase) pour la sécurité et le fonctionnement du service.',
+            '**Stockage** : le site conserve vos réglages et vos données de planning dans le stockage local de votre navigateur. Il ne dépose aucun cookie de suivi, d’analyse ou de marketing.',
           ],
           'Dans l’application, nous ne collectons aucune donnée personnelle. Les données que vous saisissez dans l’application sont décrites ci-dessus et restent sur votre appareil.',
         ],
@@ -52,9 +52,9 @@ export const fr: LegalDocs = {
         title: '3. Finalités et bases juridiques du traitement',
         blocks: [
           [
-            '**Fourniture du site** (comptes, conservation de vos contenus) : art. 6(1)(b) RGPD, exécution d’un contrat.',
+            '**Fourniture des rappels** que vous activez : art. 6(1)(b) RGPD, exécution d’un contrat.',
             '**Sécurité et prévention des abus et de la fraude** : art. 6(1)(f) RGPD, intérêt légitime du responsable.',
-            '**Communications de service essentielles** (par ex. avis de compte) : art. 6(1)(b) RGPD.',
+            '**Activation et désactivation des rappels** : art. 6(1)(a) RGPD, votre consentement, que vous pouvez retirer à tout moment.',
             '**Calendrier du téléphone, Google Agenda et notifications dans l’application** : art. 6(1)(a) RGPD, votre consentement, donné lorsque vous accordez l’autorisation ou activez la fonction. Vous pouvez le retirer à tout moment dans l’application ou dans les réglages de votre téléphone.',
             '**Vérification des mises à jour et avis de nouvelle version** (Android) : art. 6(1)(f) RGPD, intérêt légitime à vous faire installer la version actuelle. Vous pouvez désactiver l’avis dans Réglages › Notifications.',
           ],
@@ -64,11 +64,11 @@ export const fr: LegalDocs = {
       {
         title: '4. Destinataires des données et prestataires tiers',
         blocks: [
-          'Les données traitées pour le site sont confiées à des prestataires agissant en qualité de sous-traitants (art. 28 RGPD), tenus contractuellement de ne les traiter que pour les finalités indiquées ci-dessus :',
+          'Les données de rappel sont traitées par des prestataires agissant en qualité de sous-traitants (art. 28 RGPD), liés par contrat à ne les traiter que pour les finalités énoncées ci-dessus :',
           [
-            '**Supabase Inc.** : hébergement de la base de données et authentification des comptes du site. Les données sont stockées sur des serveurs situés en Irlande (UE).',
+            '**Supabase Inc.** : conserve les données de rappel et exécute les fonctions qui envoient les notifications. Les données sont stockées sur des serveurs situés en Irlande (UE).',
             '**Vercel Inc.** : hébergement du site web. Société basée aux États-Unis.',
-            '**Google LLC** : connexion avec un compte Google, si vous la choisissez sur le site ; et, si vous activez la synchronisation Google dans l’application, le service d’agenda auquel vous vous connectez. Google reçoit les requêtes que vous faites ; nous ne les recevons pas. Société basée aux États-Unis.',
+            '**Services push des navigateurs** (par exemple Google, Mozilla ou Apple) : ils acheminent chaque rappel vers votre navigateur ; nous ne les contrôlons pas. Google reçoit aussi les requêtes que vous faites si vous connectez Google Agenda dans l’application. Société établie aux États-Unis.',
             '**GitHub, Inc.** : héberge les versions de Slate et répond aux vérifications de mise à jour de l’application. Société basée aux États-Unis.',
           ],
           'Ko-fi est un site tiers. L’application ne l’ouvre que lorsque vous touchez le lien.',
@@ -83,7 +83,7 @@ export const fr: LegalDocs = {
       {
         title: '6. Durée de conservation',
         blocks: [
-          'Les données du compte du site et les contenus sont conservés tant que votre compte est actif. Si vous demandez la suppression de votre compte, les données personnelles et les contenus associés sont supprimés dans un délai de 30 jours, sauf ce qui doit être conservé plus longtemps en vertu d’obligations légales. Les journaux techniques sont conservés 12 mois au maximum.',
+          'Les données de rappel sont conservées ainsi. Les éléments sont supprimés une fois leur heure de début passée (au plus tard un jour après) et remplacés à chaque synchronisation de votre navigateur. La clé de l’appareil et l’abonnement push sont conservés jusqu’à ce que vous désactiviez les rappels dans les réglages, ce qui les supprime immédiatement. Les journaux techniques sont conservés 12 mois au maximum.',
           'Les données de l’application restent sur votre appareil jusqu’à ce que vous les effaciez (Réglages › Sauvegarde › effacer toutes les données) ou que vous désinstalliez l’application. Les événements copiés dans vos agendas Google ou du téléphone y restent jusqu’à ce que vous les supprimiez dans ces services.',
         ],
       },
@@ -100,7 +100,7 @@ export const fr: LegalDocs = {
             's’opposer au traitement fondé sur l’intérêt légitime (art. 21 RGPD) ;',
             'retirer à tout moment le consentement donné, sans remettre en cause la licéité du traitement effectué auparavant.',
           ],
-          'Pour les données conservées uniquement sur votre appareil, vous pouvez exercer ces droits vous-même : exporter une sauvegarde, corriger ou supprimer des éléments dans l’application, ou effacer toutes les données. Pour les données du site, écrivez à **egenesio@proton.me**. Vous avez également le droit d’introduire une réclamation auprès de l’autorité de contrôle compétente :',
+          'Pour les données conservées uniquement sur votre appareil, vous pouvez exercer ces droits vous-même : exporter une sauvegarde, corriger ou supprimer des éléments dans l’application, ou effacer toutes les données. Pour les données de rappel du site web, vous pouvez désactiver les rappels dans les réglages, ce qui les supprime immédiatement de nos serveurs. Pour tout le reste, écrivez à **egenesio@proton.me**. Vous avez également le droit d’introduire une réclamation auprès de l’autorité de contrôle compétente :',
           'Garante per la protezione dei dati personali (autorité italienne de protection des données), Piazza Venezia 11, 00187 Rome : www.garanteprivacy.it',
         ],
       },
@@ -113,7 +113,7 @@ export const fr: LegalDocs = {
       {
         title: '9. Sécurité des données',
         blocks: [
-          'L’application conserve ses données dans l’espace privé de l’application sur votre appareil, que les autres applications ne peuvent pas lire. Pour le site, nous prenons des mesures techniques et organisationnelles appropriées, notamment des connexions chiffrées (TLS/HTTPS), une séparation des données entre utilisateurs par Row Level Security au niveau de la base de données, et un accès aux données limité au personnel autorisé.',
+          'L’application conserve ses données sur votre appareil, où les autres applications ne peuvent pas les lire. Pour les rappels, nous appliquons des mesures techniques et organisationnelles appropriées : la clé de l’appareil n’est conservée que dans votre navigateur et seul un hachage est stocké sur nos serveurs ; les connexions sont chiffrées (TLS/HTTPS) ; les tables de rappel ne peuvent pas être lues depuis le site web et ne sont utilisées que par nos fonctions de rappel ; l’accès est limité au personnel autorisé.',
         ],
       },
       {
@@ -133,7 +133,7 @@ export const fr: LegalDocs = {
 
   terms: {
     description: 'Conditions d’utilisation de l’application et du site Slate.',
-    updated: 'Dernière mise à jour : 25 novembre 2026',
+    updated: 'Dernière mise à jour : 28 novembre 2026',
     intro: [
       'Les présentes Conditions d’utilisation (« Conditions ») régissent l’utilisation de Slate (le « Service »), l’application Android et iOS et le site web, fournis par **Matteo Genesio** (« le Titulaire », « nous »). En utilisant le Service, vous acceptez intégralement les présentes Conditions.',
     ],
@@ -141,13 +141,13 @@ export const fr: LegalDocs = {
       {
         title: '1. Description du Service',
         blocks: [
-          'Slate est une application et un site pour organiser votre semaine en blocs de temps (étude, travail, cours et autres catégories), avec des postes, des rotations, des estimations de salaire et des rappels. L’application fonctionne sur votre appareil sans compte. Le Service est gratuit : il n’a aucune fonction payante ni abonnement. Le soutien volontaire via Ko-fi est facultatif et ne débloque rien. Le Service est en développement actif : des fonctions peuvent être ajoutées, modifiées ou supprimées au fil du temps.',
+          'Slate est une application et un site pour organiser votre semaine en blocs horaires (études, travail, cours et autres catégories), avec services, rotations, estimations de salaire et rappels. Les deux fonctionnent sur votre appareil sans compte. Le service est gratuit : il n’a ni fonctionnalités payantes ni abonnements. Le soutien volontaire via Ko-fi est facultatif et ne débloque rien. Le service est en développement actif : des fonctionnalités peuvent être ajoutées, modifiées ou retirées avec le temps.',
         ],
       },
       {
-        title: '2. Comptes et conditions requises',
+        title: '2. Absence de comptes et conditions requises',
         blocks: [
-          'L’application ne nécessite pas de compte. Certaines fonctions du site exigent un compte, créé avec email et mot de passe ou par connexion avec Google. Vous devez avoir au moins 14 ans pour créer un compte. Vous êtes responsable de la confidentialité de vos identifiants et de toute activité effectuée via votre compte.',
+          'Slate n’a pas de comptes. Vos données sont conservées dans le navigateur ou l’application de l’appareil que vous utilisez, et vous êtes responsable de la sécurité de cet appareil. Effacer les données du site dans votre navigateur, ou désinstaller l’application, supprime les données conservées sur cet appareil ; comme il n’y a pas de compte, nous ne pouvons pas les récupérer pour vous. Les rappels sur le site web nécessitent un navigateur prenant en charge les notifications push.',
         ],
       },
       {
@@ -165,7 +165,7 @@ export const fr: LegalDocs = {
       {
         title: '4. Vos contenus',
         blocks: [
-          'Vous conservez la pleine propriété des contenus que vous saisissez dans Slate (titres des blocs, horaires, catégories, postes). Les contenus de l’application restent sur votre appareil. Pour les contenus du site, vous nous accordez une licence limitée et non exclusive de les stocker et de les traiter uniquement afin de vous fournir le Service. Nous ne revendiquons aucun droit sur vos contenus et ne les partageons avec des tiers que comme indiqué dans notre [Politique de confidentialité](/privacy).',
+          'Vous conservez la pleine propriété des contenus que vous saisissez dans Slate (titres de blocs, heures, catégories, services). Les contenus restent sur votre appareil. Les données de rappel ne nous sont transmises que comme décrit dans notre [Politique de confidentialité](/privacy), et uniquement pour fournir les rappels que vous activez. Nous ne revendiquons aucun droit sur vos contenus et ne les partageons pas avec des tiers, sauf comme indiqué dans la Politique de confidentialité.',
         ],
       },
       {
@@ -196,7 +196,7 @@ export const fr: LegalDocs = {
       {
         title: '9. Suspension et résiliation',
         blocks: [
-          'Vous pouvez supprimer votre compte du site à tout moment ; lors de la suppression, vos données seront traitées comme décrit dans notre [Politique de confidentialité](/privacy). La désinstallation de l’application supprime ses données de votre téléphone. Nous nous réservons le droit de suspendre ou de fermer les comptes qui enfreignent les présentes Conditions, en vous en avertissant lorsque c’est raisonnablement possible.',
+          'Vous pouvez désactiver les rappels à tout moment dans les réglages, ce qui supprime les données de rappel conservées pour votre navigateur. Effacer les données du site dans votre navigateur, ou désinstaller l’application, supprime les données conservées sur votre appareil. Nous nous réservons le droit de suspendre le service ou les rappels de toute personne qui enfreint ces conditions, en la prévenant lorsque c’est raisonnablement possible.',
         ],
       },
       {

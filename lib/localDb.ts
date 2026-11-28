@@ -15,6 +15,7 @@ type Mode = 'select' | 'insert' | 'upsert' | 'update' | 'delete';
 type Order = { col: string; ascending: boolean };
 
 const PREFIX = 'slate-db:';
+export const CHANGED_EVENT = 'slate-db-changed';
 
 function readTable(name: string): Row[] {
   try {
@@ -28,6 +29,8 @@ function readTable(name: string): Row[] {
 
 function writeTable(name: string, rows: Row[]) {
   localStorage.setItem(PREFIX + name, JSON.stringify(rows));
+  // Lets the reminder sync (dashboard) upload the new items after any change.
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(CHANGED_EVENT));
 }
 
 function newId(): string {

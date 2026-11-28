@@ -197,6 +197,7 @@ export const es: Dictionary = {
     title: "Copia de seguridad",
   },
   reminders: {
+    turnOff: 'Desactivar recordatorios',
     label: "Recordatorio",
     off: "Sin recordatorio",
     before: "{n} min antes",

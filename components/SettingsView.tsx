@@ -10,11 +10,12 @@ import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { getMonthStyle, setMonthStyle, type MonthStyle } from '@/lib/monthStyle';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
 import { BackupSection } from './BackupSection';
+import { RemindersSettings } from './RemindersSettings';
 import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
 import { useI18n } from './LanguageProvider';
 
-type SettingsPage = 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'backup' | 'install';
+type SettingsPage = 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'reminders' | 'backup' | 'install';
 
 const selected = 'bg-accent text-accent-contrast font-medium';
 const unselected = 'bg-surface-hover text-text-primary hover:bg-border';
@@ -51,6 +52,7 @@ function SETTINGS_GROUPS(
         { key: 'defaultView', title: t.settings.defaultView, hint: '' },
       ],
     },
+    { label: t.settingsGroups.permissions, items: [{ key: 'reminders', title: t.reminders.title, hint: '' }] },
     { label: '', items: [{ key: 'language', title: t.common.language, hint: (LOCALE_NAMES as Record<string, string>)[locale] ?? '' }] },
     {
       label: t.settingsGroups.work,
@@ -436,6 +438,13 @@ export function SettingsView() {
         )}
 
 
+
+        {page === 'reminders' && (
+        <Section title={t.reminders.title}>
+          <p className="text-xs text-text-tertiary mb-4">{t.reminders.lede}</p>
+          <RemindersSettings />
+        </Section>
+        )}
 
         {page === 'backup' && (
         <Section title={t.backup.title}>

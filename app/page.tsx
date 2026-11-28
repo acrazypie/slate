@@ -6,6 +6,9 @@ import { SummaryView } from '@/components/SummaryView';
 import { WeekGrid } from '@/components/WeekGrid';
 import { Sidebar } from '@/components/Sidebar';
 import { SettingsView } from '@/components/SettingsView';
+import { useI18n } from '@/components/LanguageProvider';
+import { CHANGED_EVENT } from '@/lib/localDb';
+import { syncReminders } from '@/lib/push';
 import { ShiftsView } from '@/components/ShiftsView';
 import { BottomNav, AppTab } from '@/components/BottomNav';
 
@@ -25,6 +28,24 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const [tab, setTab] = useState<AppTab>('calendar');
+  const { locale } = useI18n();
+  // Reminders: upload this browser's items now, and again shortly after each change.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const run = () => {
+      void syncReminders(locale).catch(() => {});
+    };
+    const onChange = () => {
+      clearTimeout(timer);
+      timer = setTimeout(run, 1500);
+    };
+    run();
+    window.addEventListener(CHANGED_EVENT, onChange);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener(CHANGED_EVENT, onChange);
+    };
+  }, [locale]);
   // The data and settings live in this browser, so nothing is drawn on the server.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {

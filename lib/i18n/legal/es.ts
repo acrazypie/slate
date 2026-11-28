@@ -4,7 +4,7 @@ export const es: LegalDocs = {
   privacy: {
     description:
       'Cómo Slate trata los datos personales de sus usuarios, conforme al Reglamento (UE) 2016/679 (RGPD).',
-    updated: 'Última actualización: 25 de noviembre de 2026',
+    updated: 'Última actualización: 28 de noviembre de 2026',
     intro: [
       'Esta política describe cómo trata Slate los datos personales: la app para Android e iOS y el sitio web de Slate. Se redacta conforme al artículo 13 del Reglamento (UE) 2016/679 («RGPD») y al Decreto Legislativo italiano 196/2003, modificado por el Decreto Legislativo 101/2018 (el «Código de Privacidad italiano»).',
     ],
@@ -26,7 +26,7 @@ export const es: LegalDocs = {
       {
         title: 'El sitio web de Slate',
         blocks: [
-          'El sitio web no lee ni escribe tus calendarios. Las cuentas del sitio sirven para iniciar sesión y conservar el contenido que creas en él.',
+          'El sitio web funciona con el mismo planificador en tu navegador. No tiene cuentas ni inicio de sesión. Tus bloques, turnos, rotaciones y ajustes se guardan en el almacenamiento local de tu navegador y no se envían a nuestros servidores. Lo único que el sitio web envía a nuestros servidores son los recordatorios que activas, como se describe más abajo.',
         ],
       },
       {
@@ -38,12 +38,12 @@ export const es: LegalDocs = {
       {
         title: '2. Datos que tratamos',
         blocks: [
-          'Para el sitio web tratamos las siguientes categorías de datos personales:',
+          'Para los recordatorios del sitio web tratamos las siguientes categorías de datos personales:',
           [
-            '**Datos de la cuenta**: tu dirección de correo y, si te registras con correo y contraseña, la contraseña (guardada cifrada y nunca legible por nosotros). Si inicias sesión con Google, recibimos de Google tu correo, nombre y foto de perfil, según autorizaste en la pantalla de consentimiento de Google.',
-            '**Datos del servicio**: el contenido que creas en el sitio (títulos de bloques, categoría, horas de inicio y fin, color, recurrencia), necesario para que funcione el planificador.',
-            '**Datos técnicos**: dirección IP, tipo de navegador y de dispositivo, recogidos automáticamente por nuestros proveedores de infraestructura (Vercel, Supabase) para la seguridad y el funcionamiento del servicio.',
-            '**Cookies**: solo usamos cookies técnicas necesarias para mantener tu sesión iniciada. No usamos cookies de perfilado, de analítica ni de marketing de terceros.',
+            '**Datos de recordatorios**: una clave aleatoria del dispositivo que se guarda solo en tu navegador. Solo guardamos un hash criptográfico de ella, nunca la clave. Con ella, los elementos de recordatorio que tu navegador nos envía: los títulos y horas de inicio de tus bloques y turnos de las próximas dos semanas, el tiempo de antelación que elegiste y los ajustes de notificaciones. El título forma parte de la notificación que se muestra en tu dispositivo.',
+            '**Suscripción push**: la dirección que tu navegador da para las notificaciones push web (endpoint y claves de cifrado), junto con el idioma de la app.',
+            '**Datos técnicos**: dirección IP y datos técnicos de las peticiones, recogidos por nuestros proveedores de infraestructura (Vercel, Supabase) para la seguridad y el funcionamiento del servicio.',
+            '**Almacenamiento**: el sitio guarda tus ajustes y los datos del planificador en el almacenamiento local de tu navegador. No establece cookies de seguimiento, analítica ni marketing.',
           ],
           'En la app no recogemos datos personales. Los datos que introduces en la app se describen arriba y se quedan en tu dispositivo.',
         ],
@@ -52,9 +52,9 @@ export const es: LegalDocs = {
         title: '3. Finalidades y bases jurídicas del tratamiento',
         blocks: [
           [
-            '**Prestación del sitio** (cuentas, conservación de tu contenido): art. 6(1)(b) RGPD, ejecución de un contrato.',
+            '**Prestación de los recordatorios** que activas: art. 6(1)(b) RGPD, ejecución de un contrato.',
             '**Seguridad y prevención de abusos y fraudes**: art. 6(1)(f) RGPD, interés legítimo del responsable.',
-            '**Comunicaciones esenciales del servicio** (p. ej., avisos de cuenta): art. 6(1)(b) RGPD.',
+            '**Activar y desactivar los recordatorios**: art. 6(1)(a) RGPD, tu consentimiento, que puedes retirar en cualquier momento.',
             '**Calendario del teléfono, Google Calendar y notificaciones en la app**: art. 6(1)(a) RGPD, tu consentimiento, otorgado al conceder el permiso o activar la función. Puedes retirarlo en cualquier momento desde la app o los ajustes del teléfono.',
             '**Comprobación de actualizaciones y aviso de nueva versión** (Android): art. 6(1)(f) RGPD, interés legítimo en que instales la versión actual. Puedes desactivar el aviso en Ajustes › Notificaciones.',
           ],
@@ -64,11 +64,11 @@ export const es: LegalDocs = {
       {
         title: '4. Destinatarios de los datos y proveedores terceros',
         blocks: [
-          'Los datos tratados para el sitio se encargan a proveedores que actúan como encargados del tratamiento (art. 28 RGPD), obligados por contrato a tratarlos solo para las finalidades indicadas:',
+          'Los datos de recordatorios los tratan proveedores que actúan como encargados del tratamiento (art. 28 RGPD), obligados por contrato a tratarlos solo para los fines indicados:',
           [
-            '**Supabase Inc.**: alojamiento de la base de datos y autenticación de las cuentas del sitio. Los datos se guardan en servidores ubicados en Irlanda (UE).',
+            '**Supabase Inc.**: guarda los datos de recordatorios y ejecuta las funciones que envían las notificaciones. Los datos se almacenan en servidores situados en Irlanda (UE).',
             '**Vercel Inc.**: alojamiento del sitio web. Empresa con sede en Estados Unidos.',
-            '**Google LLC**: inicio de sesión con cuenta de Google, si lo eliges en el sitio; y, si activas la sincronización con Google en la app, el servicio de calendario al que te conectas. Google recibe las solicitudes que haces; nosotros no las recibimos. Empresa con sede en Estados Unidos.',
+            '**Servicios push de los navegadores** (por ejemplo, Google, Mozilla o Apple): entregan cada recordatorio a tu navegador; no los controlamos. Google también recibe las peticiones que haces si conectas Google Calendar en la app. Empresa con sede en Estados Unidos.',
             '**GitHub, Inc.**: aloja las versiones de Slate y responde a las comprobaciones de actualización de la app. Empresa con sede en Estados Unidos.',
           ],
           'Ko-fi es un sitio de terceros. La app solo lo abre cuando tocas el enlace.',
@@ -83,7 +83,7 @@ export const es: LegalDocs = {
       {
         title: '6. Plazo de conservación',
         blocks: [
-          'Los datos de la cuenta del sitio y el contenido se conservan mientras tengas una cuenta activa. Si pides la supresión de tu cuenta, los datos personales y el contenido relacionado se eliminan en un plazo de 30 días, salvo lo que deba conservarse más tiempo por obligación legal. Los registros técnicos se conservan un máximo de 12 meses.',
+          'Los datos de recordatorios se conservan así. Los elementos se borran cuando pasa su hora de inicio (como máximo un día después) y se sustituyen cada vez que tu navegador se sincroniza. La clave del dispositivo y la suscripción push se conservan hasta que desactivas los recordatorios en Ajustes, lo que las borra de inmediato. Los registros técnicos se conservan un máximo de 12 meses.',
           'Los datos de la app permanecen en tu dispositivo hasta que los borres (Ajustes › Copia de seguridad › borrar todos los datos) o desinstales la app. Los eventos copiados a tus calendarios de Google o del teléfono siguen ahí hasta que los elimines en esos servicios.',
         ],
       },
@@ -100,7 +100,7 @@ export const es: LegalDocs = {
             'oponerte al tratamiento basado en interés legítimo (art. 21 RGPD);',
             'retirar en cualquier momento el consentimiento dado, sin afectar a la licitud del tratamiento previo.',
           ],
-          'Para los datos guardados solo en tu dispositivo puedes ejercer estos derechos tú mismo: exporta una copia de seguridad, corrige o elimina elementos en la app, o borra todos los datos. Para los datos del sitio, escribe a **egenesio@proton.me**. También tienes derecho a presentar una reclamación ante la autoridad de control competente:',
+          'Para los datos guardados solo en tu dispositivo puedes ejercer estos derechos tú mismo: exportar una copia de seguridad, corregir o borrar elementos en la app, o borrar todos los datos. Para los datos de recordatorios del sitio web, puedes desactivar los recordatorios en Ajustes, lo que los borra de nuestros servidores de inmediato. Para cualquier otra cosa, escribe a **egenesio@proton.me**. También tienes derecho a presentar una reclamación ante la autoridad de control competente:',
           'Garante para la protección de datos personales (Italia), Piazza Venezia 11, 00187 Roma: www.garanteprivacy.it',
         ],
       },
@@ -113,7 +113,7 @@ export const es: LegalDocs = {
       {
         title: '9. Seguridad de los datos',
         blocks: [
-          'La app guarda sus datos en el espacio privado de la app en tu dispositivo, que otras apps no pueden leer. Para el sitio adoptamos medidas técnicas y organizativas adecuadas, entre ellas conexiones cifradas (TLS/HTTPS), separación de datos entre usuarios mediante Row Level Security a nivel de base de datos y acceso limitado al personal autorizado.',
+          'La app guarda sus datos en tu dispositivo, donde otras apps no pueden leerlos. Para los recordatorios aplicamos medidas técnicas y organizativas adecuadas: la clave del dispositivo se guarda solo en tu navegador y solo se guarda un hash de ella en nuestros servidores; las conexiones están cifradas (TLS/HTTPS); las tablas de recordatorios no se pueden leer desde el sitio web y solo las usan nuestras funciones de recordatorios; y el acceso está limitado al personal autorizado.',
         ],
       },
       {
@@ -133,7 +133,7 @@ export const es: LegalDocs = {
 
   terms: {
     description: 'Condiciones de uso de la app y del sitio Slate.',
-    updated: 'Última actualización: 25 de noviembre de 2026',
+    updated: 'Última actualización: 28 de noviembre de 2026',
     intro: [
       'Estas Condiciones de servicio («Condiciones») regulan el uso de Slate (el «Servicio»), la app para Android e iOS y el sitio web, prestados por **Matteo Genesio** («el Titular», «nosotros»). Al usar el Servicio aceptas estas Condiciones en su totalidad.',
     ],
@@ -141,13 +141,13 @@ export const es: LegalDocs = {
       {
         title: '1. Descripción del Servicio',
         blocks: [
-          'Slate es una app y un sitio para organizar tu semana en bloques de tiempo (estudio, trabajo, clases y otras categorías), con turnos, rotaciones, estimaciones de pago y recordatorios. La app funciona en tu dispositivo sin cuenta. El Servicio es gratuito: no tiene funciones de pago ni suscripciones. El apoyo voluntario a través de Ko-fi es opcional y no desbloquea nada. El Servicio está en desarrollo activo, por lo que las funciones pueden añadirse, cambiarse o eliminarse con el tiempo.',
+          'Slate es una app y un sitio para organizar tu semana en bloques de tiempo (estudio, trabajo, clases y otras categorías), con turnos, rotaciones, estimaciones de salario y recordatorios. Ambos funcionan en tu dispositivo sin cuenta. El servicio es gratuito: no tiene funciones de pago ni suscripciones. El apoyo voluntario a través de Ko-fi es opcional y no desbloquea nada. El servicio está en desarrollo activo, así que las funciones pueden añadirse, cambiarse o eliminarse con el tiempo.',
         ],
       },
       {
-        title: '2. Cuentas y requisitos',
+        title: '2. Sin cuentas y requisitos',
         blocks: [
-          'La app no requiere cuenta. Algunas funciones del sitio requieren una cuenta, creada con correo y contraseña o iniciando sesión con Google. Para crear una cuenta debes tener al menos 14 años. Eres responsable de mantener tus credenciales en secreto y de toda la actividad realizada a través de tu cuenta.',
+          'Slate no tiene cuentas. Tus datos se guardan en el navegador o la app del dispositivo que uses, y eres responsable de mantener ese dispositivo a salvo. Borrar los datos del sitio de tu navegador, o desinstalar la app, elimina los datos guardados en ese dispositivo, y como no hay cuenta no podemos recuperarlos por ti. Los recordatorios del sitio web necesitan un navegador que admita notificaciones push web.',
         ],
       },
       {
@@ -165,7 +165,7 @@ export const es: LegalDocs = {
       {
         title: '4. Tu contenido',
         blocks: [
-          'Conservas la plena titularidad de los contenidos que introduces en Slate (títulos de bloques, horas, categorías, turnos). El contenido de la app se queda en tu dispositivo. Para el contenido del sitio, nos concedes una licencia limitada y no exclusiva para almacenarlo y tratarlo únicamente con el fin de prestarte el Servicio. No reclamamos derechos sobre tu contenido y no lo compartimos con terceros salvo lo indicado en nuestra [Política de privacidad](/privacy).',
+          'Conservas la plena titularidad de los contenidos que introduces en Slate (títulos de bloques, horas, categorías, turnos). Los contenidos se quedan en tu dispositivo. Los datos de recordatorios solo nos llegan como se describe en nuestra [Política de privacidad](/privacy), y únicamente para ofrecerte los recordatorios que activas. No reclamamos ningún derecho sobre tus contenidos y no los compartimos con terceros salvo lo indicado en la Política de privacidad.',
         ],
       },
       {
@@ -196,7 +196,7 @@ export const es: LegalDocs = {
       {
         title: '9. Suspensión y terminación',
         blocks: [
-          'Puedes eliminar tu cuenta del sitio en cualquier momento; al eliminarla, tus datos se tratarán como se describe en nuestra [Política de privacidad](/privacy). Al desinstalar la app se borran sus datos del teléfono. Nos reservamos el derecho de suspender o cerrar cuentas que incumplan estas Condiciones, avisándote cuando sea razonablemente posible.',
+          'Puedes desactivar los recordatorios en cualquier momento en Ajustes, lo que borra los datos de recordatorios guardados para tu navegador. Borrar los datos del sitio en tu navegador, o desinstalar la app, elimina los datos guardados en tu dispositivo. Nos reservamos el derecho de suspender el servicio o los recordatorios de quien incumpla estas Condiciones, avisando cuando sea razonablemente posible.',
         ],
       },
       {

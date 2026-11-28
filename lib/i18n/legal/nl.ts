@@ -26,7 +26,7 @@ export const nl: LegalDocs = {
       {
         title: 'De website van Slate',
         blocks: [
-          'De website leest en schrijft je agenda’s niet. Accounts op de website dienen om in te loggen en om de inhoud te bewaren die je op de website maakt.',
+          'De website gebruikt dezelfde planner in je browser. Er zijn geen accounts en geen inloggen. Je blokken, diensten, rotaties en instellingen worden opgeslagen in de lokale opslag van je browser en niet naar onze servers gestuurd. Het enige dat de website naar onze servers stuurt, zijn de herinneringen die je aanzet, zoals hieronder beschreven.',
         ],
       },
       {
@@ -38,12 +38,12 @@ export const nl: LegalDocs = {
       {
         title: '2. Gegevens die wij verwerken',
         blocks: [
-          'Voor de website verwerken wij de volgende categorieën persoonsgegevens:',
+          'Voor herinneringen op de website verwerken wij de volgende categorieën persoonsgegevens:',
           [
-            '**Accountgegevens**: je e-mailadres en, als je je met e-mail en wachtwoord registreert, je wachtwoord (versleuteld opgeslagen en nooit door ons leesbaar). Als je inlogt met Google, ontvangen wij van Google je e-mailadres, naam en profielfoto, zoals je die hebt toegestaan op het toestemmingsscherm van Google.',
-            '**Dienstgegevens**: de inhoud die je op de website maakt (titels van blokken, categorie, begin- en eindtijd, kleur, herhaling), die nodig is om de planner te laten werken.',
-            '**Technische gegevens**: IP-adres, type browser en apparaat, die automatisch worden verzameld door onze infrastructuurleveranciers (Vercel, Supabase) voor de beveiliging en werking van de dienst.',
-            '**Cookies**: wij gebruiken alleen technische cookies die nodig zijn om je ingelogd te houden. Wij gebruiken geen profilerings-, analyse- of marketingcookies van derden.',
+            '**Herinneringsgegevens**: een willekeurige apparaatsleutel die alleen in je browser wordt bewaard. Wij bewaren alleen een cryptografische hash ervan, nooit de sleutel. Daarmee de herinneringsitems die je browser ons stuurt: de titels en starttijden van je blokken en diensten voor de komende twee weken, de gekozen voorlooptijd en de meldingsinstellingen. De titel maakt deel uit van de melding die op je apparaat wordt getoond.',
+            '**Pushabonnement**: het adres dat je browser geeft voor pushmeldingen (endpoint en versleutelingssleutels), samen met de taal van de app.',
+            '**Technische gegevens**: IP-adres en technische verzoekgegevens, verzameld door onze infrastructuurleveranciers (Vercel, Supabase) voor de beveiliging en werking van de dienst.',
+            '**Opslag**: de website bewaart je instellingen en plannergegevens in de lokale opslag van je browser. Er worden geen tracking-, analyse- of marketingcookies geplaatst.',
           ],
           'In de app verzamelen wij geen persoonsgegevens. De gegevens die je in de app invoert, zijn hierboven beschreven en blijven op je toestel.',
         ],
@@ -52,9 +52,9 @@ export const nl: LegalDocs = {
         title: '3. Doeleinden en rechtsgronden van de verwerking',
         blocks: [
           [
-            '**Levering van de website** (accounts, bewaren van je inhoud): art. 6(1)(b) AVG, uitvoering van een overeenkomst.',
+            '**Het leveren van herinneringen** die je aanzet: art. 6(1)(b) AVG, uitvoering van een overeenkomst.',
             '**Beveiliging en voorkomen van misbruik en fraude**: art. 6(1)(f) AVG, gerechtvaardigd belang van de verwerkingsverantwoordelijke.',
-            '**Essentiële servicemeldingen** (bijv. accountberichten): art. 6(1)(b) AVG.',
+            '**Herinneringen aan- en uitzetten**: art. 6(1)(a) AVG, je toestemming, die je op elk moment kunt intrekken.',
             '**Telefoonagenda, Google Agenda en meldingen in de app**: art. 6(1)(a) AVG, je toestemming, gegeven wanneer je de machtiging verleent of de functie aanzet. Je kunt die op elk moment intrekken in de app of in de instellingen van je telefoon.',
             '**Controle op updates en melding van een nieuwe versie** (Android): art. 6(1)(f) AVG, gerechtvaardigd belang om je de actuele versie te laten installeren. Je kunt de melding uitzetten in Instellingen › Meldingen.',
           ],
@@ -64,11 +64,11 @@ export const nl: LegalDocs = {
       {
         title: '4. Ontvangers van de gegevens en externe leveranciers',
         blocks: [
-          'Gegevens die voor de website worden verwerkt, worden verwerkt door leveranciers die optreden als verwerkers (art. 28 AVG), contractueel gebonden om ze alleen voor de hierboven genoemde doeleinden te verwerken:',
+          'Herinneringsgegevens worden verwerkt door leveranciers die optreden als verwerkers (art. 28 AVG), contractueel gebonden om ze alleen te verwerken voor de hierboven genoemde doeleinden:',
           [
-            '**Supabase Inc.**: hosting van de database en authenticatie voor accounts op de website. Gegevens worden opgeslagen op servers in Ierland (EU).',
+            '**Supabase Inc.**: bewaart de herinneringsgegevens en voert de functies uit die de meldingen versturen. Gegevens worden opgeslagen op servers in Ierland (EU).',
             '**Vercel Inc.**: hosting van de website. Bedrijf gevestigd in de Verenigde Staten.',
-            '**Google LLC**: inloggen met een Google-account, als je dat op de website kiest; en, als je de Google-synchronisatie in de app aanzet, de agendadienst waarmee je verbindt. Google ontvangt de verzoeken die jij doet; wij ontvangen ze niet. Bedrijf gevestigd in de Verenigde Staten.',
+            '**Pushdiensten van browsers** (bijvoorbeeld Google, Mozilla of Apple): zij bezorgen elke herinnering bij je browser; wij beheren ze niet. Google ontvangt ook de verzoeken die je doet als je Google Agenda in de app koppelt. Een bedrijf gevestigd in de Verenigde Staten.',
             '**GitHub, Inc.**: host de Slate-releases en beantwoordt de updatecontroles van de app. Bedrijf gevestigd in de Verenigde Staten.',
           ],
           'Ko-fi is een site van derden. De app opent die alleen als je de link aantikt.',
@@ -83,7 +83,7 @@ export const nl: LegalDocs = {
       {
         title: '6. Bewaartermijn',
         blocks: [
-          'Accountgegevens van de website en inhoud worden bewaard zolang je een actief account hebt. Als je vraagt je account te verwijderen, worden de persoonsgegevens en de bijbehorende inhoud binnen 30 dagen gewist, behalve wat wettelijk langer moet worden bewaard. Technische logs worden maximaal 12 maanden bewaard.',
+          'Herinneringsgegevens worden zo bewaard. Items worden verwijderd zodra hun starttijd is verstreken (uiterlijk een dag later) en elke keer vervangen wanneer je browser synchroniseert. De apparaatsleutel en het pushabonnement blijven bewaard tot je herinneringen uitzet in de instellingen, wat ze direct verwijdert. Technische logs worden maximaal 12 maanden bewaard.',
           'Gegevens van de app blijven op je toestel totdat je ze wist (Instellingen › Back-up › alle gegevens wissen) of de app verwijdert. Afspraken die zijn gekopieerd naar je Google- of telefoonagenda blijven daar staan totdat je ze in die diensten verwijdert.',
         ],
       },
@@ -100,7 +100,7 @@ export const nl: LegalDocs = {
             'bezwaar te maken tegen verwerking op grond van gerechtvaardigd belang (art. 21 AVG);',
             'een gegeven toestemming op elk moment in te trekken, zonder dat dit de rechtmatigheid van eerdere verwerking aantast.',
           ],
-          'Voor gegevens die alleen op je toestel staan, kun je deze rechten zelf uitoefenen: een back-up exporteren, items in de app corrigeren of verwijderen, of alle gegevens wissen. Voor gegevens van de website schrijf je naar **egenesio@proton.me**. Je hebt ook het recht om een klacht in te dienen bij de bevoegde toezichthoudende autoriteit:',
+          'Voor gegevens die alleen op je toestel staan, kun je deze rechten zelf uitoefenen: een back-up exporteren, items in de app corrigeren of verwijderen, of alle gegevens wissen. Voor herinneringsgegevens van de website kun je herinneringen uitzetten in de instellingen, wat ze direct van onze servers verwijdert. Voor al het overige schrijf je naar **egenesio@proton.me**. Je hebt ook het recht om een klacht in te dienen bij de bevoegde toezichthoudende autoriteit:',
           'Garante per la protezione dei dati personali (Italiaanse toezichthouder), Piazza Venezia 11, 00187 Rome: www.garanteprivacy.it',
         ],
       },
@@ -113,7 +113,7 @@ export const nl: LegalDocs = {
       {
         title: '9. Beveiliging van gegevens',
         blocks: [
-          'De app bewaart zijn gegevens in de privéopslag van de app op je toestel, die andere apps niet kunnen lezen. Voor de website nemen wij passende technische en organisatorische maatregelen, waaronder versleutelde verbindingen (TLS/HTTPS), scheiding van gegevens tussen gebruikers via Row Level Security op databaseniveau, en toegang tot gegevens beperkt tot geautoriseerd personeel.',
+          'De app bewaart zijn gegevens op je toestel, waar andere apps ze niet kunnen lezen. Voor herinneringen nemen wij passende technische en organisatorische maatregelen: de apparaatsleutel wordt alleen in je browser bewaard en er wordt alleen een hash ervan op onze servers opgeslagen; verbindingen zijn versleuteld (TLS/HTTPS); de herinneringstabellen zijn niet leesbaar via de website en worden alleen door onze herinneringsfuncties gebruikt; en de toegang is beperkt tot geautoriseerd personeel.',
         ],
       },
       {
@@ -141,13 +141,13 @@ export const nl: LegalDocs = {
       {
         title: '1. Beschrijving van de Dienst',
         blocks: [
-          'Slate is een app en een website om je week in tijdblokken te organiseren (studie, werk, lessen en andere categorieën), met diensten, rotaties, loonschattingen en herinneringen. De app werkt op je toestel zonder account. De Dienst is gratis: er zijn geen betaalde functies en geen abonnementen. Vrijwillige steun via Ko-fi is optioneel en ontgrendelt niets. De Dienst is in actieve ontwikkeling, dus functies kunnen na verloop van tijd worden toegevoegd, gewijzigd of verwijderd.',
+          'Slate is een app en een website om je week in tijdblokken te organiseren (studie, werk, lessen en andere categorieën), met diensten, rotaties, loonschattingen en herinneringen. Beide werken op je apparaat zonder account. De dienst is gratis: er zijn geen betaalde functies en geen abonnementen. Vrijwillige steun via Ko-fi is optioneel en ontgrendelt niets. De dienst is in actieve ontwikkeling, dus functies kunnen in de loop van de tijd worden toegevoegd, gewijzigd of verwijderd.',
         ],
       },
       {
-        title: '2. Accounts en vereisten',
+        title: '2. Geen accounts en vereisten',
         blocks: [
-          'De app vereist geen account. Sommige functies van de website vereisen een account, gemaakt met e-mail en wachtwoord of door in te loggen met Google. Je moet minstens 14 jaar oud zijn om een account aan te maken. Je bent verantwoordelijk voor het geheimhouden van je inloggegevens en voor alle activiteit via je account.',
+          'Slate heeft geen accounts. Je gegevens worden bewaard in de browser of app op het apparaat dat je gebruikt, en jij bent verantwoordelijk voor de veiligheid van dat apparaat. Het wissen van de sitegegevens in je browser, of het verwijderen van de app, haalt de gegevens op dat apparaat weg; omdat er geen account is, kunnen wij ze niet voor je herstellen. Herinneringen op de website vereisen een browser die pushmeldingen ondersteunt.',
         ],
       },
       {
@@ -165,7 +165,7 @@ export const nl: LegalDocs = {
       {
         title: '4. Je inhoud',
         blocks: [
-          'Je behoudt het volledige eigendom van de inhoud die je in Slate invoert (titels van blokken, tijden, categorieën, diensten). Inhoud in de app blijft op je toestel. Voor inhoud op de website verleen je ons een beperkte, niet-exclusieve licentie om die alleen op te slaan en te verwerken om je de Dienst te leveren. Wij claimen geen rechten op je inhoud en delen die niet met derden, behalve zoals beschreven in ons [Privacybeleid](/privacy).',
+          'Je behoudt het volledige eigendom van de inhoud die je in Slate invoert (bloktitels, tijden, categorieën, diensten). Inhoud blijft op je apparaat. Herinneringsgegevens sturen wij alleen zoals beschreven in ons [Privacybeleid](/privacy), en alleen om de herinneringen te leveren die je aanzet. Wij maken geen aanspraak op je inhoud en delen die niet met derden, behalve zoals in het Privacybeleid staat.',
         ],
       },
       {
@@ -196,7 +196,7 @@ export const nl: LegalDocs = {
       {
         title: '9. Opschorting en beëindiging',
         blocks: [
-          'Je kunt je account op de website op elk moment verwijderen; bij verwijdering worden je gegevens verwerkt zoals beschreven in ons [Privacybeleid](/privacy). Het verwijderen van de app wist de gegevens op je telefoon. Wij behouden ons het recht voor accounts op te schorten of te beëindigen die deze Voorwaarden schenden, waarbij we je waar redelijkerwijs mogelijk vooraf informeren.',
+          'Je kunt herinneringen op elk moment uitzetten in de instellingen, waarmee de herinneringsgegevens voor je browser worden verwijderd. Het wissen van de sitegegevens in je browser, of het verwijderen van de app, haalt de gegevens op je apparaat weg. Wij behouden ons het recht voor de dienst of de herinneringen op te schorten voor wie deze voorwaarden schendt, met kennisgeving waar redelijkerwijs mogelijk.',
         ],
       },
       {

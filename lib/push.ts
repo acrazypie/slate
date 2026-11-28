@@ -1,15 +1,35 @@
 'use client';
 
-// Web Push for reminders: subscribe this browser and keep the server's copy of
-// the reminder settings in step with Settings.
+// Web Push reminders without an account. This browser subscribes for push, then
+// uploads its push subscription and its reminder items (see reminderItems.ts) to
+// the reminders-sync function, keyed by the random device key (deviceKey.ts).
+// Turning reminders off asks the server to forget this browser.
 
-import { db } from './localDb';
-import { getLeadMinutes, getNotifySettings } from './reminders';
+import { getDeviceKey } from './deviceKey';
+import { buildReminderItems } from './reminderItems';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
+const SYNC_URL = 'https://iafdpjvgwrdwzhdkebkk.supabase.co/functions/v1/reminders-sync';
+export const REMINDERS_ON_KEY = 'slate-reminders-on';
 
 export function pushSupported(): boolean {
   return typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && VAPID_PUBLIC_KEY !== '';
+}
+
+export function remindersOn(): boolean {
+  try {
+    return localStorage.getItem(REMINDERS_ON_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function setRemindersOn(on: boolean) {
+  try {
+    localStorage.setItem(REMINDERS_ON_KEY, on ? 'true' : 'false');
+  } catch {
+    // Storage unavailable: the choice lasts for this visit.
+  }
 }
 
 function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
@@ -20,20 +40,21 @@ function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
   return bytes;
 }
 
-async function currentRow(locale: string) {
-  return {
-    db,
-    prefs: {
-      time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-      lead_minutes: getLeadMinutes(),
-      notify_events: getNotifySettings().events,
-      notify_shifts: getNotifySettings().shifts,
-      locale,
-    },
-  };
+async function post(body: Record<string, unknown>): Promise<void> {
+  const res = await fetch(SYNC_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ key: getDeviceKey(), ...body }),
+  });
+  if (!res.ok) throw new Error(`reminders sync failed: ${res.status}`);
 }
 
-/** Subscribes this browser for reminders and saves the subscription and its settings. */
+async function currentSubscription(): Promise<PushSubscription | null> {
+  const registration = await navigator.serviceWorker.getRegistration('/sw.js');
+  return (await registration?.pushManager.getSubscription()) ?? null;
+}
+
+/** Subscribes this browser for reminders and uploads the subscription and the next two weeks of items. */
 export async function subscribeForReminders(locale: string): Promise<void> {
   if (!pushSupported()) throw new Error('push not supported');
   const registration = await navigator.serviceWorker.register('/sw.js');
@@ -46,25 +67,26 @@ export async function subscribeForReminders(locale: string): Promise<void> {
     });
   }
   const json = subscription.toJSON();
-  const { db, prefs } = await currentRow(locale);
-  const { error } = await db.from('push_subscriptions').upsert(
-    {
-      endpoint: subscription.endpoint,
-      p256dh: json.keys?.p256dh ?? '',
-      auth: json.keys?.auth ?? '',
-      ...prefs,
-    },
-    { onConflict: 'endpoint' },
-  );
-  if (error) throw new Error(error.message);
+  await post({
+    action: 'sync',
+    locale,
+    subscription: { endpoint: subscription.endpoint, keys: { p256dh: json.keys?.p256dh ?? '', auth: json.keys?.auth ?? '' } },
+    items: await buildReminderItems(),
+  });
+  setRemindersOn(true);
 }
 
-/** Pushes the current reminder settings of this browser to the server, if it is subscribed. */
-export async function syncReminderSettings(locale: string): Promise<void> {
-  if (!pushSupported()) return;
-  const registration = await navigator.serviceWorker.getRegistration('/sw.js');
-  const subscription = await registration?.pushManager.getSubscription();
-  if (!subscription) return;
-  const { db, prefs } = await currentRow(locale);
-  await db.from('push_subscriptions').update(prefs).eq('endpoint', subscription.endpoint);
+/** Uploads the current reminder items, if this browser has reminders on. */
+export async function syncReminders(locale: string): Promise<void> {
+  if (!pushSupported() || !remindersOn()) return;
+  if (!(await currentSubscription())) return;
+  await post({ action: 'sync', locale, items: await buildReminderItems() });
+}
+
+/** Unsubscribes this browser and asks the server to delete everything it stored for it. */
+export async function turnOffReminders(): Promise<void> {
+  const subscription = await currentSubscription();
+  await subscription?.unsubscribe();
+  await post({ action: 'forget' });
+  setRemindersOn(false);
 }

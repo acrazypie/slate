@@ -197,6 +197,7 @@ export const en: Dictionary = {
     title: "Backup",
   },
   reminders: {
+    turnOff: 'Turn off reminders',
     label: "Reminder",
     off: "No reminder",
     before: "{n} min before",

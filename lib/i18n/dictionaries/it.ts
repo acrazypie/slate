@@ -197,6 +197,7 @@ export const it = {
     title: "Backup",
   },
   reminders: {
+    turnOff: 'Disattiva i promemoria',
     label: "Promemoria",
     off: "Nessun promemoria",
     before: "{n} min prima",

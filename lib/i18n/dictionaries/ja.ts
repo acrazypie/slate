@@ -197,6 +197,7 @@ export const ja: Dictionary = {
     title: "バックアップ",
   },
   reminders: {
+    turnOff: 'リマインダーをオフにする',
     label: "リマインダー",
     off: "リマインダーなし",
     before: "{n}分前",

@@ -4,7 +4,7 @@ export const en: LegalDocs = {
   privacy: {
     description:
       'How Slate processes the personal data of its users, under Regulation (EU) 2016/679 (GDPR).',
-    updated: 'Last updated: 25 November 2026',
+    updated: 'Last updated: 28 November 2026',
     intro: [
       'This policy describes how personal data is handled by Slate: the Android and iOS app and the Slate website. It is written in accordance with Article 13 of Regulation (EU) 2016/679 (“GDPR”) and Italian Legislative Decree 196/2003 as amended by Legislative Decree 101/2018 (the “Italian Privacy Code”).',
     ],
@@ -26,7 +26,7 @@ export const en: LegalDocs = {
       {
         title: 'The Slate website',
         blocks: [
-          'The website does not read or write your calendars. Website accounts are used to sign in and to keep the content you create on the website.',
+          'The website runs the same planner in your browser. It has no accounts and no sign-in. Your blocks, shifts, rotations and settings are stored in your browser’s local storage and are not sent to us. The only things the website sends to our servers are the reminders you turn on, as described below.',
         ],
       },
       {
@@ -38,12 +38,12 @@ export const en: LegalDocs = {
       {
         title: '2. Data we collect',
         blocks: [
-          'For the website we process the following categories of personal data:',
+          'For reminders on the website we process the following categories of personal data:',
           [
-            '**Account data**: your email address and, if you sign up with email and password, your password (stored in encrypted form and never readable by us). If you sign in with Google, we receive from Google your email address, name and profile picture, as authorised by you on the Google consent screen.',
-            '**Service data**: the content you create on the website (time-block titles, category, start and end times, colour, recurrence), needed for the planner to work.',
-            '**Technical data**: IP address, browser type and device, collected automatically by our infrastructure providers (Vercel, Supabase) for the security and operation of the service.',
-            '**Cookies**: we only use technical cookies needed to keep you signed in. We do not use profiling, analytics or third-party marketing cookies.',
+            '**Reminder data**: a random device key kept only in your browser. We store only a cryptographic hash of it, never the key. With it, the reminder items your browser sends us: the titles and start times of your blocks and shifts for the next two weeks, the lead time you chose, and the notification settings. The title is part of the notification shown on your device.',
+            '**Push subscription**: the address your browser gives for web push notifications (endpoint and encryption keys), with the language of the app.',
+            '**Technical data**: IP address and technical request data, collected by our infrastructure providers (Vercel, Supabase) for the security and operation of the service.',
+            '**Storage**: the website keeps your settings and your planner data in your browser’s local storage. It sets no tracking, analytics or marketing cookies.',
           ],
           'For the app we collect no personal data. The data you enter in the app is described above and stays on your device.',
         ],
@@ -52,9 +52,9 @@ export const en: LegalDocs = {
         title: '3. Purposes and legal basis of processing',
         blocks: [
           [
-            '**Providing the website** (accounts, keeping your content): Art. 6(1)(b) GDPR, performance of a contract.',
+            '**Providing reminders** you turn on: Art. 6(1)(b) GDPR, performance of a contract.',
             '**Security and the prevention of abuse and fraud**: Art. 6(1)(f) GDPR, legitimate interest of the controller.',
-            '**Essential service communications** (e.g. account notices): Art. 6(1)(b) GDPR.',
+            '**Turning reminders on and off**: Art. 6(1)(a) GDPR, your consent, which you can withdraw at any time.',
             '**Phone calendar, Google Calendar and notification features in the app**: Art. 6(1)(a) GDPR, your consent, given when you grant the permission or turn the feature on. You can withdraw it at any time in the app or in your phone’s settings.',
             '**Update checks and the new-version notice** (Android): Art. 6(1)(f) GDPR, the legitimate interest in letting you install the current version. You can turn the notice off in Settings › Notifications.',
           ],
@@ -64,11 +64,11 @@ export const en: LegalDocs = {
       {
         title: '4. Recipients of the data and third-party providers',
         blocks: [
-          'Data handled for the website is processed by providers acting as data processors (Art. 28 GDPR), bound by contract to process it only for the purposes set out above:',
+          'Reminder data is processed by providers acting as data processors (Art. 28 GDPR), bound by contract to process it only for the purposes set out above:',
           [
-            '**Supabase Inc.**: database hosting and authentication for website accounts. Data is stored on servers located in Ireland (EU).',
+            '**Supabase Inc.**: stores the reminder data and runs the functions that send the notifications. Data is stored on servers located in Ireland (EU).',
             '**Vercel Inc.**: hosting of the website. A company based in the United States.',
-            '**Google LLC**: sign-in with a Google account, if you choose it on the website; and, if you turn on Google sync in the app, the calendar service you connect to. Google receives the requests you make; we do not receive them. A company based in the United States.',
+            '**Browser push services** (for example Google, Mozilla or Apple) deliver each reminder to your browser; we do not control them. Google also receives the requests you make if you connect Google Calendar in the app. A company based in the United States.',
             '**GitHub, Inc.**: hosts the Slate releases and answers the app’s update checks. A company based in the United States.',
           ],
           'Ko-fi is a third-party site. The app only opens it when you tap the link.',
@@ -83,7 +83,7 @@ export const en: LegalDocs = {
       {
         title: '6. Retention period',
         blocks: [
-          'Website account data and content are kept for as long as you have an active account. If you ask for your account to be deleted, the personal data and the related content are deleted within 30 days, except for anything that must be kept longer to comply with legal obligations. Technical logs are kept for a maximum of 12 months.',
+          'Reminder data is kept as follows. Items are deleted once their start time has passed (at most a day later) and are replaced each time your browser syncs. Your device key and push subscription are kept until you turn reminders off in Settings, which deletes them at once. Technical logs are kept for a maximum of 12 months.',
           'App data stays on your device until you erase it (Settings › Backup › erase all data) or uninstall the app. Events copied into your Google or phone calendars remain there until you delete them in those services.',
         ],
       },
@@ -100,7 +100,7 @@ export const en: LegalDocs = {
             'object to processing based on legitimate interest (Art. 21 GDPR);',
             'withdraw at any time any consent you have given, without affecting the lawfulness of processing already carried out.',
           ],
-          'For data kept only on your device, you can exercise these rights yourself: export a backup, correct or delete items in the app, or erase all data. For website data, write to **egenesio@proton.me**. You also have the right to lodge a complaint with the competent supervisory authority:',
+          'For data kept only on your device, you can exercise these rights yourself: export a backup, correct or delete items in the app, or erase all data. For reminder data on the website, you can turn reminders off in Settings, which deletes it from our servers at once. For anything else, write to **egenesio@proton.me**. You also have the right to lodge a complaint with the competent supervisory authority:',
           'Italian Data Protection Authority (Garante per la protezione dei dati personali), Piazza Venezia 11, 00187 Rome, Italy: www.garanteprivacy.it',
         ],
       },
@@ -113,7 +113,7 @@ export const en: LegalDocs = {
       {
         title: '9. Data security',
         blocks: [
-          'The app stores its data in its private storage on your device, which other apps cannot read. For the website we take appropriate technical and organisational measures, including encrypted connections (TLS/HTTPS), separation of data between users through Row Level Security at database level, and access to data limited to authorised personnel.',
+          'The app stores its data on your device, which other apps cannot read. For reminders we take appropriate technical and organisational measures: the device key is kept only in your browser and only a hash of it is stored on our servers; connections are encrypted (TLS/HTTPS); the reminder tables cannot be read through the website and are used only by our reminder functions; and access is limited to authorised personnel.',
         ],
       },
       {
@@ -133,7 +133,7 @@ export const en: LegalDocs = {
 
   terms: {
     description: 'Terms and conditions for using the Slate app and website.',
-    updated: 'Last updated: 25 November 2026',
+    updated: 'Last updated: 28 November 2026',
     intro: [
       'These Terms of Service (“Terms”) govern the use of Slate (the “Service”), the Android and iOS app and the website, provided by **Matteo Genesio** (“the Owner”, “we”). By using the Service you accept these Terms in full.',
     ],
@@ -141,13 +141,13 @@ export const en: LegalDocs = {
       {
         title: '1. Description of the Service',
         blocks: [
-          'Slate is an app and a website for organising your week in time blocks (study, work, classes and other categories), with shifts, rotations, pay estimates and reminders. The app works on your device without an account. The Service is free: it has no paid features and no subscriptions. Voluntary support through Ko-fi is optional and unlocks nothing. The Service is under active development, so features may be added, changed or removed over time.',
+          'Slate is an app and a website for organising your week in time blocks (study, work, classes and other categories), with shifts, rotations, pay estimates and reminders. Both work on your device without an account. The Service is free: it has no paid features and no subscriptions. Voluntary support through Ko-fi is optional and unlocks nothing. The Service is under active development, so features may be added, changed or removed over time.',
         ],
       },
       {
-        title: '2. Accounts and requirements',
+        title: '2. No accounts and requirements',
         blocks: [
-          'The app needs no account. Some website features require an account, created with email and password or by signing in with Google. You must be at least 14 years old to create an account. You are responsible for keeping your credentials confidential and for all activity carried out through your account.',
+          'Slate has no accounts. Your data is kept in the browser or the app on the device you use, and you are responsible for keeping that device safe. Clearing your browser’s site data, or uninstalling the app, removes the data stored on that device, and because there is no account we cannot recover it for you. Website reminders need a browser that supports web push notifications.',
         ],
       },
       {
@@ -165,7 +165,7 @@ export const en: LegalDocs = {
       {
         title: '4. Your content',
         blocks: [
-          'You keep full ownership of the content you put into Slate (block titles, times, categories, shifts). Content in the app stays on your device. For content on the website, you grant us a limited, non-exclusive licence to store and process it solely in order to provide the Service to you. We claim no rights over your content and do not share it with third parties other than as set out in our [Privacy Policy](/privacy).',
+          'You keep full ownership of the content you put into Slate (block titles, times, categories, shifts). Content stays on your device. Reminder data is sent to us only as described in our [Privacy Policy](/privacy), and only to provide the reminders you turn on. We claim no rights over your content and do not share it with third parties other than as set out in the Privacy Policy.',
         ],
       },
       {
@@ -196,7 +196,7 @@ export const en: LegalDocs = {
       {
         title: '9. Suspension and termination',
         blocks: [
-          'You can delete your website account at any time; on deletion, your data will be handled as described in our [Privacy Policy](/privacy). Uninstalling the app removes its data from your phone. We reserve the right to suspend or terminate accounts that breach these Terms, giving you notice where reasonably possible.',
+          'You can turn reminders off at any time in Settings, which deletes the reminder data stored for your browser. Clearing the site data in your browser, or uninstalling the app, removes the data stored on your device. We reserve the right to suspend the Service or the reminders for anyone who breaks these Terms, giving notice where reasonably possible.',
         ],
       },
       {

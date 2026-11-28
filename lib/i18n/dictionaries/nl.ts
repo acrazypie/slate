@@ -197,6 +197,7 @@ export const nl: Dictionary = {
     title: "Back-up",
   },
   reminders: {
+    turnOff: 'Herinneringen uitzetten',
     label: "Herinnering",
     off: "Geen herinnering",
     before: "{n} min ervoor",
