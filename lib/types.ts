@@ -77,6 +77,8 @@ export interface Shift {
   /** Unpaid break inside the shift, in minutes. Not paid, not counted as hours worked. */
   break_minutes: number;
   color: string;
+  /** One of the shift icons (lib/shiftIcons.ts). Missing = the day icon. */
+  icon?: string;
   /** Minutes before the start to remind; null = the default, -1 = no reminder. */
   reminder_minutes?: number | null;
   created_at: string;
@@ -90,6 +92,7 @@ export interface ShiftFormData {
   end_minute: number;
   break_minutes: number;
   color: string;
+  icon?: string;
   reminder_minutes?: number | null;
 }
 

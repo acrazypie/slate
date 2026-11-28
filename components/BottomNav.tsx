@@ -19,7 +19,7 @@ export function BottomNav({ active, onChange }: { active: AppTab; onChange: (tab
 
   return (
     <nav
-      className="md:hidden flex-shrink-0 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]"
+      className="md:hidden flex-shrink-0 border-t border-border bg-surface pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
       aria-label={t.nav.main}
     >
       <div className="flex justify-center gap-1 px-2 py-1.5 max-w-md mx-auto">

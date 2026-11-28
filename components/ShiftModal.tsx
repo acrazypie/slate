@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { reminderLabel, reminderText, reminderToForm, formToReminder, getLeadMinutes, REMINDER_OPTIONS } from '@/lib/reminders';
 import { Shift, ShiftFormData, COLOR_PALETTE, colorKey, SHIFT_DEFAULT_COLOR, formatTime } from '@/lib/types';
+import { SHIFT_ICON_KEYS, SHIFT_ICONS, DEFAULT_SHIFT_ICON, normalizeShiftIcon, type ShiftIconKey } from '@/lib/shiftIcons';
 import { fill } from '@/lib/i18n/format';
 import { useI18n } from './LanguageProvider';
 import { Dialog, DialogClose, ColorSwatch } from './Dialog';
@@ -28,6 +29,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
   const [start, setStart] = useState('09:00');
   const [end, setEnd] = useState('17:00');
   const [color, setColor] = useState(SHIFT_DEFAULT_COLOR);
+  const [icon, setIcon] = useState<ShiftIconKey>(DEFAULT_SHIFT_ICON);
   const [breakMinutes, setBreakMinutes] = useState('0');
   const [reminder, setReminder] = useState('default');
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
       setStart(formatTime(shift.start_hour, shift.start_minute));
       setEnd(formatTime(shift.end_hour, shift.end_minute));
       setColor(shift.color);
+      setIcon(normalizeShiftIcon(shift.icon));
       setBreakMinutes(String(shift.break_minutes ?? 0));
       setReminder(reminderToForm(shift.reminder_minutes));
     } else {
@@ -51,6 +54,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
       setStart('09:00');
       setEnd('17:00');
       setColor(SHIFT_DEFAULT_COLOR);
+      setIcon(DEFAULT_SHIFT_ICON);
     }
     setFormError(null);
     setConfirmingDelete(false);
@@ -72,7 +76,7 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
 
     setLoading(true);
     const breakValue = Math.min(240, Math.max(0, Math.round(Number(breakMinutes) || 0)));
-    await onSave({ title: title.trim(), start_hour: sh, start_minute: sm, end_hour: eh, end_minute: em, break_minutes: breakValue, color, reminder_minutes: formToReminder(reminder) });
+    await onSave({ title: title.trim(), start_hour: sh, start_minute: sm, end_hour: eh, end_minute: em, break_minutes: breakValue, color, icon, reminder_minutes: formToReminder(reminder) });
     setLoading(false);
   };
 
@@ -142,6 +146,30 @@ export function ShiftModal({ isOpen, onClose, onSave, onDelete, onRemoveFromDay,
               <option key={m} value={String(m)}>{reminderLabel(m, reminderText(t), 0)}</option>
             ))}
           </select>
+        </div>
+
+        <div role="group" aria-labelledby="shift-icon-label">
+          <span id="shift-icon-label" className={labelClass}>{t.shiftDisplay.icon}</span>
+          <div className="grid grid-cols-5 gap-2 mt-2">
+            {SHIFT_ICON_KEYS.map((key) => {
+              const Icon = SHIFT_ICONS[key];
+              const selected = icon === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setIcon(key)}
+                  aria-pressed={selected}
+                  className={`flex flex-col items-center gap-1 py-2 rounded-xl text-[11px] transition-colors ${
+                    selected ? 'bg-accent text-accent-contrast font-medium' : 'bg-surface-hover text-text-primary hover:bg-border'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                  {t.shiftDisplay[key]}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div role="group" aria-labelledby="shift-color-label">

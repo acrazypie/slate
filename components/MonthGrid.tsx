@@ -16,7 +16,8 @@ import { useShiftAssignments } from '@/hooks/useShifts';
 import { Block, ShiftAssignment, blockEndTime, formatCompactRange } from '@/lib/types';
 import { DaySheet } from './DaySheet';
 import { capitalize, fill, formatDate, weekdayNames } from '@/lib/i18n/format';
-import { getMonthStyle } from '@/lib/monthStyle';
+import { getMonthStyle, getDetailedShiftStyle, getCompactShiftStyle, textOn } from '@/lib/monthStyle';
+import { shiftIconOf } from '@/lib/shiftIcons';
 import { Plus } from 'lucide-react';
 import { useI18n } from './LanguageProvider';
 
@@ -62,6 +63,8 @@ export function MonthGrid({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   // 'compact' shows coloured squares and lists the chosen day below; 'detailed' opens a sheet.
   const [style] = useState(() => getMonthStyle());
+  const [detailedShift] = useState(() => getDetailedShiftStyle());
+  const [compactShift] = useState(() => getCompactShiftStyle());
   const [chosenDay, setChosenDay] = useState<Date>(() => (isSameMonth(today, monthDate) ? today : startOfMonth(monthDate)));
   const activeDay = isSameMonth(chosenDay, monthDate) ? chosenDay : startOfMonth(monthDate);
 
@@ -138,7 +141,7 @@ export function MonthGrid({
       : [];
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto">
+    <div className={`flex-1 flex flex-col min-h-0 ${style === 'compact' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
       <div className="grid grid-cols-7 border-b border-border">
         {weekdayLabels.map((label) => (
           <div
@@ -150,14 +153,14 @@ export function MonthGrid({
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className={`${style === 'compact' ? 'flex-none' : 'flex-1 min-h-0'} flex flex-col`}>
         {weeks.map((week, weekIdx) => (
           <div
             key={weekIdx}
             className={
               style === 'compact'
                 ? 'grid grid-cols-7 min-h-[56px]'
-                : 'flex-1 grid grid-cols-7 min-h-[104px] sm:min-h-[132px]'
+                : 'flex-1 min-h-0 grid grid-cols-7'
             }
           >
             {week.map((day) => {
@@ -186,31 +189,60 @@ export function MonthGrid({
                 }),
               ].sort((a, b) => a.startMinutes - b.startMinutes);
 
+              const dayShifts = assignmentsFor(day);
+              const fullShift = style === 'detailed' && detailedShift === 'full' ? dayShifts[0]?.shift : undefined;
+              const cellFill = fullShift && /^#[0-9a-fA-F]{6}$/.test(fullShift.color) ? fullShift.color : undefined;
+              const lineShifts = style === 'compact' && compactShift === 'line' ? dayShifts : [];
+              const dotChips = lineShifts.length > 0 ? chips.filter((c) => !c.isShift) : chips;
+              const FullIcon = fullShift ? shiftIconOf(fullShift.icon) : null;
+
+              const numberClass = cellFill
+                ? isToday
+                  ? 'ring-2 ring-current'
+                  : ''
+                : isToday
+                  ? 'bg-accent text-accent-contrast'
+                  : style === 'compact' && isSameDay(day, activeDay)
+                    ? 'border-2 border-accent text-text-primary'
+                    : 'text-text-primary';
+
               return (
                 <button
                   key={day.toISOString()}
                   onClick={() => (style === 'compact' ? setChosenDay(day) : setSelectedDate(day))}
-                  className={`flex flex-col min-w-0 border-r border-b border-border [&:nth-child(7n)]:border-r-0 hover:bg-surface-hover/50 transition-colors ${
+                  style={cellFill ? { backgroundColor: cellFill, color: textOn(cellFill) } : undefined}
+                  className={`relative flex flex-col min-w-0 overflow-hidden border-r border-b border-border [&:nth-child(7n)]:border-r-0 hover:bg-surface-hover/50 transition-colors ${
                     style === 'compact' ? 'items-center text-center py-1 px-0.5' : 'items-stretch text-left p-1 sm:p-2'
                   } ${inMonth ? '' : 'opacity-40'}`}
                 >
                   <span
-                    className={`${style === 'compact' ? 'self-center' : 'self-start'} flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium mb-1 ${
-                      isToday
-                        ? 'bg-accent text-accent-contrast'
-                        : style === 'compact' && isSameDay(day, activeDay)
-                          ? 'border-2 border-accent text-text-primary'
-                          : 'text-text-primary'
-                    }`}
+                    className={`${style === 'compact' ? 'self-center' : 'self-start'} flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium mb-1 ${numberClass}`}
                   >
                     {format(day, 'd')}
                   </span>
-                  {style === 'compact' ? (
-                    <div className="flex flex-wrap justify-center gap-0.5 mt-auto">
-                      {chips.slice(0, 4).map((chip) => (
-                        <span key={chip.key} className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: chip.color }} />
-                      ))}
+                  {cellFill && FullIcon ? (
+                    // Full: the shift's colour and icon; the day's events are not drawn.
+                    <div className="flex-1 flex items-center justify-center">
+                      <FullIcon className="w-6 h-6" aria-hidden="true" />
                     </div>
+                  ) : style === 'compact' ? (
+                    <>
+                      {dotChips.length > 0 && (
+                        <div className={`flex flex-wrap justify-center gap-0.5 mt-auto ${lineShifts.length > 0 ? 'mb-2' : ''}`}>
+                          {dotChips.slice(0, 4).map((chip) => (
+                            <span key={chip.key} className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: chip.color }} />
+                          ))}
+                        </div>
+                      )}
+                      {lineShifts.length > 0 && (
+                        // Line: a thick bar in each shift's colour at the bottom of the day.
+                        <div className="absolute left-1 right-1 bottom-1 flex flex-col gap-0.5">
+                          {lineShifts.slice(0, 3).map((a) => (
+                            <span key={a.id} className="h-1.5 rounded-full" style={{ backgroundColor: a.shift.color }} />
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ) : (
                   <div className="flex flex-col gap-0.5 min-w-0">
                     {chips.slice(0, MAX_CHIPS_DESKTOP).map((chip, i) => (

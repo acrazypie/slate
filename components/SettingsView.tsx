@@ -7,7 +7,7 @@ import { Sun, Moon, Monitor, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, 
 import { ViewMode } from '@/hooks/useWeek';
 import { ACCENT_OPTIONS, MATCH_ACCENT, getStoredAccent, getStoredBackground, groundPreview, setAccent, setBackground } from '@/lib/accent';
 import { applyOled, getOled, setOled } from '@/lib/appearance';
-import { getMonthStyle, setMonthStyle, type MonthStyle } from '@/lib/monthStyle';
+import { getMonthStyle, setMonthStyle, type MonthStyle, getDetailedShiftStyle, setDetailedShiftStyle, getCompactShiftStyle, setCompactShiftStyle, type DetailedShiftStyle, type CompactShiftStyle } from '@/lib/monthStyle';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
 import { BackupSection } from './BackupSection';
 import { RemindersSettings } from './RemindersSettings';
@@ -136,6 +136,8 @@ export function SettingsView() {
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [page, setPage] = useState<SettingsPage | null>(null);
   const [monthStyleState, setMonthStyleState] = useState<MonthStyle>(() => getMonthStyle());
+  const [detailedShift, setDetailedShiftState] = useState<DetailedShiftStyle>(() => getDetailedShiftStyle());
+  const [compactShift, setCompactShiftState] = useState<CompactShiftStyle>(() => getCompactShiftStyle());
   // Installed as an app (home-screen or standalone window): the install guide is not needed.
   const [showInstall, setShowInstall] = useState(true);
   useEffect(() => {
@@ -433,6 +435,44 @@ export function SettingsView() {
               ))}
             </div>
             <p className="text-xs text-text-tertiary mt-3">{t.settings.monthStyleHint}</p>
+          </div>
+          <div className="mt-6">
+            <h3 className="text-sm text-text-secondary mb-3">{t.shiftDisplay.detailedTitle}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {(['compact', 'full'] as const).map((value) => (
+                <button
+                  key={value}
+                  onClick={() => {
+                    setDetailedShiftState(value);
+                    setDetailedShiftStyle(value);
+                  }}
+                  aria-pressed={detailedShift === value}
+                  className={`px-3 py-3 rounded-xl text-sm transition-colors ${detailedShift === value ? selected : unselected}`}
+                >
+                  {value === 'compact' ? t.shiftDisplay.detailedCompact : t.shiftDisplay.detailedFull}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-text-tertiary mt-3">{t.shiftDisplay.detailedHint}</p>
+          </div>
+          <div className="mt-6">
+            <h3 className="text-sm text-text-secondary mb-3">{t.shiftDisplay.compactTitle}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {(['dot', 'line'] as const).map((value) => (
+                <button
+                  key={value}
+                  onClick={() => {
+                    setCompactShiftState(value);
+                    setCompactShiftStyle(value);
+                  }}
+                  aria-pressed={compactShift === value}
+                  className={`px-3 py-3 rounded-xl text-sm transition-colors ${compactShift === value ? selected : unselected}`}
+                >
+                  {value === 'dot' ? t.shiftDisplay.compactDot : t.shiftDisplay.compactLine}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-text-tertiary mt-3">{t.shiftDisplay.compactHint}</p>
           </div>
         </Section>
         )}
