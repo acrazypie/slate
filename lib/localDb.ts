@@ -64,12 +64,28 @@ class Query implements PromiseLike<DbResult> {
   private conflictKey = 'id';
   private orderBy: Order | null = null;
   private wantSingle = false;
+  private columns = '*';
 
   constructor(private readonly table: string) {}
 
   /** On a read this is the query itself; after a write it asks for the rows back. */
-  select(_columns?: string): this {
+  select(columns?: string): this {
+    if (columns) this.columns = columns;
     return this;
+  }
+
+  /**
+   * Embeds related rows named in the select, e.g. `*, shift:shifts(*)`: the row's
+   * `shift_id` picks the shift, which is attached as `shift`.
+   */
+  private embed(row: Row): Row {
+    const embeds = [...this.columns.matchAll(/([a-z_]+):([a-z_]+)\(\*\)/g)];
+    if (embeds.length === 0) return row;
+    const out: Row = { ...row };
+    for (const [, alias, table] of embeds) {
+      out[alias] = readTable(table).find((t) => t.id === row[`${alias}_id`]) ?? null;
+    }
+    return out;
   }
 
   eq(col: string, value: unknown): this {
@@ -153,7 +169,7 @@ class Query implements PromiseLike<DbResult> {
           const dir = ascending ? 1 : -1;
           out = [...out].sort((a, b) => (a[col] > b[col] ? 1 : a[col] < b[col] ? -1 : 0) * dir);
         }
-        data = out;
+        data = out.map((r) => this.embed(r));
       } else if (this.mode === 'insert') {
         const incoming = (Array.isArray(this.payload) ? this.payload : [this.payload]) as Row[];
         const inserted = incoming.map((r) => ({ id: newId(), created_at: now, ...r }));
