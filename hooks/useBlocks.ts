@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { db } from '@/lib/localDb';
 import { Block, BlockFormData } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { dateForWeekOffset, isWeekOffsetInSeries, keyFromDate, SeriesLike } from '@/lib/recurrence';
@@ -15,14 +15,13 @@ export function useBlocks(weekOffset: number) {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   const fetchBlocks = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     // Plain, non-recurring blocks that actually live in this week.
-    const plainPromise = supabase
+    const plainPromise = db
       .from('blocks')
       .select('*')
       .eq('week_offset', weekOffset)
@@ -33,7 +32,7 @@ export function useBlocks(weekOffset: number) {
     // monthly series still needs the real recurrence math below - this is
     // just a cheap DB-side prefilter.
     const weekDate = keyFromDate(dateForWeekOffset(weekOffset, 0));
-    const seriesPromise = supabase
+    const seriesPromise = db
       .from('blocks')
       .select('*')
       .eq('is_recurring', true)
@@ -56,7 +55,7 @@ export function useBlocks(weekOffset: number) {
 
     let occurrences: Block[] = [];
     if (matchingSeries.length > 0) {
-      const { data: exceptions } = await supabase
+      const { data: exceptions } = await db
         .from('block_exceptions')
         .select('block_id')
         .in(
@@ -65,7 +64,7 @@ export function useBlocks(weekOffset: number) {
         )
         .eq('occurrence_week_offset', weekOffset);
 
-      const skipped = new Set((exceptions || []).map((e) => e.block_id));
+      const skipped = new Set((exceptions || []).map((e: { block_id: string }) => e.block_id));
       occurrences = matchingSeries
         .filter((s: Block) => !skipped.has(s.id))
         .map((s: Block) => ({ ...s, week_offset: weekOffset }));
@@ -79,7 +78,7 @@ export function useBlocks(weekOffset: number) {
 
     setBlocks(combined);
     setLoading(false);
-  }, [weekOffset, supabase]);
+  }, [weekOffset, db]);
 
   useEffect(() => {
     fetchBlocks();
@@ -89,16 +88,12 @@ export function useBlocks(weekOffset: number) {
   // week other than the one this hook is currently showing.
   const createBlock = async (formData: BlockFormData, weekOffsetOverride?: number): Promise<Block | null> => {
     const targetWeekOffset = weekOffsetOverride ?? weekOffset;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
     const id = uuidv4();
     const isRecurring = !!(formData.is_recurring && formData.recurrence_type);
 
     const newBlock = {
       ...formData,
       id,
-      user_id: user.id,
       week_offset: targetWeekOffset,
       notes: formData.notes || null,
       is_recurring: isRecurring,
@@ -110,7 +105,7 @@ export function useBlocks(weekOffset: number) {
       recurrence_group_id: isRecurring ? id : undefined,
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('blocks')
       .insert([newBlock])
       .select()
@@ -136,7 +131,7 @@ export function useBlocks(weekOffset: number) {
     // NOTE: for a recurring series, `id` is the series root - this edits the
     // template, so the change applies to every future occurrence at once,
     // not just the one that was clicked.
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('blocks')
       .update(formData)
       .eq('id', id)
@@ -165,7 +160,7 @@ export function useBlocks(weekOffset: number) {
     // in WeekGrid (deleteOccurrence / truncateSeriesBefore / deleteEntireSeries),
     // since those need exception rows and start-date bookkeeping this
     // single-row delete doesn't know about.
-    const { error } = await supabase
+    const { error } = await db
       .from('blocks')
       .delete()
       .eq('id', id);

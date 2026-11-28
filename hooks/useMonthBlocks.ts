@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { db } from '@/lib/localDb';
 import { Block } from '@/lib/types';
 import { dateForWeekOffset, isWeekOffsetInSeries, keyFromDate, SeriesLike } from '@/lib/recurrence';
 
@@ -16,7 +16,6 @@ export { weekOffsetForDate } from '@/lib/recurrence';
 export function useMonthBlocks(weekOffsets: number[]) {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   // Stable key so the effect only re-runs when the actual set of weeks changes.
   const key = useMemo(() => [...new Set(weekOffsets)].sort((a, b) => a - b).join(','), [weekOffsets]);
@@ -34,13 +33,13 @@ export function useMonthBlocks(weekOffsets: number[]) {
     const maxOffset = Math.max(...offsets);
     const minDate = keyFromDate(dateForWeekOffset(minOffset, 0));
 
-    const plainPromise = supabase
+    const plainPromise = db
       .from('blocks')
       .select('*')
       .in('week_offset', offsets)
       .eq('is_recurring', false);
 
-    const seriesPromise = supabase
+    const seriesPromise = db
       .from('blocks')
       .select('*')
       .eq('is_recurring', true)
@@ -61,7 +60,7 @@ export function useMonthBlocks(weekOffsets: number[]) {
     const seriesList = (series || []) as Block[];
     let exceptionsBySeriesId = new Map<string, Set<number>>();
     if (seriesList.length > 0) {
-      const { data: exceptions } = await supabase
+      const { data: exceptions } = await db
         .from('block_exceptions')
         .select('block_id, occurrence_week_offset')
         .in('block_id', seriesList.map((s) => s.id));
@@ -88,7 +87,7 @@ export function useMonthBlocks(weekOffsets: number[]) {
     setBlocks([...(plain || []), ...occurrences]);
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, supabase]);
+  }, [key, db]);
 
   useEffect(() => {
     fetchBlocks();

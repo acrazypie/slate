@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { addDays, format } from 'date-fns';
-import { createClient } from '@/lib/supabase/client';
+import { db } from '@/lib/localDb';
 import { Rotation, RotationFormData } from '@/lib/types';
 
 /** The user's rotations, and placing them on the calendar as shift assignments. */
@@ -10,10 +10,9 @@ export function useRotations() {
   const [rotations, setRotations] = useState<Rotation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   const fetchRotations = useCallback(async () => {
-    const { data, error: fetchError } = await supabase
+    const { data, error: fetchError } = await db
       .from('rotations')
       .select('*')
       .order('created_at', { ascending: true });
@@ -25,18 +24,16 @@ export function useRotations() {
       setRotations((data || []) as Rotation[]);
     }
     setLoading(false);
-  }, [supabase]);
+  }, [db]);
 
   useEffect(() => {
     fetchRotations();
   }, [fetchRotations]);
 
   const createRotation = async (formData: RotationFormData): Promise<Rotation | null> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data, error: insertError } = await supabase
+    const { data, error: insertError } = await db
       .from('rotations')
-      .insert([{ ...formData, user_id: user.id }])
+      .insert([{ ...formData }])
       .select()
       .single();
     if (insertError) {
@@ -48,7 +45,7 @@ export function useRotations() {
   };
 
   const updateRotation = async (id: string, formData: RotationFormData): Promise<Rotation | null> => {
-    const { data, error: updateError } = await supabase
+    const { data, error: updateError } = await db
       .from('rotations')
       .update(formData)
       .eq('id', id)
@@ -63,7 +60,7 @@ export function useRotations() {
   };
 
   const deleteRotation = async (id: string): Promise<boolean> => {
-    const { error: deleteError } = await supabase.from('rotations').delete().eq('id', id);
+    const { error: deleteError } = await db.from('rotations').delete().eq('id', id);
     if (deleteError) {
       setError(deleteError.message);
       return false;
@@ -78,10 +75,8 @@ export function useRotations() {
    * Returns how many shifts were placed.
    */
   const placeRotation = async (rotation: Rotation, from: Date, days: number): Promise<number> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 0;
     const last = addDays(from, days - 1);
-    const { data: existing, error: readError } = await supabase
+    const { data: existing, error: readError } = await db
       .from('shift_assignments')
       .select('shift_id, shift_date')
       .gte('shift_date', format(from, 'yyyy-MM-dd'))
@@ -90,17 +85,17 @@ export function useRotations() {
       setError(readError.message);
       return 0;
     }
-    const taken = new Set((existing || []).map((a) => `${a.shift_date}|${a.shift_id}`));
-    const rows: { user_id: string; shift_id: string; shift_date: string }[] = [];
+    const taken = new Set((existing || []).map((a: { shift_date: string; shift_id: string }) => `${a.shift_date}|${a.shift_id}`));
+    const rows: { shift_id: string; shift_date: string }[] = [];
     for (let i = 0; i < days; i++) {
       const shiftId = rotation.pattern[i % rotation.pattern.length];
       if (!shiftId) continue;
       const shiftDate = format(addDays(from, i), 'yyyy-MM-dd');
       if (taken.has(`${shiftDate}|${shiftId}`)) continue;
-      rows.push({ user_id: user.id, shift_id: shiftId, shift_date: shiftDate });
+      rows.push({ shift_id: shiftId, shift_date: shiftDate });
     }
     if (rows.length === 0) return 0;
-    const { error: insertError } = await supabase.from('shift_assignments').insert(rows);
+    const { error: insertError } = await db.from('shift_assignments').insert(rows);
     if (insertError) {
       setError(insertError.message);
       return 0;

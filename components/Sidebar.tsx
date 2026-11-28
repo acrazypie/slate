@@ -4,36 +4,16 @@ import { AppTab, TABS } from './BottomNav';
 import { useI18n } from './LanguageProvider';
 
 interface SidebarProps {
-  user?: {
-    email: string;
-    name?: string;
-  };
   nav?: { active: AppTab; onChange: (tab: AppTab) => void };
 }
 
-export function Sidebar({ user, nav }: SidebarProps) {
+export function Sidebar({ nav }: SidebarProps) {
   const { t } = useI18n();
 
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-border">
         <p className="font-semibold tracking-tight text-2xl text-text-primary">Slate</p>
-      </div>
-
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-            <span className="text-accent-contrast font-medium">
-              {user?.email?.[0]?.toUpperCase() || 'U'}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-text-primary font-medium truncate">
-              {user?.name || t.common.user}
-            </p>
-            <p className="text-xs text-text-secondary truncate">{user?.email}</p>
-          </div>
-        </div>
       </div>
 
       {nav && (

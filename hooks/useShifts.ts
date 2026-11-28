@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
-import { createClient } from '@/lib/supabase/client';
+import { db } from '@/lib/localDb';
 import { Shift, ShiftAssignment, ShiftFormData } from '@/lib/types';
 
 const byStart = (a: Shift, b: Shift) =>
@@ -13,10 +13,9 @@ export function useShifts() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   const fetchShifts = useCallback(async () => {
-    const { data, error: fetchError } = await supabase.from('shifts').select('*');
+    const { data, error: fetchError } = await db.from('shifts').select('*');
     if (fetchError) {
       setError(fetchError.message);
       setShifts([]);
@@ -25,19 +24,17 @@ export function useShifts() {
       setShifts(((data || []) as Shift[]).sort(byStart));
     }
     setLoading(false);
-  }, [supabase]);
+  }, [db]);
 
   useEffect(() => {
     fetchShifts();
   }, [fetchShifts]);
 
   const createShift = async (formData: ShiftFormData): Promise<Shift | null> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
 
-    const { data, error: insertError } = await supabase
+    const { data, error: insertError } = await db
       .from('shifts')
-      .insert([{ ...formData, user_id: user.id }])
+      .insert([{ ...formData }])
       .select()
       .single();
 
@@ -50,7 +47,7 @@ export function useShifts() {
   };
 
   const updateShift = async (id: string, formData: ShiftFormData): Promise<Shift | null> => {
-    const { data, error: updateError } = await supabase
+    const { data, error: updateError } = await db
       .from('shifts')
       .update(formData)
       .eq('id', id)
@@ -67,7 +64,7 @@ export function useShifts() {
 
   /** Deletes the definition; its placements on the calendar go with it (FK cascade). */
   const deleteShift = async (id: string): Promise<boolean> => {
-    const { error: deleteError } = await supabase.from('shifts').delete().eq('id', id);
+    const { error: deleteError } = await db.from('shifts').delete().eq('id', id);
     if (deleteError) {
       setError(deleteError.message);
       return false;
@@ -82,13 +79,12 @@ export function useShifts() {
 /** Shifts placed on days within [rangeStart, rangeEnd], each joined with its definition. */
 export function useShiftAssignments(rangeStart: Date, rangeEnd: Date) {
   const [assignments, setAssignments] = useState<ShiftAssignment[]>([]);
-  const supabase = createClient();
 
   const startKey = format(rangeStart, 'yyyy-MM-dd');
   const endKey = format(rangeEnd, 'yyyy-MM-dd');
 
   const fetchAssignments = useCallback(async () => {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('shift_assignments')
       .select('*, shift:shifts(*)')
       .gte('shift_date', startKey)
@@ -101,7 +97,7 @@ export function useShiftAssignments(rangeStart: Date, rangeEnd: Date) {
     const rows = ((data || []) as ShiftAssignment[]).filter((a) => a.shift);
     rows.sort((a, b) => a.shift_date.localeCompare(b.shift_date) || byStart(a.shift, b.shift));
     setAssignments(rows);
-  }, [startKey, endKey, supabase]);
+  }, [startKey, endKey, db]);
 
   useEffect(() => {
     fetchAssignments();
@@ -109,12 +105,10 @@ export function useShiftAssignments(rangeStart: Date, rangeEnd: Date) {
 
   /** Places a shift on a day. Placing the same shift twice on one day is a no-op. */
   const assign = async (shiftId: string, dateKey: string): Promise<boolean> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
 
-    const { error } = await supabase
+    const { error } = await db
       .from('shift_assignments')
-      .insert([{ user_id: user.id, shift_id: shiftId, shift_date: dateKey }]);
+      .insert([{ shift_id: shiftId, shift_date: dateKey }]);
 
     // 23505 = unique violation: that shift is already on that day.
     if (error && error.code !== '23505') return false;
@@ -123,7 +117,7 @@ export function useShiftAssignments(rangeStart: Date, rangeEnd: Date) {
   };
 
   const unassign = async (assignmentId: string): Promise<boolean> => {
-    const { error } = await supabase.from('shift_assignments').delete().eq('id', assignmentId);
+    const { error } = await db.from('shift_assignments').delete().eq('id', assignmentId);
     if (error) return false;
     setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
     return true;

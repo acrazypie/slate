@@ -5,7 +5,7 @@
 // replaces the current data after the user confirms, and is checked before
 // anything is deleted.
 
-import { createClient } from './supabase/client';
+import { db } from './localDb';
 import { KEYS_FOR_BACKUP, readPortableSettings, applyPortableSettings } from './backupSettings';
 
 export const BACKUP_FORMAT = 1;
@@ -23,13 +23,12 @@ export interface BackupCounts {
 type Row = Record<string, unknown>;
 
 export async function exportBackup(): Promise<{ name: string; text: string; counts: BackupCounts }> {
-  const supabase = createClient();
   const [blocksRes, exceptionsRes, shiftsRes, assignmentsRes, rotationsRes] = await Promise.all([
-    supabase.from('blocks').select('*'),
-    supabase.from('block_exceptions').select('block_id, occurrence_week_offset'),
-    supabase.from('shifts').select('*'),
-    supabase.from('shift_assignments').select('id, shift_id, shift_date'),
-    supabase.from('rotations').select('*'),
+    db.from('blocks').select('*'),
+    db.from('block_exceptions').select('block_id, occurrence_week_offset'),
+    db.from('shifts').select('*'),
+    db.from('shift_assignments').select('id, shift_id, shift_date'),
+    db.from('rotations').select('*'),
   ]);
   for (const res of [blocksRes, exceptionsRes, shiftsRes, assignmentsRes, rotationsRes]) {
     if (res.error) throw new Error(res.error.message);
@@ -180,31 +179,24 @@ export function parseBackup(text: string): ParsedBackup {
 }
 
 async function insertChunks(table: string, rows: Row[]) {
-  const supabase = createClient();
   for (let i = 0; i < rows.length; i += CHUNK) {
-    const { error } = await supabase.from(table).insert(rows.slice(i, i + CHUNK));
+    const { error } = await db.from(table).insert(rows.slice(i, i + CHUNK));
     if (error) throw new Error(error.message);
   }
 }
 
 async function deleteAllOwn() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('not signed in');
   // Blocks cascade to their exceptions, and shifts to their placements.
   for (const table of ['shift_assignments', 'block_exceptions', 'blocks', 'rotations', 'shifts']) {
-    const { error } = await supabase.from(table).delete().eq('user_id', user.id);
+    const { error } = await db.from(table).delete();
     if (error) throw new Error(error.message);
   }
 }
 
 /** Replaces the account's blocks, shifts, placements and rotations with the file's. */
 export async function importBackup(parsed: Extract<ParsedBackup, { ok: true }>) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('not signed in');
   await deleteAllOwn();
-  const own = (rows: Row[]) => rows.map((r) => ({ ...r, user_id: user.id }));
+  const own = (rows: Row[]) => rows;
   await insertChunks('shifts', own(parsed.shifts));
   await insertChunks('blocks', own(parsed.blocks));
   await insertChunks('block_exceptions', parsed.exceptions);

@@ -3,7 +3,7 @@
 // Web Push for reminders: subscribe this browser and keep the server's copy of
 // the reminder settings in step with Settings.
 
-import { createClient } from './supabase/client';
+import { db } from './localDb';
 import { getLeadMinutes, getNotifySettings } from './reminders';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
@@ -21,12 +21,8 @@ function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
 }
 
 async function currentRow(locale: string) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('not signed in');
   return {
-    supabase,
-    userId: user.id,
+    db,
     prefs: {
       time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
       lead_minutes: getLeadMinutes(),
@@ -50,10 +46,9 @@ export async function subscribeForReminders(locale: string): Promise<void> {
     });
   }
   const json = subscription.toJSON();
-  const { supabase, userId, prefs } = await currentRow(locale);
-  const { error } = await supabase.from('push_subscriptions').upsert(
+  const { db, prefs } = await currentRow(locale);
+  const { error } = await db.from('push_subscriptions').upsert(
     {
-      user_id: userId,
       endpoint: subscription.endpoint,
       p256dh: json.keys?.p256dh ?? '',
       auth: json.keys?.auth ?? '',
@@ -70,6 +65,6 @@ export async function syncReminderSettings(locale: string): Promise<void> {
   const registration = await navigator.serviceWorker.getRegistration('/sw.js');
   const subscription = await registration?.pushManager.getSubscription();
   if (!subscription) return;
-  const { supabase, prefs } = await currentRow(locale);
-  await supabase.from('push_subscriptions').update(prefs).eq('endpoint', subscription.endpoint);
+  const { db, prefs } = await currentRow(locale);
+  await db.from('push_subscriptions').update(prefs).eq('endpoint', subscription.endpoint);
 }

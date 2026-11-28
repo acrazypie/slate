@@ -3,7 +3,7 @@
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { format, isSameDay, addDays, addMonths, subMonths, startOfDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, LocateFixed } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { db } from '@/lib/localDb';
 import { useWeek, ViewMode } from '@/hooks/useWeek';
 import { useBlocks } from '@/hooks/useBlocks';
 import { useShifts, useShiftAssignments } from '@/hooks/useShifts';
@@ -281,8 +281,7 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
 
   /** Skips just one occurrence of a series, without touching the others. */
   const deleteOccurrence = async (seriesId: string, occurrenceWeekOffset: number) => {
-    const supabase = createClient();
-    const { data: root } = await supabase.from('blocks').select('*').eq('id', seriesId).single();
+    const { data: root } = await db.from('blocks').select('*').eq('id', seriesId).single();
     if (!root) return;
 
     if (root.week_offset === occurrenceWeekOffset) {
@@ -293,9 +292,9 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
         await deleteEntireSeries(seriesId);
         return;
       }
-      await supabase.from('blocks').update({ week_offset: remaining[0] }).eq('id', seriesId);
+      await db.from('blocks').update({ week_offset: remaining[0] }).eq('id', seriesId);
     } else {
-      await supabase
+      await db
         .from('block_exceptions')
         .insert({ block_id: seriesId, occurrence_week_offset: occurrenceWeekOffset });
     }
@@ -305,8 +304,7 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
 
   /** Ends the series the day before this occurrence, dropping it and every later one. */
   const truncateSeriesBefore = async (seriesId: string, occurrenceWeekOffset: number) => {
-    const supabase = createClient();
-    const { data: root } = await supabase.from('blocks').select('*').eq('id', seriesId).single();
+    const { data: root } = await db.from('blocks').select('*').eq('id', seriesId).single();
     if (!root) return;
 
     if (root.week_offset === occurrenceWeekOffset) {
@@ -318,9 +316,9 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
     const occurrenceDate = dateForWeekOffset(occurrenceWeekOffset, root.day_of_week);
     const newEndDate = format(addDays(occurrenceDate, -1), 'yyyy-MM-dd');
 
-    await supabase.from('blocks').update({ recurrence_end_date: newEndDate }).eq('id', seriesId);
+    await db.from('blocks').update({ recurrence_end_date: newEndDate }).eq('id', seriesId);
     // Exceptions at/after the new cutoff are moot now, but tidy them up anyway.
-    await supabase
+    await db
       .from('block_exceptions')
       .delete()
       .eq('block_id', seriesId)
@@ -331,8 +329,7 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
 
   /** Removes the whole series (and, via cascade, its exceptions). */
   const deleteEntireSeries = async (seriesId: string) => {
-    const supabase = createClient();
-    await supabase.from('blocks').delete().eq('id', seriesId);
+    await db.from('blocks').delete().eq('id', seriesId);
 
     fetchBlocks();
   };

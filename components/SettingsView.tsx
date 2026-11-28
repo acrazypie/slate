@@ -2,27 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Monitor, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CalendarCheck, Loader2, LogOut, Check, Smartphone } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { Sun, Moon, Monitor, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CalendarCheck, Check, Smartphone } from 'lucide-react';
 import { ViewMode } from '@/hooks/useWeek';
 import { ACCENT_OPTIONS, MATCH_ACCENT, getStoredAccent, getStoredBackground, groundPreview, setAccent, setBackground } from '@/lib/accent';
 import { applyOled, getOled, setOled } from '@/lib/appearance';
 import { getMonthStyle, setMonthStyle, type MonthStyle } from '@/lib/monthStyle';
 import { SummaryRangeSettings } from './SummaryRangeSettings';
 import { BackupSection } from './BackupSection';
-import { DeleteAccount } from './DeleteAccount';
-import { RemindersSettings } from './RemindersSettings';
 import { usePayRules, type PayRules } from '@/lib/pay';
 import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/config';
 import { useI18n } from './LanguageProvider';
 
-interface SettingsViewProps {
-  user?: { email: string; name?: string };
-}
-
-type SettingsPage = 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'reminders' | 'backup' | 'install';
+type SettingsPage = 'language' | 'pay' | 'appearance' | 'summary' | 'defaultView' | 'backup' | 'install';
 
 const selected = 'bg-accent text-accent-contrast font-medium';
 const unselected = 'bg-surface-hover text-text-primary hover:bg-border';
@@ -59,7 +51,6 @@ function SETTINGS_GROUPS(
         { key: 'defaultView', title: t.settings.defaultView, hint: '' },
       ],
     },
-    { label: t.settingsGroups.permissions, items: [{ key: 'reminders', title: t.reminders.title, hint: '' }] },
     { label: '', items: [{ key: 'language', title: t.common.language, hint: (LOCALE_NAMES as Record<string, string>)[locale] ?? '' }] },
     {
       label: t.settingsGroups.work,
@@ -131,8 +122,7 @@ function PaySection() {
   );
 }
 
-export function SettingsView({ user }: SettingsViewProps) {
-  const router = useRouter();
+export function SettingsView() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const light = resolvedTheme === 'light';
   const { locale, t, setLocale } = useI18n();
@@ -144,7 +134,6 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [page, setPage] = useState<SettingsPage | null>(null);
   const [monthStyleState, setMonthStyleState] = useState<MonthStyle>(() => getMonthStyle());
-  const [loggingOut, setLoggingOut] = useState(false);
   // Installed as an app (home-screen or standalone window): the install guide is not needed.
   const [showInstall, setShowInstall] = useState(true);
   useEffect(() => {
@@ -174,12 +163,6 @@ export function SettingsView({ user }: SettingsViewProps) {
   const handleBackgroundChange = (value: string) => {
     setBackgroundState(value);
     setBackground(value);
-  };
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    await createClient().auth.signOut();
-    router.push('/auth/login');
   };
 
   const installGuides = [
@@ -215,24 +198,8 @@ export function SettingsView({ user }: SettingsViewProps) {
 
         {page === null && (
           <div className="space-y-6">
-            {/* The account, as a plain row: no card. */}
-            <div className="flex items-center gap-3 px-1">
-              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
-                <span className="text-accent-contrast font-medium">{user?.email?.[0]?.toUpperCase() || 'U'}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base text-text-primary font-medium truncate">{user?.name || t.common.user}</p>
-                <p className="text-xs text-text-secondary truncate">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className="flex items-center gap-2 px-3 min-h-11 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 flex-shrink-0"
-              >
-                {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                {t.settings.logout}
-              </button>
-            </div>
+            {/* No accounts: the data lives in this browser. */}
+            <p className="text-sm text-text-secondary px-1">{t.settings.localNote}</p>
             {SETTINGS_GROUPS(t, locale, showInstall).map((group, groupIndex) => (
               <section key={groupIndex}>
                 {group.label && <h2 className="text-sm text-text-secondary mb-2 px-1">{group.label}</h2>}
@@ -255,7 +222,6 @@ export function SettingsView({ user }: SettingsViewProps) {
                 </ul>
               </section>
             ))}
-            <DeleteAccount email={user?.email ?? ''} />
           </div>
         )}
 
@@ -470,12 +436,6 @@ export function SettingsView({ user }: SettingsViewProps) {
         )}
 
 
-        {page === 'reminders' && (
-        <Section title={t.reminders.title}>
-          <p className="text-xs text-text-tertiary mb-4">{t.reminders.lede}</p>
-          <RemindersSettings />
-        </Section>
-        )}
 
         {page === 'backup' && (
         <Section title={t.backup.title}>
