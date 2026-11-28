@@ -26,6 +26,8 @@ interface MonthGridProps {
   /** Bumped by the parent after any create/edit/delete so the grid reloads. */
   refreshKey: number;
   onAddEvent: (date: Date) => void;
+  /** The compact view's plus: asks "event or shift?" for the chosen day. */
+  onChoose: (date: Date) => void;
   onAddShift: (date: Date) => void;
   onEditBlock: (block: Block) => void;
   onEditAssignment: (assignment: ShiftAssignment) => void;
@@ -49,6 +51,7 @@ export function MonthGrid({
   today,
   refreshKey,
   onAddEvent,
+  onChoose,
   onAddShift,
   onEditBlock,
   onEditAssignment,
@@ -252,7 +255,7 @@ export function MonthGrid({
             <h2 className="text-lg font-semibold text-text-primary">{capitalize(formatDate(locale, activeDay, 'fullDay'))}</h2>
             <button
               type="button"
-              onClick={() => onAddEvent(activeDay)}
+              onClick={() => onChoose(activeDay)}
               aria-label={t.blockModal.newTitle}
               className="flex items-center justify-center w-9 h-9 rounded-full bg-accent text-accent-contrast flex-shrink-0"
             >

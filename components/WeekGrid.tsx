@@ -723,6 +723,10 @@ export function WeekGrid({ user, onDataChange }: WeekGridProps) {
           today={today}
           refreshKey={refreshKey}
           onAddEvent={(date) => openEventCreate(date, 9)}
+          onChoose={(date) => {
+            setCreateStep('choice');
+            setCreateContext({ date, hour: 9 });
+          }}
           onAddShift={openShiftPicker}
           onEditBlock={openBlockEdit}
           onEditAssignment={openAssignmentEdit}
